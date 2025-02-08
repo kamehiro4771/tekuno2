@@ -1,0 +1,100 @@
+Renesas Optimizing Linker (W2.06.00 )             08-Feb-2025 10:02:17
+
+*** Options ***
+
+-subcommand=Linkertekuno2.tmp
+-noprelink
+-input=".\generate\dbsct.obj"
+-input=".\generate\hwsetup.obj"
+-input=".\generate\intprg.obj"
+-input=".\generate\resetprg.obj"
+-input=".\generate\sbrk.obj"
+-input=".\generate\vecttbl.obj"
+-input=".\src\ad.obj"
+-input=".\src\auto_play.obj"
+-input=".\src\battle.obj"
+-input=".\src\clock.obj"
+-input=".\src\damage.obj"
+-input=".\src\flash.obj"
+-input=".\src\game.obj"
+-input=".\src\initialize.obj"
+-input=".\src\lcd.obj"
+-input=".\src\main.obj"
+-input=".\src\output_led.obj"
+-input=".\src\output_speaker.obj"
+-input=".\src\port.obj"
+-input=".\src\puzzle.obj"
+-input=".\src\sci.obj"
+-input=".\src\sw.obj"
+-input=".\src\timer.obj"
+-library=".\tekuno2.lib"
+-start=SU,SI,B_1,R_1,B_2,R_2,B,R/04,PResetPRG,C_1,C_2,C,C$*,D*,W*,L,PIntPRG,P/0FFF80000,FIXEDVECT/0FFFFFF80
+-output="tekuno2.abs"
+-form=absolute
+-nomessage
+-list=tekuno2.map
+-nooptimize
+-rom=D=R,D_1=R_1,D_2=R_2
+-cpu=RAM=00000000-00017fff,FIX=00080000-00083fff,FIX=00086000-00087fff,FIX=00088000-0009ffff,FIX=000a0000-000bffff,ROM=00100000-00107fff,FIX=007fc000-007fc4ff,FIX=007ffc00-007fffff,ROM=fff80000-ffffffff
+-nologo
+
+*** Error information ***
+
+*** Mapping List ***
+
+SECTION                            START      END         SIZE   ALIGN
+
+SU
+                                  00000004  00000103       100   4
+SI
+                                  00000104  00000403       300   4
+B_1
+                                  00000404  00000717       314   1
+R_1
+                                  00000718  00000771        5a   1
+B_2
+                                  00000772  00000773         2   2
+R_2
+                                  00000774  00000c57       4e4   2
+B
+                                  00000c58  000010e7       490   4
+R
+                                  000010e8  0000159f       4b8   4
+PResetPRG
+                                  fff80000  fff8002f        30   1
+C_1
+                                  fff80030  fff818eb      18bc   1
+C_2
+                                  fff818ec  fff831bf      18d4   2
+C
+                                  fff831c0  fff8347f       2c0   4
+C$DSEC
+                                  fff83480  fff834a3        24   4
+C$BSEC
+                                  fff834a4  fff834bb        18   4
+C$INIT
+                                  fff834bc  fff834bc         0   1
+C$VECT
+                                  fff834bc  fff838bb       400   4
+C$VTBL
+                                  fff838bc  fff838bc         0   1
+D
+                                  fff838bc  fff83d73       4b8   4
+D_1
+                                  fff83d74  fff83dcd        5a   1
+D_2
+                                  fff83dce  fff842b1       4e4   2
+W
+                                  fff842b4  fff842b4         0   4
+W_1
+                                  fff842b4  fff842b4         0   1
+W_2
+                                  fff842b4  fff84383        d0   2
+L
+                                  fff84384  fff8445c        d9   4
+PIntPRG
+                                  fff8445d  fff845fa       19e   1
+P
+                                  fff845fb  fff8a1f9      5bff   1
+FIXEDVECT
+                                  ffffff80  ffffffff        80   4

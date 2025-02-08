@@ -1,0 +1,13 @@
+-isa=rxv1
+-fpu
+-include="C:\Program Files (x86)\Renesas\RX\2_6_0\/include"
+-include="C:/Users/kameyamahiroki/e2_studio/workspace/tekuno2/generate" 
+-lang=c
+-utf8
+-nomessage
+-output=obj
+-obj_path="src/common"
+-debug
+-outcode=utf8
+-optimize=0
+-nologo 

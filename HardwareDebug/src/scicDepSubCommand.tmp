@@ -1,0 +1,15 @@
+-MM
+-MP
+-output=dep="src\sci.d" 
+-MT="src\sci.obj" 
+-MT="src\sci.d"
+-isa=rxv1
+-fpu
+-include="C:\Program Files (x86)\Renesas\RX\2_6_0\/include"
+-include="D:/e2_studio/workspace/tekuno2/generate" 
+-lang=c
+-nomessage
+-debug
+-outcode=utf8
+-optimize=0
+-nologo 

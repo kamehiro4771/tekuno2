@@ -1,0 +1,7 @@
+-isa=rxv1
+-fpu
+-lang=c
+-head=runtime,math,stdio,stdlib,string,new
+-output="tekuno2.lib"
+-optimize=0
+-nologo
