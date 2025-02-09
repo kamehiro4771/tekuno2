@@ -113,13 +113,13 @@ unsigned char delete_jewel(unsigned char *first_address)
 void free_padding(unsigned char *first_address)
 {
 	unsigned char i,j,moving_times;
-	unsigned char *padding_address				= &first_address[g_matched_count];
+	unsigned char *padding_address;
 	for(i = 0;i <= g_matched_count;i++){//消した宝石の数繰り返す
-		moving_times							= &battle_field - padding_address;//宝石の移動回数を求める一番右端のアドレスとの差
+		padding_address				= &first_address[g_matched_count - i];
+		moving_times							= &battle_field[FIELD_NUM - 1] - padding_address;//宝石の移動回数を求める一番右端のアドレスとの差
 		for(j = 0;j <= moving_times;j++){
 			padding_address[j]					= padding_address[j + 1];
 		}
-		padding_address--;//詰めるアドレスを一つずらす
 		battle_field[FIELD_NUM - 1]				= random_number_acquisition(5);//右端に新しい宝石発生させる
 		output_battle_field(UPDATE_FIELD);//送信データ作成
 		cmt2_wait(37500,CKS512);//200ミリ秒間隔をあける

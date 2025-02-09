@@ -33,6 +33,7 @@ void  mtu0_initialize(void)
 	IEN(MTU0,TGIA0)				= 1;
 	IPR(MTU0,TGIA0)				= 2;
 	IR(MTU0,TGIA0)				= 0;
+	MTUA.TSTR.BIT.CST0			= 1;//MTU0.TCNTのカウントスタート
 }
 
 /********************************************************************/
@@ -104,12 +105,16 @@ void count_time(void)
 /********************************************************************/
 unsigned char count_timer_set(unsigned long *timer,void func(void))
 {
+	unsigned char ret;
+	IEN(MTU0,TGIA0)				= 0;//割り込み禁止
 	if(g_timer_cnt < MAX_TIMER_NUM){
 		g_count_time[g_timer_cnt]  	= timer;
 		func_array[g_timer_cnt++]	= func;
-		return SUCCESS;
+		ret							= SUCCESS;
 	}else
-		return ERROR;
+		ret							= ERROR;
+	IEN(MTU0,TGIA0)				= 1;//割り込み禁止解除
+	return ret;
 }
 
 

@@ -62,7 +62,7 @@ signed short party_hp;//パーティー全体のHP
 void game_mode(void)
 {
 	unsigned char i;
-	struct SPEAKER *G_speaker = get_speaker();
+	G_speaker = get_speaker();
 	for(i = 0;i < ALLY_NUM;i++)
 		player.mhp = player.hp = ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
 	while(g_sequence != 8){
@@ -93,8 +93,10 @@ void game_sequence(void)
 		if(sci0_enter_check() == ON)
 			g_sequence++;//スイッチ又はエンターが押された
 		else{
-			G_speaker[0].score_count = G_speaker[1].score_count = 33;//途中から演奏
-			G_speaker[2].score_count = 1;
+			G_speaker[0].score_count 	= G_speaker[1].score_count = 33;//途中から演奏
+			G_speaker[2].score_count 	= 1;
+			G_speaker[0].set_flg 		= ON;
+			G_speaker[1].set_flg		= ON;
 			G_speaker[2].elapsed_time = 4500;
 		}
 		break;
@@ -117,17 +119,21 @@ void game_sequence(void)
 			else if(sci0_find_received_data('1') == 1)
 				g_sequence = 6;
 		}
-		send_serial(RESET,10);
+		if(g_sequence != 3)
+			send_serial(RESET,10);
 		break;
 	case 4://「名前を入力してください」表示
+		automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
 		send_serial(INPUT_NAME,sizeof(INPUT_NAME));
 		g_sequence++;
 		break;
 	case 5:
 		automatic_playing(BOUKENNNOSYO,SQUARE,G_speaker[0].score_count,G_speaker[1].score_count,G_speaker[2].score_count);
-		ret = sci0_str_cpy(player.name);
-		if(ret >= 3)
-			g_sequence = 8;
+		if(sci0_enter_check() == ON){
+			ret = sci0_str_cpy(player.name);
+			if(ret >= 3)
+				g_sequence = 8;
+		}
 		break;
 	case 6:
 		send_serial(player.name,strlen((const char*)player.name));

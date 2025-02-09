@@ -83,15 +83,15 @@ void player_turn(struct Enemy* enemy)
 		}
 		ret 								= sci0_enter_check();
 		if(ret == ON){//エンターが押されたとき
+			resume_point[0].start			= battle_speaker[0].score_count;
+			resume_point[1].start			= battle_speaker[1].score_count;
+			resume_point[2].start			= battle_speaker[2].score_count;
+			battle_speaker[0].elapsed_time	= get_interrupt_data(0).elapsed_time;//経過時間も覚える
+			battle_speaker[1].elapsed_time	= get_interrupt_data(1).elapsed_time;
+			battle_speaker[2].elapsed_time	= get_interrupt_data(2).elapsed_time;
 			ret								= sci0_get_receive_count();
 			if(ret == 4){//2文字入力された
 				sci0_data_cpy(&input[0]);
-				resume_point[0].start		= battle_speaker[0].score_count;
-				resume_point[1].start		= battle_speaker[1].score_count;
-				resume_point[2].start		= battle_speaker[2].score_count;
-				resume_point[0].elapsed		= get_interrupt_data(0).elapsed_time;//経過時間も覚える
-				resume_point[1].elapsed		= get_interrupt_data(1).elapsed_time;
-				resume_point[2].elapsed		= get_interrupt_data(2).elapsed_time;
 				if(input[0] >= 'A' && input[0] < 'N'){//1文字目判定
 					if(input[1] >= 'A' && input[1] < 'N')//2文字目判定
 						break;
@@ -108,10 +108,6 @@ void player_turn(struct Enemy* enemy)
 		}else//何も入力されずに曲終了
 			resume_point[0].start	= resume_point[1].start = resume_point[2].start = 0;//曲の演奏開始位置を最初に設定
 	}
-/*	speaker[0].elapsed_time = resume_point.elapsed[0];
-	speaker[1].elapsed_time = resume_point.elapsed[1];
-	speaker[2].elapsed_time = resume_point.elapsed[2];*/
-
 	automatic_playing(BATTLE1,SQUARE,resume_point[0].start,resume_point[1].start,resume_point[2].start);
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
@@ -135,15 +131,15 @@ void player_turn(struct Enemy* enemy)
 				resume_point[1].elapsed		= get_interrupt_data(1).elapsed_time;
 				resume_point[2].elapsed		= get_interrupt_data(2).elapsed_time;
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
-				play_up_to_last = OFF;
+				play_up_to_last				= OFF;
 				send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
 				i_to_a(damage);
 				send_serial(output_string,sizeof(output_string));//ダメージ値表示
 				send_serial(DAMAGE,sizeof(DAMAGE));//のダメージ
 				if(enemy->hp >= damage)
-					enemy->hp 			= enemy->hp - damage;//モンスターのHPからダメージを引く
+					enemy->hp 				= enemy->hp - damage;//モンスターのHPからダメージを引く
 				else
-					enemy->hp 			= 0;
+					enemy->hp 				= 0;
 			}else{
 				auto_play_end_processing();
 				resume_point[0].start		= battle_speaker[0].score_count;
@@ -159,13 +155,13 @@ void player_turn(struct Enemy* enemy)
 				//自分のHPにダメージを足す
 			}
 			free_padding(dladder);//空いた宝石配列を詰める
-			play_up_to_last				= OFF;
+			play_up_to_last					= OFF;
 		}else
 			break;
 	}
-	battle_speaker[0].elapsed_time = resume_point[0].elapsed;
-	battle_speaker[1].elapsed_time = resume_point[1].elapsed;
-	battle_speaker[2].elapsed_time = resume_point[2].elapsed;
+	battle_speaker[0].elapsed_time 			= resume_point[0].elapsed;
+	battle_speaker[1].elapsed_time 			= resume_point[1].elapsed;
+	battle_speaker[2].elapsed_time 			= resume_point[2].elapsed;
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
 

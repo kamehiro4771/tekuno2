@@ -295,25 +295,26 @@ const unsigned short doragon_quest_note_value3[]		= {6000,//6000
 												500,500,1000,500,500,500,500,500,500,500,500,500,500,500,500,//8000
 												500,500,500,500,1000,1000,1500,500,//6000
 												};
-const unsigned char boukennnosyo_score[][126]			= {{52,50,40,48,36,47,45,43,41,29,33,36,40,36,33,29,50,48,43,47,31,45,43,41,40,31,36,40,38,35,31,35,//32
+const unsigned char boukennnosyo_score1[] =		{52,50,40,48,36,47,45,43,41,29,33,36,40,36,33,29,50,48,43,47,31,45,43,41,40,31,36,40,38,35,31,35,//32
 												52,50,40,48,36,47,45,43,41,29,33,36,40,36,33,29,35,31,31,41,31,31,40,31,35,43,41,35,31,37,43,31,//32
 												52,50,40,48,36,47,45,43,41,29,33,36,40,36,33,29,50,48,43,47,31,45,43,41,40,31,36,40,38,35,31,35,//32
-												52,50,40,48,36,47,45,43,41,29,33,36,40,36,33,29,43,31,31,44,30,30,45,29,29,47,31,36,48,73,},//30
-												{48,47,73,45,73,43,41,40,38,73,29,33,36,33,29,73,47,45,73,43,73,41,40,38,36,73,73,31,35,31,73,31,//32
+												52,50,40,48,36,47,45,43,41,29,33,36,40,36,33,29,43,31,31,44,30,30,45,29,29,47,31,36,48,73,};//30
+
+const unsigned char boukennnosyo_score2[] =		{48,47,73,45,73,43,41,40,38,73,29,33,36,33,29,73,47,45,73,43,73,41,40,38,36,73,73,31,35,31,73,31,//32
 												48,47,73,45,73,43,41,40,38,73,29,33,36,33,29,73,31,73,73,35,73,73,35,73,31,35,73,73,73,73,73,31,//32
 												48,47,73,45,73,43,41,40,38,73,29,33,36,33,29,73,47,45,73,43,73,41,40,38,36,73,73,31,35,31,73,31,//32
-												48,47,73,45,73,43,41,40,38,73,29,33,36,33,29,73,41,73,73,38,73,73,39,73,73,41,73,73,43,73,},//30
-												{36,31,73,73,73,31,36,73,73,73,73,73,73,73,73,73,31,38,73,73,73,38,73,73,73,73,73,73,73,73,73,73,//32
+												48,47,73,45,73,43,41,40,38,73,29,33,36,33,29,73,41,73,73,38,73,73,39,73,73,41,73,73,43,73,};//30
+
+const unsigned char boukennnosyo_score3[] =		{36,31,73,73,73,31,36,73,73,73,73,73,73,73,73,73,31,38,73,73,73,38,73,73,73,73,73,73,73,73,73,73,//32
 												36,31,73,73,73,31,36,73,73,73,73,73,73,73,73,73,73,73,73,31,73,73,31,73,73,73,73,73,73,73,73,73,//32
 												36,31,73,73,73,31,36,73,73,73,73,73,73,73,73,73,33,38,73,73,73,38,73,73,73,73,73,73,73,73,73,73,//32
-												36,31,73,73,73,31,36,73,73,73,73,73,73,73,73,73,35,73,73,34,73,73,36,73,73,37,73,73,40,73,}};//30
+												36,31,73,73,73,31,36,73,73,73,73,73,73,73,73,73,35,73,73,34,73,73,36,73,73,37,73,73,40,73,};//30
 
 const unsigned short boukennnosyo_note_value[]			= {250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,
 												250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,
 												250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,
 												250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,500,};
-const unsigned char initial_check_score[]				= {24,26,28,29,31,33,35,36};
-const unsigned short initial_check_note_value[]			=	{500,500,500,500,500,500,500,500};
+
 const unsigned char battle_score1[]						= {53,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,//24
 													29,//1
 													41,48,47,43,44,44,//6
@@ -330,21 +331,7 @@ const unsigned char battle_score1[]						= {53,52,51,50,49,48,47,46,45,44,43,42,
 													29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,//24
 												};//265
 
-const unsigned short battle_note_value1[]					= {83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													4000,//1:4000
-													1000,1000,1500,250,125,125,//6:4000
-													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													1000,1000,1500,250,125,125,//6:4000
-													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,125,125,125,125,//22:1994
-													125,125,125,125,125,125,125,125,125,125,125,625,125,125,125,125,125,125,125,125,125,125,125,625,//24:4000
-													500,250,250,250,250,250,1500,125,125,250,250,//11:4000
-													500,250,250,250,250,250,1500,125,125,250,250,//11:4000
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													};//265:43954
+
 
 const unsigned char battle_score2[]						= {45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,//24
 													21,73,23,73,21,73,23,73,21,73,23,73,21,73,23,73,21,73,23,73,21,73,23,73,21,73,23,73,21,73,23,73,//32
@@ -359,19 +346,6 @@ const unsigned char battle_score2[]						= {45,44,43,42,41,40,39,38,37,36,35,34,
 													32,36,36,36,36,36,36,36,36,36,36,36,36,36,36,73,12,12,12,73,12,12,12,73,12,12,12,73,12,12,//30
 													21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,//24
 												};//292
-const unsigned short battle_note_value2[]					= {83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													3984,
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													3984,
-													125,125,125,125,250,125,125,125,125,250,500,125,125,125,125,250,125,125,125,125,250,500,//22:4000
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
-													125,125,125,125,250,125,125,125,125,250,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//30:4000
-													125,125,125,125,250,125,125,125,125,250,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//30:4000
-													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
-													};//292:43952
 
 const unsigned char battle_score3[]						= {73,//1
 													18,73,20,73,18,73,20,73,18,73,20,73,18,73,20,73,18,73,20,73,18,73,20,73,18,73,20,73,18,73,20,73,//32
@@ -388,7 +362,34 @@ const unsigned char battle_score3[]						= {73,//1
 													17,32,32,32,32,73,32,32,32,32,32,73,32,32,32,32,32,73,//18
 													15,73,//2
 												};//325
-
+const unsigned short battle_note_value1[]					= {83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													4000,//1:4000
+													1000,1000,1500,250,125,125,//6:4000
+													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													1000,1000,1500,250,125,125,//6:4000
+													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,125,125,125,125,//22:1994
+													125,125,125,125,125,125,125,125,125,125,125,625,125,125,125,125,125,125,125,125,125,125,125,625,//24:4000
+													500,250,250,250,250,250,1500,125,125,250,250,//11:4000
+													500,250,250,250,250,250,1500,125,125,250,250,//11:4000
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													};//265:43954
+const unsigned short battle_note_value2[]					= {83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													3984,
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													3984,
+													125,125,125,125,250,125,125,125,125,250,500,125,125,125,125,250,125,125,125,125,250,500,//22:4000
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
+													125,125,125,125,250,125,125,125,125,250,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//30:4000
+													125,125,125,125,250,125,125,125,125,250,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//30:4000
+													83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,//24:1992
+													};//292:43952
 const unsigned short battle_note_value3[]					= {1992,//1:1992
 													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
 													125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,//32:4000
@@ -411,13 +412,15 @@ const unsigned short battle_note_value3[]					= {1992,//1:1992
 const unsigned char ally_attack_score[]			= {43,44,42,43,44,42,};
 const unsigned short ally_attack_note_value[]		= {62,62,62,62,62,62,};
 
-const unsigned char level_up_score[][7]			= {{41,41,41,41,39,43,41,},{36,35,34,33,31,35,33,}};
+const unsigned char level_up_score1[]			= {41,41,41,41,39,43,41,};
+const unsigned char level_up_score2[]			= {36,35,34,33,31,35,33,};
 const unsigned short level_up_note_value[]			= {125,125,125,250,250,250,750,};
 
 const unsigned char win_score[]					= {24,26,28,29,31,33,35,36,38,40,41,43,45,47,48};
 const unsigned short win_note_value[]				= {500,25,25,25,25,25,25,25,25,25,25,25,25,25,500};
 
-const unsigned char yadoya_score[][7]				= {{50,49,48,47,45,38,50},{42,41,40,38,36,30,42,}};
+const unsigned char yadoya_score1[]				= {50,49,48,47,45,38,50};
+const unsigned char yadoya_score2[]					= {42,41,40,38,36,30,42,};
 const unsigned short yadoya_note_value[]				= {250,250,250,250,250,250,500,};
 
 
@@ -442,6 +445,33 @@ const unsigned char zennmetu_score3[]			= {73,14,73,13,73,10,73,};//7
 const unsigned short zennmetu_note_value1[]		= {250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,125,125,1250};//5500
 const unsigned short zennmetu_note_value2[]		= {250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,125,125,1250};//5500
 const unsigned short zennmetu_note_value3[]		= {250,500,500,500,500,500,2750};
+const unsigned char initial_check_score[]				= {24,26,28,29,31,33,35,36};
+const unsigned short initial_check_note_value[]			=	{500,500,500,500,500,500,500,500};
+const unsigned char *score_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_score,NULL,NULL},{saint_march_score,NULL,NULL},
+																		{menuett_score,NULL,NULL},{jesu_joy_of_man_s_score,NULL,NULL},
+																		{aura_lee_score,NULL,NULL},{sakura_score,NULL,NULL},
+																		{zyounetutairiku_score,NULL,NULL},{let_it_be_score,NULL,NULL},
+																		{nhk_nodozimann_score,NULL,NULL},{doragon_quest_score1,doragon_quest_score2,doragon_quest_score3},
+																		{level_up_score1,level_up_score2,NULL},{win_score,NULL,NULL},
+																		{boukennnosyo_score1,boukennnosyo_score2,boukennnosyo_score3},{yadoya_score1,yadoya_score2,NULL},
+																		{ally_attack_score,NULL,NULL},{battle_score1,battle_score2,battle_score3},
+																		{zennmetu_score1,zennmetu_score2,zennmetu_score3},{initial_check_score,NULL,NULL},
+																		};
+
+const unsigned short *note_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_note_value,NULL,NULL},{saint_march_note_value,NULL,NULL},
+																		{menuett_note_value,NULL,NULL},{jesu_joy_of_man_s_note_value,NULL,NULL},
+																		{aura_lee_note_value,NULL,NULL},{sakura_note_value,NULL,NULL},
+																		{zyounetutairiku_note_value,NULL,NULL},{let_it_be_note_value,NULL,NULL},
+																		{nhk_nodozimann_note_value,NULL,NULL},{doragon_quest_note_value1,doragon_quest_note_value2,doragon_quest_note_value3},
+																		{level_up_note_value,level_up_note_value,NULL},{win_note_value,NULL,NULL},
+																		{boukennnosyo_note_value,boukennnosyo_note_value,boukennnosyo_note_value},{yadoya_note_value,yadoya_note_value,NULL},
+																		{ally_attack_note_value,NULL,NULL},{battle_note_value1,battle_note_value2,battle_note_value3},
+																		{zennmetu_note_value1,zennmetu_note_value2,zennmetu_note_value3},{initial_check_note_value,NULL,NULL},
+																		};
+
+const unsigned char use_speaker_array[SONG_NUM]						= {1,1,1,1,1,1,1,1,1,3,2,1,3,2,1,3,3,1};
+const unsigned short note_size_array[SONG_NUM][SUPEAKER_NUM]		= {{113,0,0},{33,0,0},{127,0,0},{169,0,0},{47,0,0},{181,0,0},{427,0,0},{390,0,0},
+																		{83,0,0},{100,96,61},{7,7,0},{15,0,0},{126,126,126},{7,7,0},{6,0,0},{265,292,325},{19,19,7},{8,0,0},};
 //ëSâπïÑ2000Å@ìÒï™âπïÑ1000Å@élï™âπïÑ500Å@î™ï™âπïÑ250Å@è\òZï™âπïÑ125
 /********************************************************************/
 /*ÉvÉçÉgÉ^ÉCÉvêÈåæ													*/
@@ -457,6 +487,7 @@ struct SPEAKER interrupt_data[3];//ÉGÉìÉ^Å[Ç‚ÉXÉCÉbÉ`Ç≈ââëtèIóπÇµÇΩÇ∆Ç´ÇÃÉXÉsÅ[É
 unsigned char g_use_speaker_num;		//égópÇ∑ÇÈÉXÉsÅ[ÉJÅ[ÇÃå¬êî
 unsigned long common_timer = 1;
 unsigned char playing_flg = OFF;
+
 /*
  * é©ìÆââëtÉmÉìÉuÉçÉbÉLÉìÉOî≈
  *
@@ -465,7 +496,7 @@ unsigned char playing_flg = OFF;
 void automatic_playing(unsigned short title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
 {
 	playing_flg						= ON;//ââëtíÜÉtÉâÉOON
-	g_speaker						= get_speaker();
+	g_speaker						= get_speaker();//ÉXÉsÅ[ÉJÇ÷ÇÃÉ|ÉCÉìÉ^ñ·Ç§
 	score_set_speaker(title,wave_type,start1,start2,start3);//äyïàÇÉZÉbÉgÇ∑ÇÈÅAã»ÇÃäJénà íuÇÃÉZÉbÉg
 }
 
@@ -477,7 +508,7 @@ void automatic_playing(unsigned short title,unsigned char wave_type,unsigned sho
 void forward_score(void)
 {
 	unsigned char i;
-	for(i = 0;i < g_use_speaker_num;i++){
+for(i = 0;i < g_use_speaker_num;i++){
 		g_speaker[i].elapsed_time--;
 		if(g_speaker[i].elapsed_time == 0){
 			g_speaker[i].score_count++;//âπïÑî‘çÜÇêiÇﬂÇÈ
@@ -541,6 +572,7 @@ void input_check(void)
 	}
 	common_timer = 1;
 }
+
 /********************************************************************/
 /*é©ìÆââëtèIóπèàóù													*/
 /*void auto_play_end_processing(void)								*/
@@ -550,17 +582,20 @@ void auto_play_end_processing(void)
 	g_use_speaker_num	= 0;
 	output_led(REST);				//LEDè¡ìî
 	mute(3);						//è¡âπ
-	interrupt_data[0]		= g_speaker[0];
-	interrupt_data[1]		= g_speaker[1];
-	interrupt_data[2]		= g_speaker[2];
+	interrupt_data[0]			= g_speaker[0];
+	interrupt_data[1]			= g_speaker[1];
+	interrupt_data[2]			= g_speaker[2];
 	count_timer_dell(forward_score);
 	count_timer_dell(output_function_call);
 	count_timer_dell(end_decision);
 	count_timer_dell(input_check);
-	g_speaker[0].end_flg	= OFF;
-	g_speaker[1].end_flg	= OFF;
-	g_speaker[2].end_flg	= OFF;
-	playing_flg				= OFF;//ââëtíÜÉtÉâÉOOFF
+	g_speaker[0].elapsed_time	= 0;
+	g_speaker[1].elapsed_time	= 0;
+	g_speaker[2].elapsed_time	= 0;
+	g_speaker[0].end_flg		= OFF;
+	g_speaker[1].end_flg		= OFF;
+	g_speaker[2].end_flg		= OFF;
+	playing_flg					= OFF;//ââëtíÜÉtÉâÉOOFF
 }
 
 /********************************************************************************************/
@@ -576,169 +611,38 @@ void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,u
 	g_speaker[1].score_count 		= start2;
 	g_speaker[2].score_count 		= start3;//ââëtäJénà íuÇÃê›íË
 	g_speaker[0].wave_type			= wave_type;
-	switch(title){
-	case AVE_MARIA:
-		g_speaker[0].pscore			= ave_maria_score;
-		g_speaker[0].pnote_value	= ave_maria_note_value;
-		g_speaker[0].note_size		= sizeof(ave_maria_score);
-		g_use_speaker_num			= 1;
-		break;
-	case SAINT_MARCH:
-		g_speaker[0].pscore			= saint_march_score;
-		g_speaker[0].pnote_value	= saint_march_note_value;
-		g_speaker[0].note_size		= sizeof(saint_march_score);
-		g_use_speaker_num			= 1;
-		break;
-	case MENUETT:
-		g_speaker[0].pscore			= menuett_score;
-		g_speaker[0].pnote_value	= menuett_note_value;
-		g_speaker[0].note_size		= sizeof(menuett_score);
-		g_use_speaker_num			= 1;
-		break;
-	case JESU_JOY_OF_MAN_S:
-		g_speaker[0].pscore			= jesu_joy_of_man_s_score;
-		g_speaker[0].pnote_value	= jesu_joy_of_man_s_note_value;
-		g_speaker[0].note_size		= sizeof(jesu_joy_of_man_s_score);
-		g_use_speaker_num			= 1;
-		break;
-	case AURA_LEE:
-		g_speaker[0].pscore			= aura_lee_score;
-		g_speaker[0].pnote_value	= aura_lee_note_value;
-		g_speaker[0].note_size		= sizeof(aura_lee_score);
-		g_use_speaker_num			= 1;
-		break;
-	case SAKURA:
-		g_speaker[0].pscore			= sakura_score;
-		g_speaker[0].pnote_value	= sakura_note_value;
-		g_speaker[0].note_size		= sizeof(sakura_score);
-		g_use_speaker_num			= 1;
-		break;
-	case ZYOUNETUTAIRIKU:
-		g_speaker[0].pscore			= zyounetutairiku_score;
-		g_speaker[0].pnote_value	= zyounetutairiku_note_value;
-		g_speaker[0].note_size		= sizeof(zyounetutairiku_score);
-		g_use_speaker_num			= 1;
-		break;
-	case LET_IT_BE:
-		g_speaker[0].pscore			= let_it_be_score;
-		g_speaker[0].pnote_value	= let_it_be_note_value;
-		g_speaker[0].note_size		= sizeof(let_it_be_score);
-		g_use_speaker_num			= 1;
-		break;
-	case NHK_NODOZIMAN:
-		g_speaker[0].pscore			= nhk_nodozimann_score;
-		g_speaker[0].pnote_value		= nhk_nodozimann_note_value;
-		g_speaker[0].note_size		= sizeof(nhk_nodozimann_score);
-		g_use_speaker_num			= 1;
-		break;
-	case DORAGON_QUEST:
-		g_speaker[0].pscore			= doragon_quest_score1;
-		g_speaker[1].pscore			= doragon_quest_score2;
-		g_speaker[2].pscore			= doragon_quest_score3;
-		g_speaker[0].pnote_value	= doragon_quest_note_value1;
-		g_speaker[1].pnote_value	= doragon_quest_note_value2;
-		g_speaker[2].pnote_value	= doragon_quest_note_value3;
-		g_speaker[0].note_size		= sizeof(doragon_quest_score1);
-		g_speaker[1].note_size		= sizeof(doragon_quest_score2);
-		g_speaker[2].note_size		= sizeof(doragon_quest_score3);
-		g_use_speaker_num			= 3;
-		break;
-	case LEVEL_UP:
-		g_speaker[0].pscore			= level_up_score[0];
-		g_speaker[1].pscore			= level_up_score[1];
-		g_speaker[0].pnote_value	= level_up_note_value;
-		g_speaker[1].pnote_value	= level_up_note_value;
-		g_speaker[0].note_size		= sizeof(level_up_score[0]);
-		g_speaker[1].note_size		= sizeof(level_up_score[0]);
-		g_use_speaker_num			= 2;
-		break;
-	case WINNING:
-		g_speaker[0].pscore			= win_score;
-		g_speaker[0].pnote_value	= win_note_value;
-		g_speaker[0].note_size		= sizeof(win_score);
-		g_use_speaker_num			= 1;
-		break;
-	case BOUKENNNOSYO:
-		g_speaker[0].pscore			= boukennnosyo_score[0];
-		g_speaker[1].pscore			= boukennnosyo_score[1];
-		g_speaker[2].pscore			= boukennnosyo_score[2];
-		g_speaker[0].pnote_value	= boukennnosyo_note_value;
-		g_speaker[1].pnote_value	= boukennnosyo_note_value;
-		g_speaker[2].pnote_value	= boukennnosyo_note_value;
-		g_speaker[0].note_size		= sizeof(boukennnosyo_score[0]);
-		g_speaker[1].note_size		= sizeof(boukennnosyo_score[0]);
-		g_speaker[2].note_size		= sizeof(boukennnosyo_score[0]);
-		g_use_speaker_num			= 3;
-		break;
-	case YADOYA:
-		g_speaker[0].pscore			= yadoya_score[0];
-		g_speaker[1].pscore			= yadoya_score[1];
-		g_speaker[0].pnote_value	= yadoya_note_value;
-		g_speaker[1].pnote_value	= yadoya_note_value;
-		g_speaker[0].note_size		= sizeof(yadoya_score[0]);
-		g_speaker[1].note_size		= sizeof(yadoya_score[0]);
-		g_use_speaker_num			= 2;
-		break;
-	case ALLY_ATACK:
-		g_speaker[0].pscore			= ally_attack_score;
-		g_speaker[0].pnote_value	= ally_attack_note_value;
-		g_speaker[0].note_size		= sizeof(ally_attack_score);
-		g_use_speaker_num			= 1;
-		break;
-	case BATTLE1:
-		g_speaker[0].pscore			= battle_score1;
-		g_speaker[1].pscore			= battle_score2;
-		g_speaker[2].pscore			= battle_score3;
-		g_speaker[0].pnote_value	= battle_note_value1;
-		g_speaker[1].pnote_value	= battle_note_value2;
-		g_speaker[2].pnote_value	= battle_note_value3;
-		g_speaker[0].note_size		= sizeof(battle_score1);
-		g_speaker[1].note_size		= sizeof(battle_score2);
-		g_speaker[2].note_size		= sizeof(battle_score3);
-		g_use_speaker_num			= 3;
-		break;
-	case ZENNMETU:
-		g_speaker[0].pscore			= zennmetu_score1;
-		g_speaker[1].pscore			= zennmetu_score2;
-		g_speaker[2].pscore			= zennmetu_score3;
-		g_speaker[0].pnote_value	= zennmetu_note_value1;
-		g_speaker[1].pnote_value	= zennmetu_note_value2;
-		g_speaker[2].pnote_value	= zennmetu_note_value3;
-		g_speaker[0].note_size		= sizeof(zennmetu_score1);
-		g_speaker[1].note_size		= sizeof(zennmetu_score2);
-		g_speaker[2].note_size		= sizeof(zennmetu_score3);
-		g_use_speaker_num			= 3;
-		break;
-	case INITIAL_CHECK:
-		g_speaker[0].pscore			= initial_check_score;
-		g_speaker[0].pnote_value	= initial_check_note_value;
-		g_speaker[0].note_size		= sizeof(initial_check_score);
-		g_use_speaker_num			= 1;
-		break;
-	}
+	g_speaker[0].pscore				= score_pointer_array[title-1][0];
+	g_speaker[1].pscore				= score_pointer_array[title-1][1];
+	g_speaker[2].pscore				= score_pointer_array[title-1][2];
+	g_speaker[0].pnote_value		= note_pointer_array[title-1][0];
+	g_speaker[1].pnote_value		= note_pointer_array[title-1][1];
+	g_speaker[2].pnote_value		= note_pointer_array[title-1][2];
+	g_speaker[0].note_size			= note_size_array[title-1][0];
+	g_speaker[1].note_size			= note_size_array[title-1][1];
+	g_speaker[2].note_size			= note_size_array[title-1][2];
+	g_use_speaker_num				= use_speaker_array[title-1];
 	if(start1 == 0 && start2 == 0 && start3 == 0){
 		switch(g_use_speaker_num){
 		case 1:
-			g_speaker[0].set_flg		= ON;
-			g_speaker[1].end_flg		= g_speaker[2].end_flg = ON;
+			g_speaker[0].set_flg	= ON;
+			g_speaker[1].end_flg	= g_speaker[2].end_flg = ON;
 			break;
 		case 2:
-			g_speaker[0].set_flg 		= g_speaker[1].set_flg = ON;
-			g_speaker[2].end_flg		= ON;
+			g_speaker[0].set_flg 	= g_speaker[1].set_flg = ON;
+			g_speaker[2].end_flg	= ON;
 			break;
 		case 3:
-			g_speaker[0].set_flg 		= g_speaker[1].set_flg = g_speaker[2].set_flg		= ON;
+			g_speaker[0].set_flg 	= g_speaker[1].set_flg = g_speaker[2].set_flg		= ON;
 			break;
 		}
 	}
-	count_timer_set(&common_timer,forward_score);//åoâﬂéûä‘äƒéãÇÃÉGÉäÉAÇìoò^
 	count_timer_set(&common_timer,output_function_call);//èoóÕä÷êîÇÃìoò^
+	count_timer_set(&common_timer,forward_score);//åoâﬂéûä‘äƒéãÇÃÉGÉäÉAÇìoò^
 	if(play_up_to_last == OFF){
 		count_timer_set(&common_timer,input_check);
 		sci0_receive_start();//éÛêMäJén
 	}
 	count_timer_set(&common_timer,end_decision);
-	MTUA.TSTR.BIT.CST0				= 1;//MTU0.TCNTÇÃÉJÉEÉìÉgÉXÉ^Å[Ég
 }
 
 /*

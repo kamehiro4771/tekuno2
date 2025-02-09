@@ -15,6 +15,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "auto_play.h"
 #include "clock.h"
 #include "initialize.h"
@@ -37,6 +38,7 @@
 #define NO_SET (0)
 #define NOT_FOUND (0)
 #define SONG_NUM (18)//曲の種類
+#define SUPEAKER_NUM (3)
 #define WAVE_NUM (4)//波形の種類
 #define SETTING_ITEM_NUM (3)//設定項目数
 #define NBCK (0)//関数のノンブロッキング指定
@@ -68,6 +70,7 @@
 #define DISPLAY_CLEAR "\x1b[2J"
 #define RESET "\x1b[2J\x1b[0;0H"
 //#define RESET "\x1b[2J\x1b[!p\x1b[0;0H"//画面をクリアして設定を初期化カーソルを原点に戻す
+#define CURSOR_3LINE_BUCK "\x1b[3F"
 #define CURSOR_2LINE_BUCK "\x1b[2F"
 #define CURSOR_1LINE_BUCK "\x1b[1F"
 #define CURSOR_2LINE_ADVANCE "\x1b[2E"
@@ -128,7 +131,7 @@ struct SPEAKER{
 	const unsigned short *pnote_value;	//音の長さ配列へのポインタ
 	unsigned short score_count;			//スコアカウント
 	unsigned long elapsed_time;			//経過時間監視エリア
-	unsigned char duty_value;					//デューティ比
+	float duty_value;					//デューティ比
 	unsigned char wave_type;			//出力波形（スピーカー１の）
 	unsigned short note_size;			//音符の数
 	unsigned char speaker_num;			//スピーカー番号0～2

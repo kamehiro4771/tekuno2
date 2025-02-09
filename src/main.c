@@ -111,7 +111,7 @@ void main_sequence_process(void)
 	switch(g_sequence_num){
 		case 0:
 			sci0_receive_start();//受信開始
-			sprintf((char *)g_output_string,"%s%s%d％ %s%s＊SW1~SW3又はキーボード1~3+エンター\n**************************************************\n"
+			sprintf((char *)g_output_string,"%s%s%lf％ %s%s＊SW1~SW3又はキーボード1~3+エンター\n**************************************************\n"
 					,E_NEIRO,DUTY_VALUE,speaker[0].duty_value,WAVE_TYPE,wave_type_name[speaker[0].wave_type - 1]);
 			send_serial(g_output_string,strlen(g_output_string));
 			g_sequence_num++;
