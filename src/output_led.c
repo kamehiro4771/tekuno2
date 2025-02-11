@@ -209,8 +209,8 @@ void output_led(int scale)
 		break;
 	case RE_SH_5:
 	case MI_5:
-		PORTE.DR.BIT.B1	= 1;//LED3Ž‡“_“”
-		PORTE.DR.BIT.B7	= 1;
+		PORTD.DR.BIT.B6	= 1;//LED3Ž‡“_“”
+		PORTE.DR.BIT.B0	= 1;
 		break;
 	case FA_5:
 		PORTE.DR.BYTE	= 0x0a;//LED4Ž‡“_“”

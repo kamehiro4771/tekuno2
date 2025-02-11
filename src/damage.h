@@ -8,6 +8,6 @@
 #ifndef DAMAGE_H_
 #define DAMAGE_H_
 
-signed short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number);
+unsigned short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number);
 
 #endif /* DAMAGE_H_ */

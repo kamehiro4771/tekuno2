@@ -1,5 +1,9 @@
 #include "main.h"
 
+//’è”’è‹`
+const float ATTRIBUTE_CORRECTION_VALUE[ATTRIBUTE_NUM][ATTRIBUTE_NUM] = {
+											{1.0,0.5,2.0,1.0,},{2.0,1.0,1.0,0.5,},{0.5,1.0,1.0,2.0,},{1.0,2.0,0.5,1.0,},
+																};
 /************************************************************************************************************************************/
 /*ƒ_ƒ[ƒW‹y‚Ñ‰ñ•œ—Ê‚ÌŒvŽZ																											*/
 /*signed short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)	*/
@@ -9,11 +13,10 @@
 /*		@unsigned char deleted_number@Á–Å•óÎ”																					*/
 /*	–ß‚è’lFsigned short@ŒvŽZŒ‹‰Ê																									*/
 /************************************************************************************************************************************/
-signed short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)
+unsigned short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)
 {
 	unsigned char i,exponent;
 	float result = 1.0, base = 1.5;
-	float correction;
 	signed short damage;
 	unsigned char random_num	= random_number_acquisition(21);
 	Ally *ally = get_ally_data(type);
@@ -23,27 +26,28 @@ signed short damage_calculation(struct Enemy* enemy,unsigned short combo_count,u
 	if(type == LIFE)//Á‚µ‚½•óÎ‚ª–½‘®«‚ÌŽž
 		damage	= ((20 * result) * (90 + random_num)) / 100;
 	else{
-		if(enemy->el == WATER && type == FIRE)//“G…E–¡•û‰Î
-			correction	= 0.5;
-		else if(enemy->el == FIRE && type == WIND)//“G‰ÎE–¡•û•—
-			correction	= 0.5;
-		else if(enemy->el == WIND && type == SOIL)//“G•—E–¡•û“y
-			correction	= 0.5;
-		else if(enemy->el == SOIL && type == WATER)//“G“yE–¡•û…
-			correction	= 0.5;
-		else if(enemy->el == FIRE && type == WATER)//“G‰ÎE–¡•û…
-			correction	= 2.0;
-		else if(enemy->el == WIND && type == FIRE)//“G•—E–¡•û‰Î
-			correction	= 2.0;
-		else if(enemy->el == SOIL && type == WIND)//“G“yE–¡•û•—
-			correction	= 2.0;
-		else if(enemy->el == WATER && type == SOIL)//“G…E–¡•û“y
-			correction	= 2.0;
-		else
-			correction	= 1.0;
-		damage	= ((ally->ap - enemy->gp) * correction * result * (90 + random_num)) / 100;
-		if(damage <= 1)
-			damage = 1;//‚PˆÈ‰º‚Ìê‡‚P‚Æ‚·‚é
+		damage	= ((ally->ap - enemy->gp) * ATTRIBUTE_CORRECTION_VALUE[enemy->el][type] * result * (90 + random_num)) / 100;
+		if(damage < 1)
+			damage = 1;//‚P–¢–ž‚Ìê‡‚P‚Æ‚·‚é
 	}
+	return damage;
+}
+
+/*
+ * “G‚©‚ç‚Ìƒ_ƒ[ƒWŒvŽZ
+ * unsigned short damge_from_enemy_calculation(struct Enemy* enemy)
+ */
+unsigned short damge_from_enemy_calculation(struct Enemy* enemy)
+{
+	unsigned char i;
+	unsigned short total_gp;
+	unsigned short damage;
+	unsigned char random_num	= random_number_acquisition(21);
+	Ally *ally[ALLY_NUM];
+	for(i = 0;i < ALLY_NUM;i++){
+		ally[i] = get_ally_data(i);
+		total_gp += ally[i]->gp;
+	}
+	damage = enemy->ap - total_gp * (90 + random_num) / 100;
 	return damage;
 }

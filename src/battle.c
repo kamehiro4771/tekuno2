@@ -8,7 +8,7 @@
 /*********************************************************************/
 /*定数定義															 */
 /*********************************************************************/
-const unsigned char ATTACK[]			= {"攻撃！\n"};
+const unsigned char ATTACK[]			= {"の攻撃！\n"};
 const unsigned char COMBO[]				= {"コンボ！\n"};
 const unsigned char DAMAGE[]			= {"のダメージ！\n"};
 const unsigned char RECOVERY[]			= {"回復！\n"};
@@ -167,12 +167,14 @@ void player_turn(struct Enemy* enemy)
 
 /********************************************************************/
 /*敵のターン関数													*/
-/*unsigned char player_turn(struct Enemy* enemy)					*/
+/*void enemy_turn(Player *player,struct Enemy* enemy)					*/
 /*	引数：struct Enemy* enemy　攻撃する敵の情報
 /*	戻り値：unsigned char
 /********************************************************************/
-void enemy_turn(struct Enemy* enemy)
+void enemy_turn(Player *player,struct Enemy* enemy)
 {
+	send_serial(enemy->name,strlen(enemy->name));
+	send_serial(ATTACK,sizeof(ATTACK));
 	
 }
 

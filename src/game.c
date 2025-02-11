@@ -93,11 +93,12 @@ void game_sequence(void)
 		if(sci0_enter_check() == ON)
 			g_sequence++;//スイッチ又はエンターが押された
 		else{
-			G_speaker[0].score_count 	= G_speaker[1].score_count = 33;//途中から演奏
+			G_speaker[0].score_count 	= G_speaker[1].score_count = 32;//途中から演奏するため
 			G_speaker[2].score_count 	= 1;
-			G_speaker[0].set_flg 		= ON;
+			G_speaker[0].set_flg 		= ON;//途中から演奏する時はSETフラグをONにしておく
 			G_speaker[1].set_flg		= ON;
-			G_speaker[2].elapsed_time = 4500;
+//			G_speaker[2].set_flg		= ON;
+			G_speaker[2].elapsed_time	= 500;
 		}
 		break;
 	case 2://セーブデータ確認

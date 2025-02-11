@@ -58,6 +58,7 @@
 #define NEW_FIELD (0)
 #define CURRENT_FIELD (1)
 #define UPDATE_FIELD (2)
+#define ATTRIBUTE_NUM (4)
 //âÊñ ÅAï∂éöêßå‰
 #define SCREEN_ERACE "\x1b[2J"
 #define RED_CHAR "\x1b[31m"
