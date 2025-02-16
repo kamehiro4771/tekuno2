@@ -157,7 +157,7 @@ unsigned char sci0_str_cpy(unsigned char *data)
 	for(i = 0;i <= sci0.receive_count - 2;i++){//CRとLF以外をコピー
 		data[i]	= sci0.receive_data[i];
 	}
-	sci0.receive_data[i] = '\0';
+	data[i] = '\0';
 	return sci0.receive_count;
 }
 /****************************************************/

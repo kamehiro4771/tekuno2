@@ -26,8 +26,8 @@ const unsigned char GAME_TITLE[] = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~
 						   "~                                          ~\n"
 		                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\n"
 							};
-const unsigned char SAVE_DATA_CREATION[]	= {"0:ぼうけんのしょをつくる\n"};
-const unsigned char LOAD_SAVE_DATA[]		= {"1:ぼうけんをする\n"};
+const unsigned char SAVE_DATA_CREATION[]	= {"1:ぼうけんのしょをつくる\n"};
+const unsigned char LOAD_SAVE_DATA[]		= {"2:ぼうけんをする\n"};
 const unsigned char INPUT_NAME[] 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
 const unsigned char ARRIVAL[]				= {"はダンジョンに到着した\n"};
 const unsigned char GAME_CLEAR[] 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
@@ -65,7 +65,7 @@ void game_mode(void)
 	G_speaker = get_speaker();
 	for(i = 0;i < ALLY_NUM;i++)
 		player.mhp = player.hp = ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
-	while(g_sequence != 8){
+	while(g_sequence != 11){
 		game_sequence();
 	}
 	send_serial(RESET,4);
@@ -86,22 +86,25 @@ void game_sequence(void)
 		G_speaker[0].score_count = G_speaker[1].score_count = G_speaker[2].score_count = 0;
 		break;
 	case 1:
+		sci0_receive_start();//受信開始
 		automatic_playing(DORAGON_QUEST,SQUARE,G_speaker[0].score_count,G_speaker[1].score_count,G_speaker[2].score_count);//オープニング曲を自動演奏
-		while(playing_flg == ON){
-			//nop
-		}
-		if(sci0_enter_check() == ON)
+		g_sequence++;
+	case 2:
+		ret	= input_check();
+		if(ret != OFF){
+			G_speaker[0].end_flg = G_speaker[1].end_flg = G_speaker[2].end_flg = ON;
 			g_sequence++;//スイッチ又はエンターが押された
-		else{
-			G_speaker[0].score_count 	= G_speaker[1].score_count = 32;//途中から演奏するため
+		}else if(playing_flg == OFF){//入力されていないのに演奏が終了した（最後まで演奏された）
+			//途中から演奏するための位置指定
+			G_speaker[0].score_count 	= G_speaker[1].score_count = 32;
 			G_speaker[2].score_count 	= 1;
-			G_speaker[0].set_flg 		= ON;//途中から演奏する時はSETフラグをONにしておく
-			G_speaker[1].set_flg		= ON;
-//			G_speaker[2].set_flg		= ON;
+			G_speaker[0].elapsed_time	= 375;
+			G_speaker[1].elapsed_time	= 375;
 			G_speaker[2].elapsed_time	= 500;
+			g_sequence					= 1;
 		}
 		break;
-	case 2://セーブデータ確認
+	case 3://画面表示切り替え
 #if 0
 		if(blank_check())//セーブデータがあれば「ぼうけんをする」「ぼうけんのしょをつくる」両方表示
 #endif
@@ -112,36 +115,59 @@ void game_sequence(void)
 			send_serial(SAVE_DATA_CREATION);*/
 		g_sequence++;
 		break;
-	case 3://冒険の書自動演奏
+	case 4://冒険の書自動演奏開始
+		sci0_receive_start();//受信開始
 		automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
-		while(playing_flg == ON){
-			if(sci0_find_received_data('0') == 1)
-				g_sequence++;
-			else if(sci0_find_received_data('1') == 1)
-				g_sequence = 6;
-		}
-		if(g_sequence != 3)
-			send_serial(RESET,10);
-		break;
-	case 4://「名前を入力してください」表示
-		automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
-		send_serial(INPUT_NAME,sizeof(INPUT_NAME));
 		g_sequence++;
 		break;
 	case 5:
-		automatic_playing(BOUKENNNOSYO,SQUARE,G_speaker[0].score_count,G_speaker[1].score_count,G_speaker[2].score_count);
-		if(sci0_enter_check() == ON){
+		ret = input_check();
+		switch(ret){
+		case ON:
+			if(sci0_find_received_data('1') == 1)
+				g_sequence++;
+			else if(sci0_find_received_data('2') == 1)
+				g_sequence = 7;
+			break;
+		case SW1:
+			g_sequence++;
+			break;
+		case SW2:
+			g_sequence = 8;
+			break;
+		case OFF:
+			if(playing_flg == OFF)
+				g_sequence = 4;
+			break;
+		default:
+			//無効なスイッチ入力があった場合
+			break;
+		}
+		break;
+	case 6://名前の入力促す表示
+		sci0_receive_start();//受信開始
+		send_serial(RESET,10);
+		send_serial(INPUT_NAME,sizeof(INPUT_NAME));
+		g_sequence++;
+		break;
+	case 7:
+		ret = input_check();
+		if(ret == ON){
 			ret = sci0_str_cpy(player.name);
 			if(ret >= 3)
 				g_sequence = 8;
-		}
+			else
+				sci0_receive_start();//受信開始
+		}else if(playing_flg == OFF)
+			automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
 		break;
-	case 6:
+	case 8:
+		auto_play_end_processing();
 		send_serial(player.name,strlen((const char*)player.name));
 		send_serial(ARRIVAL,sizeof(ARRIVAL));
 		g_sequence++;
 		break;
-	case 7:
+	case 9:
 		for(i = 0;i < ENEMY_NUM;i++){
 			ret = battle_main(&player,&enemy[i]);
 			if(ret == LOSE){
@@ -152,7 +178,7 @@ void game_sequence(void)
 		}
 		g_sequence++;
 		break;
-	case 8:
+	case 10:
 		send_serial(player.name,sizeof(player.name));
 		send_serial(GAME_CLEAR,sizeof(GAME_CLEAR));
 		g_sequence++;

@@ -65,14 +65,14 @@ const int pwm_timer_value[] = {45867,43293,40863,38569,36405,34362,32433,30613,2
 							2866,2705,2554,2410,2275,2147,2027,1913,1806,1704,1609,1518,
 							//60　　　61　　62　　　63　　　64　　　65　　　66　　67　68　 69　 70  71  72 73
 							//ド　　　ド＃　　レ　　　レ＃　　　ミ　　　ファ　　ファ＃　　ソ　　ソ＃　ラ　　ラ＃　　シ　　ド
-							1433,1353,1277,1205,1137,1073,1013,956,903,852,804,759,716,};
+							1433,1353,1277,1205,1137,1073,1013,956,903,852,804,759,716,0,};
 //DA出力用の周波数テーブル
 const double onnkai_freq_value[] = {65.406,69.296,73.416,77.782,82.407,87.307,92.499,97.999,103.826,110.000,116.541,123.471,
 									130.813,138.591,146.832,155.563,164.814,174.614,184.997,195.998,207.652,220.000,233.082,246.942,
 									261.626,277.183,293.665,311.127,329.628,349.228,369.994,391.995,415.305,440.000,466.164,493.883,
 									523.251,554.365,587.330,622.254,659.255,698.456,739.989,783.991,830.609,880.000,932.328,987.767,
 									1046.502,1108.731,1174.659,1244.508,1318.510,1396.913,1479.978,1567.982,1661.219,1760.000,1864.655,1975.533,
-									2093.005,2217.461,2349.318,2489.016,2637.020,2793.826,2959.955,3135.963,3322.438,3520.000,3729.310,3951.066,4186.009,};
+									2093.005,2217.461,2349.318,2489.016,2637.020,2793.826,2959.955,3135.963,3322.438,3520.000,3729.310,3951.066,4186.009,0,};
 /********************************************************************************/
 /*ワークエリア定義																*/
 /********************************************************************************/
@@ -132,33 +132,27 @@ void speaker_initialize(void)
 void set_output_value(const char output_num,unsigned char speaker_num)
 {
 	struct SPEAKER *speaker						= get_speaker();
-	if(output_num == REST || output_num == OFF){
-		mute(speaker_num);//休符なら消音
-		if(speaker_num == 0)
-			output_led(output_num);
-	}else{
-		switch(speaker_num){
-		case 0://スピーカー１の値セット
-			output_led(OFF);
-			MTUB.TSTR.BIT.CST0					= 0;//PWM出力タイマー停止
-			MTUA.TSTR.BIT.CST1					= 0;//DA出力タイマ停止
-			DA.DACR.BIT.DAOE1					= 1;//DA出力許可
-			MTU6.TGRA 							= pwm_timer_value[output_num];
-			MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
-			da_process_each_waveform(speaker[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
-			output_led(output_num);
-			break;
-		case 1://スピーカー2の値セット
-			MTUB.TSTR.BIT.CST1					= 0;
-			MTU7.TGRA 							= pwm_timer_value[output_num];
-			MTU7.TGRB							= MTU7.TGRA * (speaker[1].duty_value / 100);
-			break;
-		case 2://スピーカー3の値セット
-			MTUB.TSTR.BIT.CST2					= 0;
-			MTU8.TGRA 							= pwm_timer_value[output_num];
-			MTU8.TGRB							= MTU8.TGRA * (speaker[2].duty_value / 100);
-			break;
-		}
+	switch(speaker_num){
+	case 0://スピーカー１の値セット
+		output_led(OFF);
+		MTUB.TSTR.BIT.CST0					= 0;//PWM出力タイマー停止
+		MTUA.TSTR.BIT.CST1					= 0;//DA出力タイマ停止
+		DA.DACR.BIT.DAOE1					= 1;//DA出力許可
+		MTU6.TGRA 							= pwm_timer_value[output_num];
+		MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
+		da_process_each_waveform(speaker[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
+		output_led(output_num);
+		break;
+	case 1://スピーカー2の値セット
+		MTUB.TSTR.BIT.CST1					= 0;
+		MTU7.TGRA 							= pwm_timer_value[output_num];
+		MTU7.TGRB							= MTU7.TGRA * (speaker[1].duty_value / 100);
+		break;
+	case 2://スピーカー3の値セット
+		MTUB.TSTR.BIT.CST2					= 0;
+		MTU8.TGRA 							= pwm_timer_value[output_num];
+		MTU8.TGRB							= MTU8.TGRA * (speaker[2].duty_value / 100);
+		break;
 	}
 }
 void set_output_speaker_length(unsigned char set_pattern)

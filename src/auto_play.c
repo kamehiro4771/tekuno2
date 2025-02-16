@@ -425,14 +425,46 @@ const unsigned char yadoya_score1[]				= {50,49,48,47,45,38,50};
 const unsigned char yadoya_score2[]					= {42,41,40,38,36,30,42,};
 const unsigned short yadoya_note_value[]				= {250,250,250,250,250,250,500,};
 
+const unsigned char CANON_SCORE1[] = {40,38,36,35,33,31,33,35,//8
+										36,35,36,24,23,31,26,28,24,36,35,33,35,40,43,45,41,40,38,41,40,38,36,35,//24
+										 33,31,29,28,26,29,28,26,24,26,28,29,31,26,31,29,28,33,31,29,31,29,28,26,//24
+										 24,33,35,36,35,33,31,29,28,26,33,31,33,31,29,43,40,41,43,40,41,43,31,33,35,36,38,40,41,//29
+										 40,36,38,40,28,29,31,33,31,29,31,28,29,31,29,33,31,29,28,26,28,26,24,26,28,29,31,33,//28
+										29,33,31,33,35,36,31,33,35,36,38,40,41,43,36,43,43,45,43,41,40,40,40,41,40,38,//26
+										36,34,33,34,31,31,29,36,36,35,36,11,
+										};
 
+const unsigned char CANON_SCORE2[] = {12,7,9,4,5,0,5,7,//8
+										12,7,9,4,5,0,//6
+										5,7,12,7,9,4,//6
+										5,0,5,9,0,9,//6
+										5,7,12,7,9,4,//6
+										5,0,5,7,28,//5
+										};
+const unsigned char CANON_SCORE3[] = {73,73,
+										28,
+										};
+const unsigned short CANON_NOTE_VALUE1[] = {1000,1000,1000,1000,1000,1000,1000,1000,//8000
+											250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,//6000
+											250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,//6000
+											500,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,125,125,250,125,125,125,125,125,125,125,125,125,125,//6000
+											250,125,125,250,125,125,125,125,125,125,125,125,125,125,250,125,125,250,125,125,125,125,125,125,125,125,125,125,//4000
+											250,125,125,250,125,125,125,125,125,125,125,125,125,125,750,250,250,250,250,250,750,250,250,250,250,250,//6000
+											250,250,250,250,750,250,500,500,750,250,2000,//6000
+											};//42000
 
-//const unsigned char　CANON_SCORE1[] = {40,38,36,35,33,31,33,35,
-										/*36,35,36,24,23,31,26,28,24,36,35,33,35,40,43,45,41,40,38,41,40,38,36,35,
-										};*/
-//const unsigned char CANON_SCORE2[] = {};
-//const unsigned short CANON_NOTE_VALUE1
-//const unsigned short CANON_NOTE_VALUE2
+const unsigned short CANON_NOTE_VALUE2[] = {1000,1000,1000,1000,1000,1000,1000,1000,//8000
+											1000,1000,1000,1000,1000,1000,
+											1000,1000,1000,1000,1000,1000,
+											1000,1000,1000,1000,1000,1000,
+											1000,1000,1000,1000,//4000
+											1000,1000,1000,1000,1000,1000,
+											1000,1000,1000,1000,1000,1000,
+											};//42000
+const unsigned short CANON_NOTE_VALUE3[] = {20000,20000,
+											2000,
+											};
+
 //0　　1	　2	 3  4  5  6	  7	 8   9	10	 11
 //ド　 ド＃ レ  レ＃ ミ  ファ ファ＃ソ	ソ＃  ラ	ラ＃   シ
 //12  13  14  15  16  17  18   19   20  21  22   23
@@ -572,20 +604,22 @@ void end_flg_check(void)
  * 自動演奏中断条件のエンターキーとスイッチ入力の判定
  *
  */
-void play_interruption_check(void)
+//自動演奏以外にも使える汎用的なスイッチ、エンターポーリング関数にする
+unsigned char input_check(void)
 {
+	unsigned char ret						= OFF;
 	static unsigned char sw_state			= OFF;
 	static unsigned char last_sw_state		= OFF;
 	sw_state				= sw_check();
 	if(sw_state != OFF){//スイッチが押されていたら
 		last_sw_state		= sw_state;//スイッチの状態記録
 	}else if(sci0_enter_check() == ON){//スイッチが押されている時はエンターは見ない
-		g_speaker[0].end_flg = g_speaker[1].end_flg = g_speaker[2].end_flg = ON;
+		ret				= ON;
 	}else if(last_sw_state != OFF){//スイッチが離された
-		g_speaker[0].end_flg = g_speaker[1].end_flg = g_speaker[2].end_flg = ON;
-		last_sw_state = OFF;
+		ret				= last_sw_state;
+		last_sw_state	= OFF;
 	}
-	common_timer = 1;
+	return ret;
 }
 
 /********************************************************************/
@@ -603,7 +637,7 @@ void auto_play_end_processing(void)
 	count_timer_dell(forward_score);
 	count_timer_dell(output_function_call);
 	count_timer_dell(end_flg_check);
-	count_timer_dell(play_interruption_check);
+	count_timer_dell(input_check);
 	g_speaker[0].elapsed_time	= 0;
 	g_speaker[1].elapsed_time	= 0;
 	g_speaker[2].elapsed_time	= 0;
@@ -622,6 +656,7 @@ void auto_play_end_processing(void)
 /********************************************************************************************/
 void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
 {
+	unsigned char i;
 	g_speaker[0].score_count 		= start1;
 	g_speaker[1].score_count 		= start2;
 	g_speaker[2].score_count 		= start3;//演奏開始位置の設定
@@ -650,13 +685,15 @@ void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,u
 			g_speaker[0].set_flg 	= g_speaker[1].set_flg = g_speaker[2].set_flg		= ON;
 			break;
 		}
+	}else{//途中から演奏する時は経過時間の更新をされたくないためset_flgをOFFでスタートする
+		for(i = 0;i < g_use_speaker_num;i++){
+			set_output_value(g_speaker[i].score_count,i);
+		}
+		output_speaker_start(3);//出力開始
+
 	}
 	count_timer_set(&common_timer,output_function_call);//出力関数の登録
 	count_timer_set(&common_timer,forward_score);//経過時間監視のエリアを登録
-	if(play_up_to_last == OFF){
-		count_timer_set(&common_timer,play_interruption_check);
-		sci0_receive_start();//受信開始
-	}
 	count_timer_set(&common_timer,end_flg_check);
 }
 
