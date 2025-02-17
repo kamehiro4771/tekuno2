@@ -154,7 +154,7 @@ unsigned char sci0_data_cpy(unsigned char *data)
 unsigned char sci0_str_cpy(unsigned char *data)
 {
 	unsigned char i;
-	for(i = 0;i <= sci0.receive_count - 2;i++){//CRとLF以外をコピー
+	for(i = 0;i < sci0.receive_count - 2;i++){//CRとLF以外をコピー
 		data[i]	= sci0.receive_data[i];
 	}
 	data[i] = '\0';

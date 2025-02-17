@@ -76,16 +76,14 @@ void player_turn(struct Enemy* enemy)
 	send_serial(CRLF,2);
 	send_serial(output_string,strlen((const char*)output_string));
 	send_serial(CRLF,2);
+	automatic_playing(BATTLE1,SQUARE,0,0,0);
 	if(first_turn_flg == ON)
 		output_battle_field(NEW_FIELD);
 	else
 		output_battle_field(CURRENT_FIELD);
 	while(1){
-		automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
-		if(sci0_enter_check() == ON){
-			resume_data[0]			= get_interrupt_data(0);
-			resume_data[1]			= get_interrupt_data(1);
-			resume_data[2]			= get_interrupt_data(2);
+		ret = input_check();
+		if(ret == ON){
 			ret						= sci0_get_receive_count();
 			if(ret == 4){//2文字入力された
 				sci0_data_cpy(&input[0]);
@@ -101,17 +99,17 @@ void player_turn(struct Enemy* enemy)
 					if(input[1] >= 'a' && input[1] < 'n')
 						break;
 				}
-			}
-		}else if(playing_flg == OFF)//何も入力されずに曲終了
-			resume_data[0].score_count	= resume_data[1].score_count = resume_data[2].score_count = 0;//曲の演奏開始位置を最初に設定
+			}else
+				sci0_receive_start();
+		}else if(playing_flg == OFF){//何も入力されずに曲終了
+			automatic_playing(BATTLE1,SQUARE,0,0,0);
+		}
 	}
-//	automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
 		deleted_type					= *dladder;
 		if(dladder != NULL){
-			play_up_to_last				= ON;//宝石動かし中は、エンターやスイッチで終了しない設定
 			combo_count++;//
 			deleted_number				= delete_jewel(dladder);//宝石を消す消した宝石数をもらう
 			send_serial(CURSOR_2LINE_ADVANCE,4);
@@ -126,7 +124,6 @@ void player_turn(struct Enemy* enemy)
 				resume_data[1]			= get_interrupt_data(1);
 				resume_data[2]			= get_interrupt_data(2);
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
-				play_up_to_last			= OFF;
 				send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
 				i_to_a(damage);
 				send_serial(output_string,sizeof(output_string));//ダメージ値表示
@@ -147,7 +144,6 @@ void player_turn(struct Enemy* enemy)
 				//自分のHPにダメージを足す
 			}
 			free_padding(dladder);//空いた宝石配列を詰める
-			play_up_to_last					= OFF;
 		}else
 			break;
 	}

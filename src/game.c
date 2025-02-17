@@ -86,7 +86,6 @@ void game_sequence(void)
 		G_speaker[0].score_count = G_speaker[1].score_count = G_speaker[2].score_count = 0;
 		break;
 	case 1:
-		sci0_receive_start();//受信開始
 		automatic_playing(DORAGON_QUEST,SQUARE,G_speaker[0].score_count,G_speaker[1].score_count,G_speaker[2].score_count);//オープニング曲を自動演奏
 		g_sequence++;
 	case 2:
@@ -116,7 +115,6 @@ void game_sequence(void)
 		g_sequence++;
 		break;
 	case 4://冒険の書自動演奏開始
-		sci0_receive_start();//受信開始
 		automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
 		g_sequence++;
 		break;
@@ -127,7 +125,9 @@ void game_sequence(void)
 			if(sci0_find_received_data('1') == 1)
 				g_sequence++;
 			else if(sci0_find_received_data('2') == 1)
-				g_sequence = 7;
+				g_sequence = 8;
+			else//無効なキーボード入力があった場合再入力
+				sci0_receive_start();//受信開始
 			break;
 		case SW1:
 			g_sequence++;

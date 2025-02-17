@@ -159,6 +159,7 @@ void set_output_speaker_length(unsigned char set_pattern)
 {
 	unsigned char i;
 	struct SPEAKER *speaker						= get_speaker();
+	//スラーの時はforを通らないようにしたい
 	for(i = 0;i < 200;i++){//音と音の間空ける
 	}
 	switch(set_pattern){//セットパターンを見て経過時間カウントに音の長さをセットする

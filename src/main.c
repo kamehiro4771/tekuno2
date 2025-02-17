@@ -65,7 +65,6 @@ struct SPEAKER speaker[3]			= {{NULL,NULL,0,0,50,SQUARE,0,1,OFF,OFF},
 unsigned char g_output_string[512];
 unsigned char g_sequence_num;
 unsigned char g_select;
-unsigned char play_up_to_last		= ON;//自動演奏時、この変数がONなら最後まで演奏する
 /*
  * プロトタイプ宣言
  */
@@ -95,7 +94,6 @@ void main(void)
 	eneiro_init();
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
 	automatic_playing(INITIAL_CHECK,SQUARE,0,0,0);
-	play_up_to_last = OFF;
 	while(1)
 	{
 		main_sequence_process();
@@ -170,6 +168,7 @@ static void selection_screen_display(const unsigned char *item,const unsigned ch
 /*********************************************************************************************************************************/
 signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)
 {
+	unsigned char ret;
 	switch(g_sequence_num){
 	case 0:
 		sci0_receive_start();//受信開始
@@ -177,26 +176,18 @@ signed short item_select_sequence(const unsigned char *item_select,const unsigne
 		g_sequence_num++;
 		break;
 	case 1:
-		if(sci0_enter_check() ==ON){
-			g_select			= a_to_i();//受信データを数値にして受け取る
+		ret = input_check();
+		if(ret == ON){
 			if(sci0_find_received_data('e'))
 				return 'e';
-			g_sequence_num		= 4;
-		}else
+			g_select			= a_to_i();//受信データを数値にして受け取る
 			g_sequence_num++;
+		}else if(ret != OFF){
+			g_select			= ret;
+			g_sequence_num++;
+		}
 		break;
 	case 2:
-		g_select					= sw_check();
-		if(g_select != OFF)
-			g_sequence_num++;
-		else
-			g_sequence_num			= 1;
-		break;
-	case 3:
-		if(sw_check() == OFF)
-			g_sequence_num++;
-		break;
-	case 4:
 		if(g_select > item_num)
 			g_sequence_num		= 0;
 		else{
@@ -265,9 +256,9 @@ void electronic_organ_mode(void)
 /********************************************************************/
 void autplay_mode(void)
 {
+	unsigned char ret			= 0;
 	signed short title			= -1;
 	signed short wave_type		= -1;
-	play_up_to_last				= OFF;
 	g_sequence_num				= 0;
 	while(title == -1){
 		title = item_select_sequence(playlists_select,title_name,SONG_NUM);
@@ -283,7 +274,9 @@ void autplay_mode(void)
 	send_serial(wave_type_name[wave_type - 1],sizeof(wave_type_name[wave_type - 1]));
 	automatic_playing((unsigned short)title,wave_type,0,0,0);
 	while(playing_flg == ON){
-		/*nop*/
+		ret = input_check();
+		if(ret != OFF)
+			auto_play_end_processing();
 	}
 }
 

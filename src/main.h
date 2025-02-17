@@ -37,7 +37,7 @@
 #define SET (1)
 #define NO_SET (0)
 #define NOT_FOUND (0)
-#define SONG_NUM (18)//曲の種類
+#define SONG_NUM (19)//曲の種類
 #define SUPEAKER_NUM (3)
 #define WAVE_NUM (4)//波形の種類
 #define SETTING_ITEM_NUM (3)//設定項目数
@@ -140,7 +140,6 @@ struct SPEAKER{
 	unsigned char end_flg;
 };
 
-extern unsigned char play_up_to_last;
 extern unsigned char playing_flg;
 /****************************************************************************/
 /*プロトタイプ宣言																*/

@@ -495,6 +495,7 @@ const unsigned char *score_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_s
 																		{boukennnosyo_score1,boukennnosyo_score2,boukennnosyo_score3},{yadoya_score1,yadoya_score2,NULL},
 																		{ally_attack_score,NULL,NULL},{battle_score1,battle_score2,battle_score3},
 																		{zennmetu_score1,zennmetu_score2,zennmetu_score3},{initial_check_score,NULL,NULL},
+																		{CANON_SCORE1,CANON_SCORE2,CANON_SCORE3},
 																		};
 
 const unsigned short *note_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_note_value,NULL,NULL},{saint_march_note_value,NULL,NULL},
@@ -506,11 +507,13 @@ const unsigned short *note_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_n
 																		{boukennnosyo_note_value,boukennnosyo_note_value,boukennnosyo_note_value},{yadoya_note_value,yadoya_note_value,NULL},
 																		{ally_attack_note_value,NULL,NULL},{battle_note_value1,battle_note_value2,battle_note_value3},
 																		{zennmetu_note_value1,zennmetu_note_value2,zennmetu_note_value3},{initial_check_note_value,NULL,NULL},
+																		{CANON_NOTE_VALUE1,CANON_NOTE_VALUE2,CANON_NOTE_VALUE3},
 																		};
 
-const unsigned char use_speaker_array[SONG_NUM]						= {1,1,1,1,1,1,1,1,1,3,2,1,3,2,1,3,3,1};
+const unsigned char use_speaker_array[SONG_NUM]						= {1,1,1,1,1,1,1,1,1,3,2,1,3,2,1,3,3,1,3};
 const unsigned short note_size_array[SONG_NUM][SUPEAKER_NUM]		= {{113,0,0},{33,0,0},{127,0,0},{169,0,0},{47,0,0},{181,0,0},{427,0,0},{390,0,0},
-																		{83,0,0},{98,93,62},{7,7,0},{15,0,0},{126,126,126},{7,7,0},{6,0,0},{265,292,325},{19,19,7},{8,0,0},};
+																		{83,0,0},{98,93,62},{7,7,0},{15,0,0},{126,126,126},{7,7,0},{6,0,0},{265,292,325},{19,19,7},{8,0,0},
+																		{151,37,3}};
 //全音符2000　二分音符1000　四分音符500　八分音符250　十六分音符125
 /********************************************************************/
 /*プロトタイプ宣言													*/
@@ -534,6 +537,7 @@ unsigned char playing_flg = OFF;
  */
 void automatic_playing(unsigned short title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
 {
+	sci0_receive_start();//受信開始
 	playing_flg						= ON;//演奏中フラグON
 	g_speaker						= get_speaker();//スピーカへのポインタ貰う
 	score_set_speaker(title,wave_type,start1,start2,start3);//楽譜をセットする、曲の開始位置のセット
