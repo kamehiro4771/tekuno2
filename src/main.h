@@ -35,7 +35,6 @@
 #define SUCCESS (0)
 #define ON (0)
 #define SET (1)
-#define NO_SET (0)
 #define NOT_FOUND (0)
 #define SONG_NUM (19)//‹È‚ÌŽí—Þ
 #define SUPEAKER_NUM (3)

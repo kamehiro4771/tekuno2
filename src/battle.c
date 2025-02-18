@@ -51,7 +51,7 @@ unsigned char battle_main(Player *player, Enemy *enemy)
 		player_turn(enemy);
 		if(enemy->hp == 0)
 			return 1;
-		enemy_turn(enemy);
+//		enemy_turn(enemy);
 		if(player->hp <= 0)
 			return 0;
 		first_turn_flg 			= OFF;
@@ -126,7 +126,7 @@ void player_turn(struct Enemy* enemy)
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
 				send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
 				i_to_a(damage);
-				send_serial(output_string,sizeof(output_string));//ダメージ値表示
+				send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
 				send_serial(DAMAGE,sizeof(DAMAGE));//のダメージ
 				if(enemy->hp >= damage)
 					enemy->hp 			= enemy->hp - damage;//モンスターのHPからダメージを引く

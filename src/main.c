@@ -63,7 +63,6 @@ struct SPEAKER speaker[3]			= {{NULL,NULL,0,0,50,SQUARE,0,1,OFF,OFF},
 										{NULL,NULL,0,0,50,SQUARE,0,2,OFF,OFF},
 										{NULL,NULL,0,0,50,SQUARE,0,3,OFF,OFF}};
 unsigned char g_output_string[512];
-unsigned char g_sequence_num;
 unsigned char g_select;
 /*
  * プロトタイプ宣言
@@ -76,7 +75,7 @@ void electronic_organ_mode(void);
 void autplay_mode(void);
 void setting_mode(void);
 void game_mode(void);
-void duty_setting(void);
+void duty_setting(unsigned char speaker_num);
 int semibreve_value_setting(int semibreve);
 //unsigned short item_select(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num);
 #ifdef __cplusplus
@@ -106,36 +105,27 @@ void main(void)
 /****************************************************************************/
 void main_sequence_process(void)
 {
-	switch(g_sequence_num){
+	static unsigned char main_sequence_num = 0;
+	signed char ret;
+	switch(main_sequence_num){
 		case 0:
 			sci0_receive_start();//受信開始
 			sprintf((char *)g_output_string,"%s%s%lf％ %s%s＊SW1~SW3又はキーボード1~3+エンター\n**************************************************\n"
 					,E_NEIRO,DUTY_VALUE,speaker[0].duty_value,WAVE_TYPE,wave_type_name[speaker[0].wave_type - 1]);
 			send_serial(g_output_string,strlen(g_output_string));
-			g_sequence_num++;
+			main_sequence_num++;
 			break;
 		case 1:
-			if(sci0_enter_check() == ON){//エンター確認
-				g_select				= a_to_i();//受信データを数値にして受け取る
-				g_sequence_num			= 4;
-			}
-			else
-				g_sequence_num++;
+			ret = input_check();
+			if(ret == ON){
+				ret			= a_to_i();
+				main_sequence_num++;
+			}else if(ret != OFF)
+				main_sequence_num++;
 			break;
 		case 2:
-			g_select					= sw_check();
-			if(g_select != OFF)
-				g_sequence_num++;
-			else
-				g_sequence_num			= 1;
-			break;
-		case 3:
-			if(sw_check() == OFF)
-				g_sequence_num++;
-			break;
-		case 4:
-			selected_mode_transition(g_select);
-			g_sequence_num				= 0;
+			selected_mode_transition(ret);
+			main_sequence_num = 0;
 			break;
 	}
 }
@@ -168,12 +158,13 @@ static void selection_screen_display(const unsigned char *item,const unsigned ch
 /*********************************************************************************************************************************/
 signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)
 {
+	static unsigned char item_select_sequence_num = 0;
 	unsigned char ret;
-	switch(g_sequence_num){
+	switch(item_select_sequence_num){
 	case 0:
 		sci0_receive_start();//受信開始
 		selection_screen_display(item_select,item_name,item_num);//選択画面が表示される
-		g_sequence_num++;
+		item_select_sequence_num++;
 		break;
 	case 1:
 		ret = input_check();
@@ -181,17 +172,17 @@ signed short item_select_sequence(const unsigned char *item_select,const unsigne
 			if(sci0_find_received_data('e'))
 				return 'e';
 			g_select			= a_to_i();//受信データを数値にして受け取る
-			g_sequence_num++;
+			item_select_sequence_num++;
 		}else if(ret != OFF){
 			g_select			= ret;
-			g_sequence_num++;
+			item_select_sequence_num++;
 		}
 		break;
 	case 2:
 		if(g_select > item_num)
-			g_sequence_num		= 0;
+			item_select_sequence_num		= 0;
 		else{
-			g_sequence_num			= 0;
+			item_select_sequence_num			= 0;
 			return g_select;
 		}
 	}
@@ -211,11 +202,11 @@ void selected_mode_transition(unsigned char select)
 	case AUTOPLAY:
 		autplay_mode();
 		break;
-	case SETTING:
-		setting_mode();
-		break;
 	case GAME:
 		game_mode();
+		break;
+	case SETTING:
+		setting_mode();
 		break;
 	default:
 		send_serial(error_message,sizeof(error_message));
@@ -259,7 +250,6 @@ void autplay_mode(void)
 	unsigned char ret			= 0;
 	signed short title			= -1;
 	signed short wave_type		= -1;
-	g_sequence_num				= 0;
 	while(title == -1){
 		title = item_select_sequence(playlists_select,title_name,SONG_NUM);
 	}
@@ -293,7 +283,7 @@ void setting_mode(void)
 		}
 		switch(setting_num){
 		case DUTY:
-			duty_setting();
+			duty_setting(0);
 			return;
 		case WAVE:
 			item_select_sequence(wavetype_select,wave_type_name,WAVE_NUM);
@@ -314,63 +304,43 @@ void game_mode(void)
 #endif
 
 /*********************************************************************************************************/
-/*デューティ比の設定関数
+/*
 /*void duty_setting(void)
 /*********************************************************************************************************/
-void duty_setting(void)
+
+void duty_setting(unsigned char speaker_num)
 {
-#if 0
-	int select					= OFF;
-	int last_select				= NO_SELECT;
-	int duty_one_digits			= OFF;
-	int duty_two_digits			= OFF;
+	signed long ret					= OFF;
+	unsigned char duty_one_digits		= NO_SELECT;
+	unsigned char duty_two_digits		= NO_SELECT;
+	send_serial(duty_setting_display,sizeof(duty_setting_display));
 	while(1){
-		if(last_select == NO_SELECT){
-			last_select			= OFF;
-			send_serial(duty_setting_display,sizeof(duty_setting_display));
-			while(sci0_send_comp_check());
-		}
-		select					= sw_check();
-		if(select == OFF){
-			if(last_select != select){
-				if(last_select >= 0 && last_select <= 9){
-					if(duty_two_digits == OFF){
-						duty_two_digits = (last_select + 1) % 10;
-					}else{
-						duty_one_digits = (last_select + 1) % 10;
-					}
-					last_select			= OFF;
-				}else{
-					duty_two_digits		= OFF;
-					duty_one_digits		= OFF;
-					last_select = 'e';
-				}
-				if(duty_one_digits != OFF){
-										= (duty_two_digits * 10) + duty_one_digits;
+		ret						= input_check();
+		if(ret == ON){
+			ret					= a_to_i();
+			if(ret > 99 || ret < 1){
+				sci0_receive_start();
+				ret				= OFF;
+			}else
+				break;
+		}else if(ret != OFF){
+			//スイッチ入力の時
+			if(duty_one_digits == NO_SELECT){
+				if(ret < SW11)
+					duty_one_digits = ret;
+			}else if(ret < SW11){
+				duty_two_digits = ret;
+				ret  = ((duty_one_digits % 10) * 10) + duty_two_digits % 10;
+				if(ret < 1)
+					duty_one_digits = duty_two_digits = NO_SELECT;
+				else
 					break;
-				}
-			}else if(sci0_find_received_data('\n')){
-				speaker[0].duty_value				= atoi(sci0_get_receive_data());
-//				sci0_delete_receive_data();
-				if(duty_two_digits != OFF){
-					duty_two_digits		= OFF;
-					last_select = 'e';
-				}else if( <= 0 ||  >= 100){
-					last_select = NO_SELECT;//値がおかしい時
-				}else{
-					break;
-				}
 			}
-		}else{
-			last_select		= select;
 		}
 	}
-	sprintf(g_output_string,"%d％%s",,setting_comp);
-	send_serial(g_output_string,sizeof(g_output_string));
-	while(sci0_send_comp_check());
-	return;
-#endif
+	speaker[speaker_num].duty_value		= ret;
 }
+
 
 struct SPEAKER *get_speaker(void)
 {
