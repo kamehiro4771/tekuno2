@@ -219,23 +219,27 @@ void selected_mode_transition(unsigned char select)
 /*unsigned char electronic_organ_mode(void)							*/
 /********************************************************************/
 //スイッチを押しながらエンターが押されるとスイッチを離した時にメニューに戻る音が鳴りっぱなしになる
+//スイッチ押して離した時ではなく押したときにONを返すようにする
 void electronic_organ_mode(void)
 {
-	int output_num				= OFF;
-	int last_output_num			= OFF;
+	unsigned char ret				= OFF;
+	unsigned char output_num		= OFF;
 	send_serial(end_method,sizeof(end_method));
 	sci0_receive_start();//受信開始
 	while(1){
-		output_num				= sw_check();
-		if(output_num == OFF){//スイッチがOFFなら
-			if(sci0_enter_check() == ON){//エンターが押されたか確認する
-				set_output_value(output_num,0);
+		ret							= sci0_enter_check();
+		if(ret == ON){
+			if(sci0_find_received_data('e') != NOT_FOUND){
+				mute(SPEAKER1);
+				output_led(OFF);
 				break;
-			}
+			}else
+				sci0_receive_start();//受信開始
 		}
-		if(last_output_num != output_num){
-			last_output_num			= output_num;
-			set_output_value(output_num,0);
+		ret							= sw_check();
+		if(output_num != ret){
+			output_num				= ret;
+			set_output_value(output_num,SPEAKER1);
 			output_speaker_start(1);
 		}
 	}

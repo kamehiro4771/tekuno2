@@ -38,12 +38,6 @@ void learn_resume_point(void);
 /********************************************************************/
 unsigned char battle_main(Player *player, Enemy *enemy)
 {
-	resume_data[0]					= get_interrupt_data(0);
-	resume_data[1]					= get_interrupt_data(1);
-	resume_data[2]					= get_interrupt_data(2);
-	resume_data[0].score_count 		= 0;
-	resume_data[1].score_count 		= 0;
-	resume_data[2].score_count 		= 0;
 	first_turn_flg 					= ON;
 	send_serial(enemy->name,sizeof(enemy->name));//敵の名前表示
 	send_serial(APPEAR,sizeof(APPEAR));//「現れた！」表示
@@ -68,7 +62,8 @@ void player_turn(struct Enemy* enemy)
 {
 	unsigned char input[2] = {0};
 	unsigned char *dladder;
-	unsigned char ret,deleted_type,deleted_number,i = 0;
+	struct SPEAKER *speaker;
+	unsigned char ret,deleted_type,deleted_number;
 	unsigned short combo_count = 0;
 	signed short damage;
 	send_serial(enemy->name,strlen((const char*)enemy->name));//敵と自分のパラメーター表示
@@ -76,11 +71,17 @@ void player_turn(struct Enemy* enemy)
 	send_serial(CRLF,2);
 	send_serial(output_string,strlen((const char*)output_string));
 	send_serial(CRLF,2);
-	automatic_playing(BATTLE1,SQUARE,0,0,0);
-	if(first_turn_flg == ON)
+	if(first_turn_flg == ON){
+		automatic_playing(BATTLE1,SQUARE,0,0,0);
 		output_battle_field(NEW_FIELD);
-	else
+	}else{
+		2ターン目に曲がおかしくなる
+		speaker[0].elapsed_time = resume_data[0].elapsed_time;
+		speaker[1].elapsed_time = resume_data[1].elapsed_time;
+		speaker[2].elapsed_time = resume_data[2].elapsed_time;
+		automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 		output_battle_field(CURRENT_FIELD);
+	}
 	while(1){
 		ret = input_check();
 		if(ret == ON){

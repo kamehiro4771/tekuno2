@@ -257,9 +257,7 @@ void output_led(int scale)
 	case SI_6:
 		PORTB.DR.BYTE	= 0x0c;//LED7â©êFì_ìî
 		break;
-	case OFF:
-	case REST://LEDëSÇƒè¡ìî
-	case COMP:
+	default:
 		PORTD.DR.BYTE = 0;
 		PORTE.DR.BYTE = 0;
 		PORTB.DR.BYTE = 0;

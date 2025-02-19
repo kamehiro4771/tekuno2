@@ -40,8 +40,9 @@
 #define SUPEAKER_NUM (3)
 #define WAVE_NUM (4)//波形の種類
 #define SETTING_ITEM_NUM (3)//設定項目数
-#define NBCK (0)//関数のノンブロッキング指定
-#define BCK (1)//関数のブロッキング指定
+#define SPEAKER1 (0)
+#define SPEAKER2 (1)
+#define SPEAKER3 (2)
 //ゲームで使用する
 #define FIELD_NUM (13)//バトルフィールドの数
 #define ONE_JEWEL (6)//一つの宝石のバイト数
@@ -103,7 +104,7 @@ enum title{AVE_MARIA = 1,SAINT_MARCH,MENUETT,JESU_JOY_OF_MAN_S,AURA_LEE,SAKURA,Z
 enum wave{SQUARE = 1,SAWTHOOTH,TRIANGLE,SINE};
 enum setting{DUTY = 1,WAVE,};
 enum{
-	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP,NO_SELECT,OFF,
+	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP = 73,NO_SELECT = 73,OFF = 73,
 };
 //構造体宣言
 struct SCI{
