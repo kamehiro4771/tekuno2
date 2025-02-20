@@ -9,5 +9,6 @@
 #define DAMAGE_H_
 
 unsigned short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number);
+unsigned short damge_from_enemy_calculation(unsigned short player_gp,struct Enemy* enemy);
 
 #endif /* DAMAGE_H_ */

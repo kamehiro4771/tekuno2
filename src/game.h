@@ -37,6 +37,7 @@ typedef struct Player{
 	unsigned char name[64];
 	signed short hp;
 	unsigned short mhp;
+	unsigned short gp;
 }Player;
 
 #endif /* GAME_H_ */

@@ -26,7 +26,7 @@ unsigned char first_turn_flg;
 /*プロトタイプ宣言													*/
 /********************************************************************/
 void player_turn(struct Enemy* enemy);
-void enemy_turn(struct Enemy* enemy);
+void enemy_turn(Player *player,struct Enemy* enemy);
 void i_to_a(unsigned short i);
 void learn_resume_point(void);
 /********************************************************************/
@@ -45,7 +45,7 @@ unsigned char battle_main(Player *player, Enemy *enemy)
 		player_turn(enemy);
 		if(enemy->hp == 0)
 			return 1;
-//		enemy_turn(enemy);
+		enemy_turn(player,enemy);
 		if(player->hp <= 0)
 			return 0;
 		first_turn_flg 			= OFF;
@@ -62,7 +62,7 @@ void player_turn(struct Enemy* enemy)
 {
 	unsigned char input[2] = {0};
 	unsigned char *dladder;
-	struct SPEAKER *speaker;
+	struct SPEAKER *speaker = get_speaker();
 	unsigned char ret,deleted_type,deleted_number;
 	unsigned short combo_count = 0;
 	signed short damage;
@@ -75,7 +75,6 @@ void player_turn(struct Enemy* enemy)
 		automatic_playing(BATTLE1,SQUARE,0,0,0);
 		output_battle_field(NEW_FIELD);
 	}else{
-		2ターン目に曲がおかしくなる
 		speaker[0].elapsed_time = resume_data[0].elapsed_time;
 		speaker[1].elapsed_time = resume_data[1].elapsed_time;
 		speaker[2].elapsed_time = resume_data[2].elapsed_time;
@@ -120,11 +119,13 @@ void player_turn(struct Enemy* enemy)
 			damage						= damage_calculation(enemy,combo_count,deleted_type,deleted_number);//ダメージ計算
 			if(deleted_type != LIFE){//damageがマイナスなら敵へのダメージ、プラスなら回復表示
 				auto_play_end_processing();
-				//経過時間おかしい
 				resume_data[0]			= get_interrupt_data(0);
 				resume_data[1]			= get_interrupt_data(1);
 				resume_data[2]			= get_interrupt_data(2);
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
+				while(playing_flg == ON){
+					//nop
+				}
 				send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
 				i_to_a(damage);
 				send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
@@ -139,14 +140,26 @@ void player_turn(struct Enemy* enemy)
 				resume_data[1]			= get_interrupt_data(1);
 				resume_data[2]			= get_interrupt_data(2);
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);
+				while(playing_flg == ON){
+					//nop
+				}
 				i_to_a(damage);
 				send_serial(output_string,strlen((const char*)output_string));
 				send_serial(RECOVERY,sizeof(RECOVERY));//「回復！」
 				//自分のHPにダメージを足す
 			}
+			speaker[0].elapsed_time = resume_data[0].elapsed_time;
+			speaker[1].elapsed_time = resume_data[1].elapsed_time;
+			speaker[2].elapsed_time = resume_data[2].elapsed_time;
+			automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 			free_padding(dladder);//空いた宝石配列を詰める
-		}else
+		}else{
+			auto_play_end_processing();
+			resume_data[0]			= get_interrupt_data(0);
+			resume_data[1]			= get_interrupt_data(1);
+			resume_data[2]			= get_interrupt_data(2);
 			break;
+		}
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
@@ -159,9 +172,14 @@ void player_turn(struct Enemy* enemy)
 /********************************************************************/
 void enemy_turn(Player *player,struct Enemy* enemy)
 {
+	unsigned short ret;
 	send_serial(enemy->name,strlen(enemy->name));
 	send_serial(ATTACK,sizeof(ATTACK));
-	
+	ret = damge_from_enemy_calculation(player->gp,enemy);
+	i_to_a(ret);
+	send_serial(output_string,strlen((const char*)output_string));
+	send_serial(DAMAGE,sizeof(DAMAGE));//のダメージ
+	player->hp = player->hp - ret;
 }
 
 /********************************************************************/
@@ -202,20 +220,6 @@ void i_to_a(unsigned short i)
 	}
 }
 
-/*
- * 演奏中断した位置を覚える
- * void learn_resume_point(RESUME_POINT resume_point)
- */
-/*
-void learn_resume_point(RESUME_POINT resume_point)
-{
-	resume_point.start[0]		= speaker[0].score_count;
-	resume_point.start[1]		= speaker[1].score_count;
-	resume_point.start[2]		= speaker[2].score_count;
-	resume_point.elapsed[0]		= get_interrupt_data(0).elapsed_time;//経過時間も覚える
-	resume_point.elapsed[1]		= get_interrupt_data(1).elapsed_time;
-	resume_point.elapsed[2]		= get_interrupt_data(2).elapsed_time;
-}*/
 /********************************************************************/
 /*else if(ret == 3){
 				if(input[i] < 0x41 || input[i] > 0x4d)//1文字目A~M以外の入力

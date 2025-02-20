@@ -37,17 +37,10 @@ unsigned short damage_calculation(struct Enemy* enemy,unsigned short combo_count
  * 敵からのダメージ計算
  * unsigned short damge_from_enemy_calculation(struct Enemy* enemy)
  */
-unsigned short damge_from_enemy_calculation(struct Enemy* enemy)
+unsigned short damge_from_enemy_calculation(unsigned short player_gp,struct Enemy* enemy)
 {
-	unsigned char i;
-	unsigned short total_gp;
 	unsigned short damage;
 	unsigned char random_num	= random_number_acquisition(21);
-	Ally *ally[ALLY_NUM];
-	for(i = 0;i < ALLY_NUM;i++){
-		ally[i] = get_ally_data(i);
-		total_gp += ally[i]->gp;
-	}
-	damage = enemy->ap - total_gp * (90 + random_num) / 100;
+	damage = enemy->ap - player_gp * (90 + random_num) / 100;
 	return damage;
 }

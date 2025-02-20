@@ -63,8 +63,11 @@ void game_mode(void)
 {
 	unsigned char i;
 	G_speaker = get_speaker();
-	for(i = 0;i < ALLY_NUM;i++)
-		player.mhp = player.hp = ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
+	for(i = 0;i < ALLY_NUM;i++){
+		player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
+		player.gp = player.gp + ally[i].gp;
+	}
+	player.gp = player.gp / ALLY_NUM;
 	while(g_sequence != 11){
 		game_sequence();
 	}
@@ -171,10 +174,13 @@ void game_sequence(void)
 		for(i = 0;i < ENEMY_NUM;i++){
 			ret = battle_main(&player,&enemy[i]);
 			if(ret == LOSE){
-				g_sequence = 9;
+				g_sequence =11;
 				break;
 			}
 			automatic_playing(WINNING,SQUARE,0,0,0);
+			while(playing_flg == ON){
+				/*nop*/
+			}
 		}
 		g_sequence++;
 		break;
