@@ -127,7 +127,7 @@ typedef struct playing_resume_point{
 			}RESUME_POINT;
 //elapsed_timesとcore_countを構造体にしてまとめて受け渡しできるようにする
 //演奏中断ポイントをもらう時に構造体で貰えるようにする
-struct SPEAKER{
+typedef struct SPEAKER{
 	const unsigned char *pscore;		//楽譜配列へのポインタ
 	const unsigned short *pnote_value;	//音の長さ配列へのポインタ
 	unsigned short score_count;			//スコアカウント
@@ -138,7 +138,7 @@ struct SPEAKER{
 	unsigned char speaker_num;			//スピーカー番号0～2
 	unsigned char set_flg;				//自動演奏時スコアカウントが進んだのでセットが必要であることを知らせる
 	unsigned char end_flg;
-};
+}SPEAKER;
 
 extern unsigned char playing_flg;
 /****************************************************************************/

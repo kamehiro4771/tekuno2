@@ -53,7 +53,7 @@ unsigned char last_sw					= 'e';
 unsigned char output_num				= OFF;
 unsigned char last_output_num			= OFF;
 unsigned char g_sequence;//シーケンス番号
-struct SPEAKER *G_speaker;
+SPEAKER *G_speaker;
 signed short party_hp;//パーティー全体のHP
 /********************************************************************************************/
 /*ゲームモードメイン																		*/

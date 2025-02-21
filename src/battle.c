@@ -42,7 +42,7 @@ unsigned char battle_main(Player *player, Enemy *enemy)
 	send_serial(enemy->name,sizeof(enemy->name));//敵の名前表示
 	send_serial(APPEAR,sizeof(APPEAR));//「現れた！」表示
 	while(1){
-		player_turn(enemy);
+		player_turn(player,enemy);
 		if(enemy->hp == 0)
 			return 1;
 		enemy_turn(player,enemy);
@@ -55,10 +55,10 @@ unsigned char battle_main(Player *player, Enemy *enemy)
 
 /********************************************************************/
 /*プレーヤーのターン関数											*/
-/*void player_turn(struct Enemy* enemy)								*/
+/*void player_turn(Player *player,Enemy* enemy)							*/
 /*	引数：struct Enemy* enemy 戦闘中の敵のデータ					*/
 /********************************************************************/
-void player_turn(struct Enemy* enemy)
+void player_turn(Player *player,Enemy* enemy)
 {
 	unsigned char input[2] = {0};
 	unsigned char *dladder;
@@ -146,7 +146,9 @@ void player_turn(struct Enemy* enemy)
 				i_to_a(damage);
 				send_serial(output_string,strlen((const char*)output_string));
 				send_serial(RECOVERY,sizeof(RECOVERY));//「回復！」
-				//自分のHPにダメージを足す
+				player->hp = player->hp + damage;//自分のHPにダメージを足す最大値を超えないように
+				if(player->hp > player->mhp)
+					player->hp = player->mhp;
 			}
 			speaker[0].elapsed_time = resume_data[0].elapsed_time;
 			speaker[1].elapsed_time = resume_data[1].elapsed_time;
@@ -170,7 +172,7 @@ void player_turn(struct Enemy* enemy)
 /*	引数：struct Enemy* enemy　攻撃する敵の情報
 /*	戻り値：unsigned char
 /********************************************************************/
-void enemy_turn(Player *player,struct Enemy* enemy)
+void enemy_turn(Player *player,Enemy* enemy)
 {
 	unsigned short ret;
 	send_serial(enemy->name,strlen(enemy->name));

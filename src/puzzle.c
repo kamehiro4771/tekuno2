@@ -29,31 +29,35 @@ void create_send_data(void);
 void move_jewel(unsigned char input1,unsigned char input2)
 {
 	signed char difference;
-	unsigned char absolute_value,temp,i;
+	unsigned char absolute_value,temp,position1,position2;
 	if(input1 <= 'Z')
-		i					= input1 - 'A';//動かす宝石の位置
+		position1					= input1 - 'A';//動かす宝石の位置
 	else
-		i					= input1 - 'a';
-	difference				= input1 - input2;//一番目に入力した値と二番目に入力した値の差を求める
+		position1					= input1 - 'a';
+	if(input2 <= 'Z')
+		position2					= input2 - 'A';
+	else
+		position2					= input2 - 'a';
+	difference						= position1 - position2;//一番目に入力した値と二番目に入力した値の差を求める
 	if(difference > 0){
-		absolute_value		= input1 - input2;
+		absolute_value				= position1 - position2;
 		//宝石を左にづらしていく
 		while(absolute_value--){
-			temp				= battle_field[i - 1];
-			battle_field[i - 1]	= battle_field[i];
-			battle_field[i]		= temp;
-			i--;
+			temp					= battle_field[position1 - 1];
+			battle_field[position1 - 1]		= battle_field[position1];
+			battle_field[position1]			= temp;
+			position1--;
 			output_battle_field(UPDATE_FIELD);
 			cmt2_wait(18750,CKS512);//200ミリ秒間隔をあける
 		}
 	}else{
-		absolute_value = input2 - input1;
+		absolute_value = position2 - position1;
 		//宝石を右にづらしていく
 		while(absolute_value--){
-			temp				= battle_field[i + 1];
-			battle_field[i + 1]	= battle_field[i];
-			battle_field[i]	= temp;
-			i++;
+			temp				= battle_field[position1 + 1];
+			battle_field[position1 + 1]	= battle_field[position1];
+			battle_field[position1]	= temp;
+			position1++;
 			output_battle_field(UPDATE_FIELD);
 			cmt2_wait(18750,CKS512);//200ミリ秒間隔をあける
 		}
