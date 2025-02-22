@@ -21,10 +21,6 @@
 #include "main.h"
 
 const unsigned char E_NEIRO[]		= {"\x1b[2J\x1b[0;0H\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"
-										"１.電子オルガンモード\n"
-										"２.自動演奏モード\n"
-										"３.ゲームモード\n"
-										"４.設定\n\x1b[49m"
 										};
 const unsigned char DUTY_VALUE[]			= {"デューティー比："};
 const unsigned char WAVE_TYPE[]				= {"波形："};
@@ -33,24 +29,27 @@ const unsigned char playlists_select[]		= {"\x1b[2J\x1b[13A曲を選択して下さい\n"
 const unsigned char wavetype_select[]		= {"音の波形を選択してください\n"};
 const unsigned char setting_item_select[] 	= {"設定する項目を選択してください\n"};
 const unsigned char end_method[]				= {"メニューに戻る e + エンター\n"};
-const unsigned char title_name[SONG_NUM][64]	= {{"1.アヴェ・マリア\n"},
-										{"2.聖者の行進\n"},
-										{"3.メヌエット\n"},
-										{"4.主よ、人の望みの喜びよ\n"},
-										{"5.オーラ・リー\n"},
-										{"6.さくら（独唱）\n"},
-										{"7.情熱大陸\n"},
-										{"8.Let it Be\n"},
-										{"9.NHKのど自慢のテーマ曲\n"},
-										{"10ドラゴンクエスト序曲\n"},};									//9.少年時代　10．戦場のメリークリスマス
-const unsigned char wave_type_name[WAVE_NUM][64] 	= {{"1.矩形波\n"},
-											{"2.のこぎり波\n"},
-											{"3.三角波\n"},
-											{"4.サイン波\n",}};
+const unsigned char SELECTABLE_MODE_ARREY[MODE_NUM]	= {ORGAN,AUTOPLAY,GAME,SETTING};
+const unsigned char SELECTABLE_TITLE_ARREY[AUTO_PLAY_TITLE_NUM]	= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON};//この配列に入っている曲が自動演奏される
+const unsigned char SELECTABLE_WAVE_TYPE[WAVE_NUM]			= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//選択できる波形
 
-const unsigned char setting_item_name[SETTING_ITEM_NUM][64] = {{"1.デューティー比\n"},
-													{"2.波形\n"},
-													{"3.キーの高さ\n"}};
+const unsigned char MODE_NAME[MODE_NUM]			= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
+const unsigned char title_name[SONG_NUM][64]	= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
+													"Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","冒険の書",
+													"宿屋","攻撃音","勝利","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
+const unsigned char wave_type_name[WAVE_NUM][64] 	= {{"矩形波"},
+											{"のこぎり波"},
+											{"三角波"},
+											{"サイン波",}};
+
+//曲の順番を並べ替えらるようにしたい
+//曲名だけの配列を作る
+//数字＋.＋\nはAUTO_PLAY_TITLE_ARREYの数だけ出力する
+
+
+const unsigned char setting_item_name[SETTING_ITEM_NUM][64] = {{"デューティー比"},
+													{"波形"},
+													{"キーの高さ"}};
 
 const unsigned char duty_setting_display[] 	= {"デューティ比を入力してください（1~99％）\n"
 										"SW1:1　～　SW9:9 SW10:0\n"};
@@ -93,6 +92,9 @@ void main(void)
 	eneiro_init();
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
 	automatic_playing(INITIAL_CHECK,SQUARE,0,0,0);
+	while(playing_flg == ON){
+		//nop
+	}
 	while(1)
 	{
 		main_sequence_process();
@@ -110,12 +112,11 @@ void main_sequence_process(void)
 	switch(main_sequence_num){
 		case 0:
 			sci0_receive_start();//受信開始
-			sprintf((char *)g_output_string,"%s%s%lf％ %s%s＊SW1~SW3又はキーボード1~3+エンター\n**************************************************\n"
-					,E_NEIRO,DUTY_VALUE,speaker[0].duty_value,WAVE_TYPE,wave_type_name[speaker[0].wave_type - 1]);
-			send_serial(g_output_string,strlen(g_output_string));
+			send_serial(E_NEIRO,sizeof(E_NEIRO));
 			main_sequence_num++;
 			break;
 		case 1:
+			//モード選択表示
 			ret = input_check();
 			if(ret == ON){
 				ret			= a_to_i();
@@ -133,15 +134,18 @@ void main_sequence_process(void)
 /*選択項目表示																*/
 /*void selection_screen_display(char *item,char *item_name,unsigned char item_num)	*/
 /*			char *item:選択する内容											*/
-/*			char *item_name:選択する項目名									*/
+/*			char *item_name:選択する項目名配列へのポインタ									*/
 /*			char item_num:項目の数											*/
 /****************************************************************************/
+//項目名の前の「数字.」はこちらで表示
+//改行もこちらで表示
 static void selection_screen_display(const unsigned char *item,const unsigned char (*item_name)[64],unsigned char item_num)
 {
 	int i;
 	send_serial(RESET,10);
 	send_serial(item,strlen((const char*)item));
 	for(i = 0;i < item_num;i++){
+		send_serial();
 		send_serial(item_name[i],sizeof(item_name[i]));
 	}
 	send_serial(end_method,sizeof(end_method));
@@ -219,7 +223,6 @@ void selected_mode_transition(unsigned char select)
 /*unsigned char electronic_organ_mode(void)							*/
 /********************************************************************/
 //スイッチを押しながらエンターが押されるとスイッチを離した時にメニューに戻る音が鳴りっぱなしになる
-//スイッチ押して離した時ではなく押したときにONを返すようにする
 void electronic_organ_mode(void)
 {
 	unsigned char ret				= OFF;
@@ -255,7 +258,7 @@ void autplay_mode(void)
 	signed short title			= -1;
 	signed short wave_type		= -1;
 	while(title == -1){
-		title = item_select_sequence(playlists_select,title_name,SONG_NUM);
+		title = item_select_sequence(playlists_select,TITLE_NAME,SONG_NUM);
 	}
 	if(title == 'e')
 		return;//タイトル選択でeが入力されたらメニューへ戻る
@@ -264,7 +267,7 @@ void autplay_mode(void)
 	}
 	if(wave_type == 'e')
 		return;//波形選択でeが入力されたら自動演奏モード終了
-	send_serial(title_name[title - 1],sizeof(title_name[title - 1]));
+	send_serial(TITLE_NAME[title - 1],sizeof(TITLE_NAME[title - 1]));
 	send_serial(wave_type_name[wave_type - 1],sizeof(wave_type_name[wave_type - 1]));
 	automatic_playing((unsigned short)title,wave_type,0,0,0);
 	while(playing_flg == ON){

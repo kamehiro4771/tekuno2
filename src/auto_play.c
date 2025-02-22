@@ -509,7 +509,7 @@ const unsigned short *note_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_n
 																		{zennmetu_note_value1,zennmetu_note_value2,zennmetu_note_value3},{initial_check_note_value,NULL,NULL},
 																		{CANON_NOTE_VALUE1,CANON_NOTE_VALUE2,CANON_NOTE_VALUE3},
 																		};
-
+//少年時代　戦場のメリークリスマス
 const unsigned char use_speaker_array[SONG_NUM]						= {1,1,1,1,1,1,1,1,1,3,2,1,3,2,1,3,3,1,3};
 const unsigned short note_size_array[SONG_NUM][SUPEAKER_NUM]		= {{113,0,0},{33,0,0},{127,0,0},{169,0,0},{47,0,0},{181,0,0},{427,0,0},{390,0,0},
 																		{83,0,0},{98,93,62},{7,7,0},{15,0,0},{126,126,126},{7,7,0},{6,0,0},{265,292,325},{19,19,7},{8,0,0},
