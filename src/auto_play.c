@@ -486,7 +486,7 @@ const unsigned short zennmetu_note_value2[]		= {250,250,250,250,250,250,250,250,
 const unsigned short zennmetu_note_value3[]		= {250,500,500,500,500,500,2750};
 const unsigned char initial_check_score[]				= {24,26,28,29,31,33,35,36};
 const unsigned short initial_check_note_value[]			=	{500,500,500,500,500,500,500,500};
-const unsigned char *score_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_score,NULL,NULL},{saint_march_score,NULL,NULL},
+const unsigned char *score_pointer_array[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_score,NULL,NULL},{saint_march_score,NULL,NULL},
 																		{menuett_score,NULL,NULL},{jesu_joy_of_man_s_score,NULL,NULL},
 																		{aura_lee_score,NULL,NULL},{sakura_score,NULL,NULL},
 																		{zyounetutairiku_score,NULL,NULL},{let_it_be_score,NULL,NULL},
@@ -498,7 +498,7 @@ const unsigned char *score_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_s
 																		{CANON_SCORE1,CANON_SCORE2,CANON_SCORE3},
 																		};
 
-const unsigned short *note_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_note_value,NULL,NULL},{saint_march_note_value,NULL,NULL},
+const unsigned short *note_pointer_array[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_note_value,NULL,NULL},{saint_march_note_value,NULL,NULL},
 																		{menuett_note_value,NULL,NULL},{jesu_joy_of_man_s_note_value,NULL,NULL},
 																		{aura_lee_note_value,NULL,NULL},{sakura_note_value,NULL,NULL},
 																		{zyounetutairiku_note_value,NULL,NULL},{let_it_be_note_value,NULL,NULL},
@@ -511,7 +511,7 @@ const unsigned short *note_pointer_array[SONG_NUM][SUPEAKER_NUM]	= {{ave_maria_n
 																		};
 //少年時代　戦場のメリークリスマス
 const unsigned char use_speaker_array[SONG_NUM]						= {1,1,1,1,1,1,1,1,1,3,2,1,3,2,1,3,3,1,3};
-const unsigned short note_size_array[SONG_NUM][SUPEAKER_NUM]		= {{113,0,0},{33,0,0},{127,0,0},{169,0,0},{47,0,0},{181,0,0},{427,0,0},{390,0,0},
+const unsigned short note_size_array[SONG_NUM][SPEAKER_NUM]		= {{113,0,0},{33,0,0},{127,0,0},{169,0,0},{47,0,0},{181,0,0},{427,0,0},{390,0,0},
 																		{83,0,0},{98,93,62},{7,7,0},{15,0,0},{126,126,126},{7,7,0},{6,0,0},{265,292,325},{19,19,7},{8,0,0},
 																		{150,37,3}};
 //全音符2000　二分音符1000　四分音符500　八分音符250　十六分音符125
@@ -530,11 +530,7 @@ unsigned char g_use_speaker_num;		//使用するスピーカーの個数
 unsigned long common_timer = 1;
 unsigned char playing_flg = OFF;
 
-/*
- * 自動演奏ノンブロッキング版
- *
- *
- */
+
 void automatic_playing(unsigned short title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
 {
 	sci0_receive_start();//受信開始
@@ -579,7 +575,7 @@ void output_function_call(void)
 	unsigned char output_pattern = 0;
 	for(i = 0;i < g_use_speaker_num;i++){
 		if(g_speaker[i].set_flg == ON){//スコアカウントが動いたか判定
-			set_output_value(g_speaker[i].pscore[g_speaker[i].score_count],i);
+			set_output_value(g_speaker[i].pscore[g_speaker[i].score_count],i+1);
 			g_speaker[i].set_flg	= OFF;
 			output_pattern				+= SET << i;
 		}
@@ -634,7 +630,7 @@ void auto_play_end_processing(void)
 {
 	g_use_speaker_num	= 0;
 	output_led(REST);				//LED消灯
-	mute(3);//スピーカーi消音
+	mute(ALL_SPEAKER);//スピーカーi消音
 	interrupt_data[0]			= g_speaker[0];
 	interrupt_data[1]			= g_speaker[1];
 	interrupt_data[2]			= g_speaker[2];

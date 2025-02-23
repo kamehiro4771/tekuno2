@@ -15,7 +15,7 @@
 /********************************************************************************/
 /*定数定義																		*/
 /********************************************************************************/
-short int sine_value_table[]={
+const unsigned short sine_value_table[]={
 		512,521,530,540,549,559,568,577,587,596,605,614,624,633,642,651,660,
 		669,678,687,696,705,713,722,730,739,747,756,764,772,780,788,796,804,
 		811,819,826,834,841,848,855,862,869,876,882,889,895,901,907,913,919,
@@ -49,8 +49,8 @@ short int sine_value_table[]={
 									//ド　ド＃　レ　レ＃　ミ　ファファ＃ソソ＃　 ラ　ラ＃シ
 									//60　　61　　62　63　　64　65　　66　　67　68　 69　 70  71  72 73
 									//ド　　ド＃　レ　レ＃　ミ　ファ　ファ＃ソ　ソ＃　ラ　ラ＃シ　ド 消音							//0　　　　1	　　2	  　　3	　　4	 　　5	6	  　　7	　8	  　　9	10	  　　11
-//PWM用のタイマ設定値テーブル		//ド　　　　ド＃	　　レ	　　　レ＃	　　ミ	　　　ファ	ファ＃	　　　　ソ	　ソ＃	　　　　ラ	ラ＃	　　　　シ
-const int pwm_timer_value[] = {45867,43293,40863,38569,36405,34362,32433,30613,28894,27273,25742,24297,
+//PWMのタイマ設定値テーブル		//ド　　　　ド＃	　　レ	　　　レ＃	　　ミ	　　　ファ	ファ＃	　　　　ソ	　ソ＃	　　　　ラ	ラ＃	　　　　シ
+const unsigned short pwm_timer_value[] = {45867,43293,40863,38569,36405,34362,32433,30613,28894,27273,25742,24297,
 							//12	13	　　14  　15  　　16   17   18   19   20   21   22   23
 							//ド   　ド＃　　　　レ　　　レ＃　　　ミ　　　ファ　　　ファ＃　　ソ　　　ソ＃　　ラ　　　　ラ＃　　シ
 							22933,21646,20431,19284,18202,17180,16216,15306,14447,13636,12871,12148,
@@ -67,7 +67,7 @@ const int pwm_timer_value[] = {45867,43293,40863,38569,36405,34362,32433,30613,2
 							//ド　　　ド＃　　レ　　　レ＃　　　ミ　　　ファ　　ファ＃　　ソ　　ソ＃　ラ　　ラ＃　　シ　　ド
 							1433,1353,1277,1205,1137,1073,1013,956,903,852,804,759,716,0,};
 //DA出力用の周波数テーブル
-const double onnkai_freq_value[] = {65.406,69.296,73.416,77.782,82.407,87.307,92.499,97.999,103.826,110.000,116.541,123.471,
+const float onnkai_freq_value[] = {65.406,69.296,73.416,77.782,82.407,87.307,92.499,97.999,103.826,110.000,116.541,123.471,
 									130.813,138.591,146.832,155.563,164.814,174.614,184.997,195.998,207.652,220.000,233.082,246.942,
 									261.626,277.183,293.665,311.127,329.628,349.228,369.994,391.995,415.305,440.000,466.164,493.883,
 									523.251,554.365,587.330,622.254,659.255,698.456,739.989,783.991,830.609,880.000,932.328,987.767,
@@ -133,7 +133,7 @@ void set_output_value(const char output_num,unsigned char speaker_num)
 {
 	struct SPEAKER *speaker						= get_speaker();
 	switch(speaker_num){
-	case 0://スピーカー１の値セット
+	case SPEAKER1:
 		output_led(OFF);
 		MTUB.TSTR.BIT.CST0					= 0;//PWM出力タイマー停止
 		MTUA.TSTR.BIT.CST1					= 0;//DA出力タイマ停止
@@ -143,12 +143,12 @@ void set_output_value(const char output_num,unsigned char speaker_num)
 		da_process_each_waveform(speaker[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
 		output_led(output_num);
 		break;
-	case 1://スピーカー2の値セット
+	case SPEAKER2:
 		MTUB.TSTR.BIT.CST1					= 0;
 		MTU7.TGRA 							= pwm_timer_value[output_num];
 		MTU7.TGRB							= MTU7.TGRA * (speaker[1].duty_value / 100);
 		break;
-	case 2://スピーカー3の値セット
+	case SPEAKER3:
 		MTUB.TSTR.BIT.CST2					= 0;
 		MTU8.TGRA 							= pwm_timer_value[output_num];
 		MTU8.TGRB							= MTU8.TGRA * (speaker[2].duty_value / 100);
@@ -235,21 +235,21 @@ void output_speaker_start(unsigned char pattern)
 void mute(unsigned char speaker_num)
 {
 	switch(speaker_num){
-	case 0://スピーカー１消音DAも
+	case SPEAKER1://スピーカー１消音DAも
 		MTUA.TSTR.BIT.CST1		= 0;
 		MTUB.TSTR.BIT.CST0		= 0;
 		MTU6.TGRA = MTU6.TGRB 	= 0;
 		DA.DACR.BIT.DAOE1		= 0;//DA出力禁止
 		break;
-	case 1://スピーカー2消音
+	case SPEAKER2://スピーカー2消音
 		MTUB.TSTR.BIT.CST1		= 0;
 		MTU7.TGRA = MTU7.TGRB 	= 0;
 		break;
-	case 2://スピーカー3消音
+	case SPEAKER3://スピーカー3消音
 		MTUB.TSTR.BIT.CST2		= 0;
 		MTU8.TGRA = MTU8.TGRB 	= 0;
 		break;
-	case 3://全スピーカー消音
+	case ALL_SPEAKER://全スピーカー消音
 		MTUA.TSTR.BIT.CST1		= 0;
 		MTUB.TSTR.BYTE	= 0;
 		MTU6.TGRA = MTU6.TGRB 	= 0;

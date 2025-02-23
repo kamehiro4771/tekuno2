@@ -36,15 +36,19 @@
 #define ON (0)
 #define SET (1)
 #define NOT_FOUND (0)
-#define AUTO_PLAY_TITLE_NUM (5)//自動演奏モードで演奏する曲数
-#define MODE_NUM (4)//モード数
+//選択できる項目数
+#define SELECT_MODE_NUM (4)//選択するモード数
+#define SELECT_PLAY_TITLE_NUM (5)//自動演奏モードで演奏する曲数
+#define SELECT_WAVE_NUM (4)//選択する波形の種類
+#define SELECT_SETTING_ITEM_NUM (3)
+#define SELECT_SPEAKER_NUM (3)
+#define SELECT_OUTPUT_SPEAKER_NUM (3)
+//全項目数
+#define MODE_NUM (4)//全モード数
 #define SONG_NUM (19)//全部の曲数
-#define WAVE_NUM (4)//波形の種類
-#define SUPEAKER_NUM (3)
+#define WAVE_NUM (4)//全波形の種類
 #define SETTING_ITEM_NUM (3)//設定項目数
-#define SPEAKER1 (0)
-#define SPEAKER2 (1)
-#define SPEAKER3 (2)
+#define SPEAKER_NUM (3)
 //ゲームで使用する
 #define FIELD_NUM (13)//バトルフィールドの数
 #define ONE_JEWEL (6)//一つの宝石のバイト数
@@ -104,6 +108,7 @@ enum title{AVE_MARIA = 1,SAINT_MARCH,MENUETT,JESU_JOY_OF_MAN_S,AURA_LEE,SAKURA,Z
 			WINNING,BOUKENNNOSYO,YADOYA,ALLY_ATACK,BATTLE1,ZENNMETU,INITIAL_CHECK,CANON,};
 //波形
 enum wave{SQUARE = 1,SAWTHOOTH,TRIANGLE,SINE};
+enum SPEAKERS{SPEAKER1 = 1,SPEAKER2,SPEAKER3,ALL_SPEAKER};
 enum setting{DUTY = 1,WAVE,};
 enum{
 	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP = 73,NO_SELECT = 73,OFF = 73,
@@ -116,19 +121,12 @@ struct SCI{
 	unsigned short send_length[64];		//送信するデータの長さ
 	unsigned char send_counter;			//
 	unsigned char reg_cnt;				//送信するデータの登録数
+	unsigned char reg_0_flg;			//登録データ0フラグ
 	unsigned char send_compflg;			//送信が終了したか確認するフラグ
 	unsigned char enter_flg;			//エンターが押されたか確認するためのフラグ
 	signed long elapsed_time;			//タイマカウントエリア
 };
-/*
- *
- */
-typedef struct playing_resume_point{
-			signed short start;
-			long elapsed;
-			}RESUME_POINT;
-//elapsed_timesとcore_countを構造体にしてまとめて受け渡しできるようにする
-//演奏中断ポイントをもらう時に構造体で貰えるようにする
+
 typedef struct SPEAKER{
 	const unsigned char *pscore;		//楽譜配列へのポインタ
 	const unsigned short *pnote_value;	//音の長さ配列へのポインタ

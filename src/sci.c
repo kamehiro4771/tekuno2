@@ -9,7 +9,7 @@
 #include "main.h"
 
 //ワークエリア定義
-struct SCI sci0 = {{0},0,{NULL},{0},0,0,ON,OFF,10};
+struct SCI sci0 = {{0},0,{NULL},{0},0,0,ON,ON,OFF,10};
 /*
  * void sci0_init(void)
  *シリアル通信初期化関数
@@ -83,11 +83,13 @@ void sci0_send_comp(void)
 	SCI0.SCR.BIT.TEIE		= 0;//送信終了割り込み禁止
 	SCI0.SCR.BIT.TE			= 0;//シリアル送信動作禁止
 	sci0.send_counter		= (sci0.send_counter + 1) % 64;
+	sci0.send_compflg		= ON;//送信完了フラグON
 	if(sci0.send_counter == sci0.reg_cnt){
 		sci0.send_counter	= 0;
 		sci0.reg_cnt		= 0;
+		sci0.reg_0_flg		= ON;//送信登録数０
 	}
-	sci0.send_compflg		= ON;//送信完了フラグON
+
 }
 
 /********************************************************************/
@@ -103,6 +105,7 @@ void sci0_send_start(void)
 //	sci0.send_length[sci0.reg_cnt]		= length;
 	SCI0.SCR.BYTE						= 0xc0;
 	SCI0.SCR.BYTE						= 0xf0;
+	sci0.send_compflg 					= OFF;
 }
 
 /****************************************************/
@@ -118,15 +121,11 @@ void sci0_receive_start(void)
 
 /****************************************************/
 /*送信が終了したか確認する							*/
-/*int sci0_send_comp_check(void)					*/
+/*unsigned char sci0_send_comp_check(void)					*/
 /****************************************************/
-int sci0_send_comp_check(void)
+unsigned char sci0_get_reg_0_flg(void)
 {
-	if(sci0.send_compflg == ON){
-		sci0.send_compflg = OFF;
-		return 0;
-	}
-	return 1;
+	return sci0.reg_0_flg;
 }
 
 
@@ -259,13 +258,13 @@ void send_serial(const unsigned char *send_data,unsigned short length)
 	sci0.send_data[sci0.reg_cnt]	= send_data;
 	sci0.send_length[sci0.reg_cnt]	= length;
 	sci0.reg_cnt					= (sci0.reg_cnt + 1) % 64;
+	sci0.reg_0_flg					= OFF;
 }
 
 void send_data_is_exists_confirm(void)
 {
 	if(sci0.reg_cnt != 0 && sci0.send_compflg == ON){
 		sci0_send_start();
-		sci0.send_compflg = OFF;
 	}
 	sci0.elapsed_time	= 1;
 }

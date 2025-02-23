@@ -20,61 +20,69 @@
 /********************************************************************/
 #include "main.h"
 
-const unsigned char E_NEIRO[]		= {"\x1b[2J\x1b[0;0H\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"
-										};
-const unsigned char DUTY_VALUE[]			= {"デューティー比："};
-const unsigned char WAVE_TYPE[]				= {"波形："};
-const unsigned char playlists_select[]		= {"\x1b[2J\x1b[13A曲を選択して下さい\n"
-										};
-const unsigned char wavetype_select[]		= {"音の波形を選択してください\n"};
-const unsigned char setting_item_select[] 	= {"設定する項目を選択してください\n"};
-const unsigned char end_method[]				= {"メニューに戻る e + エンター\n"};
-const unsigned char SELECTABLE_MODE_ARREY[MODE_NUM]	= {ORGAN,AUTOPLAY,GAME,SETTING};
-const unsigned char SELECTABLE_TITLE_ARREY[AUTO_PLAY_TITLE_NUM]	= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON};//この配列に入っている曲が自動演奏される
-const unsigned char SELECTABLE_WAVE_TYPE[WAVE_NUM]			= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//選択できる波形
+const unsigned char E_NEIRO[]								= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
+const unsigned char DUTY_VALUE[]							= {"デューティー比："};
+const unsigned char WAVE_TYPE[]								= {"波形："};
+/*項目の種類*/
+const unsigned char playlists_select[]						= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
+const unsigned char wavetype_select[]						= {"音の波形を選択してください\n"};
+const unsigned char setting_item_select[] 					= {"設定する項目を選択してください\n"};
+const unsigned char SETTING_SPEAKER_SELECT[]				= {"設定するスピーカを選択してください\n"};
+const unsigned char OUTPUT_SPEAKER_SELECT[]					= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
+/*項目名*/
+const unsigned char MODE_NAME[MODE_NUM][64]					= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
+const unsigned char TITLE_NAME[SONG_NUM][64]				= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
+																"Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","冒険の書",
+																"宿屋","攻撃音","勝利","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
+const unsigned char WAVE_TYPE_NAME[WAVE_NUM][64] 			= {{"矩形波"},
+																{"のこぎり波"},
+																{"三角波"},
+																{"サイン波",}};
+const unsigned char SETTING_ITME_NAME[SETTING_ITEM_NUM][64] = {{"デューティー比"},
+																{"波形"},
+																{"スピーカ数"}};
+const unsigned char SETTING_SPEAKER_NAME[SPEAKER_NUM][64]	= {{"スピーカ１"},
+																{"スピーカ２"},
+																{"スピーカ３"},
+																};
+const unsigned char OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64] = {{"1：ひとつ"},{"2：ふたつ"},{"3：みっつ"}};
 
-const unsigned char MODE_NAME[MODE_NUM]			= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
-const unsigned char title_name[SONG_NUM][64]	= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
-													"Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","冒険の書",
-													"宿屋","攻撃音","勝利","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
-const unsigned char wave_type_name[WAVE_NUM][64] 	= {{"矩形波"},
-											{"のこぎり波"},
-											{"三角波"},
-											{"サイン波",}};
+/*選択出来る項目を変えたい時は以下の配列を変更して、増減があったら#defineのSELECT_NUMを変える*/
+const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]			= {ORGAN,AUTOPLAY,GAME,SETTING};//選択できるモード
+const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]	= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON};//この配列に入っている曲が自動演奏される
+const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]			= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//選択できる波形
+const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]= {DUTY,WAVE,SPEAKER_NUM};
+const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]	= {SPEAKER1,SPEAKER2,SPEAKER3,};
+const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] = {SPEAKER1,SPEAKER2,SPEAKER3,};
+/*終了方法*/
+const unsigned char end_method[]							= {"メニューに戻る e + エンター\n"};
 
-//曲の順番を並べ替えらるようにしたい
-//曲名だけの配列を作る
-//数字＋.＋\nはAUTO_PLAY_TITLE_ARREYの数だけ出力する
-
-
-const unsigned char setting_item_name[SETTING_ITEM_NUM][64] = {{"デューティー比"},
-													{"波形"},
-													{"キーの高さ"}};
-
-const unsigned char duty_setting_display[] 	= {"デューティ比を入力してください（1~99％）\n"
+/*操作方法*/
+const unsigned char DUTY_SETTING_DISPLAY[] 	= {"デューティ比を入力してください（1~99％）\n"
 										"SW1:1　～　SW9:9 SW10:0\n"};
+
 const unsigned char setting_comp[]			= {"に設定されました。\n"};
 const unsigned char error_message[]			= {"入力が正しくありません\n"};
 /*
  * ワークエリア定義
  */
-struct SPEAKER speaker[3]			= {{NULL,NULL,0,0,50,SQUARE,0,1,OFF,OFF},
-										{NULL,NULL,0,0,50,SQUARE,0,2,OFF,OFF},
-										{NULL,NULL,0,0,50,SQUARE,0,3,OFF,OFF}};
-unsigned char g_output_string[512];
+SPEAKER speaker[3]							= {{NULL,NULL,0,0,50,SQUARE,0,1,OFF,OFF},
+											{NULL,NULL,0,0,50,SQUARE,0,2,OFF,OFF},
+											{NULL,NULL,0,0,50,SQUARE,0,3,OFF,OFF}};
+unsigned char electronic_organ_speaker		= 1;
 unsigned char g_select;
 /*
  * プロトタイプ宣言
  */
 void main(void);
 void main_sequence_process(void);
-signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num);
+signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],const unsigned char *select_num,unsigned char item_num);
 void selected_mode_transition(unsigned char select);
 void electronic_organ_mode(void);
 void autplay_mode(void);
 void setting_mode(void);
 void game_mode(void);
-void duty_setting(unsigned char speaker_num);
+void duty_setting(void);
 int semibreve_value_setting(int semibreve);
 //unsigned short item_select(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num);
 #ifdef __cplusplus
@@ -110,43 +118,39 @@ void main_sequence_process(void)
 	static unsigned char main_sequence_num = 0;
 	signed char ret;
 	switch(main_sequence_num){
-		case 0:
-			sci0_receive_start();//受信開始
-			send_serial(E_NEIRO,sizeof(E_NEIRO));
-			main_sequence_num++;
-			break;
-		case 1:
-			//モード選択表示
-			ret = input_check();
-			if(ret == ON){
-				ret			= a_to_i();
-				main_sequence_num++;
-			}else if(ret != OFF)
+		case 0://モード選択
+			ret = item_select_sequence(E_NEIRO,MODE_NAME,SELECTABLE_MODE_ARREY,SELECT_MODE_NUM);
+			if(ret != -1 && ret != 'e')
 				main_sequence_num++;
 			break;
-		case 2:
+		case 1://各モードに移行
 			selected_mode_transition(ret);
 			main_sequence_num = 0;
 			break;
 	}
 }
-/****************************************************************************/
-/*選択項目表示																*/
+/************************************************************************************/
+/*選択項目表示																		*/
 /*void selection_screen_display(char *item,char *item_name,unsigned char item_num)	*/
-/*			char *item:選択する内容											*/
-/*			char *item_name:選択する項目名配列へのポインタ									*/
-/*			char item_num:項目の数											*/
-/****************************************************************************/
-//項目名の前の「数字.」はこちらで表示
-//改行もこちらで表示
-static void selection_screen_display(const unsigned char *item,const unsigned char (*item_name)[64],unsigned char item_num)
+/*			const unsigned char *item:選択する内容									*/
+/*			const unsigned char *item_name:選択する項目名配列へのポインタ			*/
+/*			const unsigned char *select_num選択できる項目の配列番号の配列へのポインタ			*/
+/*			char item_num:項目の数													*/
+/************************************************************************************/
+static void selection_screen_display(const unsigned char *select_item,const unsigned char (*item_name)[64],const unsigned char *select_num,unsigned char item_num)
 {
-	int i;
-	send_serial(RESET,10);
-	send_serial(item,strlen((const char*)item));
-	for(i = 0;i < item_num;i++){
-		send_serial();
-		send_serial(item_name[i],sizeof(item_name[i]));
+	unsigned char i;
+	unsigned char index_num[8];
+	send_serial(RESET,10);//画面をリセット
+	send_serial(select_item,strlen((const char*)select_item));
+	for(i = 1;i <= item_num;i++){
+		sprintf((char *)index_num,"%d.",i);
+		send_serial(index_num,2);
+		send_serial(item_name[select_num[i - 1] - 1],strlen((const char *)item_name[select_num[i - 1] - 1]));
+		send_serial("\n",1);
+		while(sci0_get_reg_0_flg() != ON){
+			//index_numが書き換えられるとおかしくなるので送信完了するまで待つ
+		}
 	}
 	send_serial(end_method,sizeof(end_method));
 }
@@ -156,21 +160,21 @@ static void selection_screen_display(const unsigned char *item,const unsigned ch
 /*signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)*/
 /*
 /*
-/*
+/*			const unsigned char *選択できる項目の配列番号の配列へのポインタ
 /*
 /*
 /*********************************************************************************************************************************/
-signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)
+signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],const unsigned char *select_num,unsigned char item_num)
 {
 	static unsigned char item_select_sequence_num = 0;
 	unsigned char ret;
 	switch(item_select_sequence_num){
-	case 0:
+	case 0://画面表示
 		sci0_receive_start();//受信開始
-		selection_screen_display(item_select,item_name,item_num);//選択画面が表示される
+		selection_screen_display(item_select,item_name,select_num,item_num);//選択画面が表示される
 		item_select_sequence_num++;
 		break;
-	case 1:
+	case 1://入力待ち
 		ret = input_check();
 		if(ret == ON){
 			if(sci0_find_received_data('e'))
@@ -183,12 +187,9 @@ signed short item_select_sequence(const unsigned char *item_select,const unsigne
 		}
 		break;
 	case 2:
-		if(g_select > item_num)
-			item_select_sequence_num		= 0;
-		else{
-			item_select_sequence_num			= 0;
-			return g_select;
-		}
+		item_select_sequence_num		= 0;
+		if(g_select <= item_num)
+			return select_num[g_select - 1];
 	}
 	return -1;
 }
@@ -242,8 +243,23 @@ void electronic_organ_mode(void)
 		ret							= sw_check();
 		if(output_num != ret){
 			output_num				= ret;
-			set_output_value(output_num,SPEAKER1);
-			output_speaker_start(1);
+			switch(electronic_organ_speaker){
+			case 1:
+				set_output_value(output_num,SPEAKER1);
+				output_speaker_start(1);
+				break;
+			case 2:
+				set_output_value(output_num,SPEAKER1);
+				set_output_value(output_num + 12,SPEAKER2);
+				output_speaker_start(3);
+				break;
+			case 3:
+				set_output_value(output_num,SPEAKER1 - 1);
+				set_output_value(output_num + 12,SPEAKER2);
+				set_output_value(output_num + 24,SPEAKER3);
+				output_speaker_start(7);
+				break;
+			}
 		}
 	}
 }
@@ -258,17 +274,17 @@ void autplay_mode(void)
 	signed short title			= -1;
 	signed short wave_type		= -1;
 	while(title == -1){
-		title = item_select_sequence(playlists_select,TITLE_NAME,SONG_NUM);
+		title = item_select_sequence(playlists_select,TITLE_NAME,SELECTABLE_TITLE_ARREY,SELECT_PLAY_TITLE_NUM);
 	}
 	if(title == 'e')
 		return;//タイトル選択でeが入力されたらメニューへ戻る
 	while(wave_type == -1){
-		wave_type = item_select_sequence(wavetype_select,wave_type_name,WAVE_NUM);
+		wave_type = item_select_sequence(wavetype_select,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM);
 	}
 	if(wave_type == 'e')
 		return;//波形選択でeが入力されたら自動演奏モード終了
 	send_serial(TITLE_NAME[title - 1],sizeof(TITLE_NAME[title - 1]));
-	send_serial(wave_type_name[wave_type - 1],sizeof(wave_type_name[wave_type - 1]));
+	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
 	automatic_playing((unsigned short)title,wave_type,0,0,0);
 	while(playing_flg == ON){
 		ret = input_check();
@@ -284,43 +300,48 @@ void autplay_mode(void)
 void setting_mode(void)
 {
 	signed short setting_num			= -1;
-	while(1){
-		while(setting_num == -1){
-			setting_num = item_select_sequence(setting_item_select,setting_item_name,SETTING_ITEM_NUM);
-		}
-		switch(setting_num){
-		case DUTY:
-			duty_setting(0);
-			return;
-		case WAVE:
-			item_select_sequence(wavetype_select,wave_type_name,WAVE_NUM);
-			return;
-		case 3:
-	//		while(semibreve_value_setting(semibreve_value));
-			break;
-		case 101:
-			return;
-		}
+	while(setting_num == -1){
+		setting_num = item_select_sequence(setting_item_select,SETTING_ITME_NAME,SELECTABLE_SETTING_ARREY,SETTING_ITEM_NUM);
+	}
+	switch(setting_num){
+	case DUTY:
+		デューティ比のスピーカごとの設定ができない
+		duty_setting();
+		return;
+	case WAVE:
+		do{
+			setting_num = item_select_sequence(wavetype_select,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM);
+		}while(setting_num == -1);
+		speaker[0].wave_type= setting_num;
+		return;
+	case SPEAKER_NUM://電子オルガンモード時に鳴らすスピーカの番号指定
+		do{
+			setting_num = item_select_sequence(OUTPUT_SPEAKER_SELECT,OUTPUT_SPEAKER_SELECT_NAME,SELECTABLE_OUTPUT_SPEAKER_ARREY,SELECT_OUTPUT_SPEAKER_NUM);
+		}while(setting_num == -1);
+		electronic_organ_speaker = setting_num;
+		break;
+	case 101:
+		break;
 	}
 }
-#if 0
-void game_mode(void)
-{
-	game_main();
-}
-#endif
+
 
 /*********************************************************************************************************/
-/*
-/*void duty_setting(void)
+/*デューティ比の設定																					 */
+/*void duty_setting(unsigned char speaker_num)															 */
+/*	unsigned char speaker_num スピーカ番号																 */
 /*********************************************************************************************************/
-
-void duty_setting(unsigned char speaker_num)
+void duty_setting(void)
 {
-	signed long ret					= OFF;
+	signed long ret						= OFF;
+	signed short speaker_num			= -1;
 	unsigned char duty_one_digits		= NO_SELECT;
 	unsigned char duty_two_digits		= NO_SELECT;
-	send_serial(duty_setting_display,sizeof(duty_setting_display));
+
+	while(speaker_num == -1){
+		speaker_num = item_select_sequence(SETTING_SPEAKER_SELECT,SETTING_SPEAKER_NAME,SELECTABLE_SPEAKER_ARREY,SELECT_SPEAKER_NUM);
+	}
+	send_serial(DUTY_SETTING_DISPLAY,sizeof(DUTY_SETTING_DISPLAY));
 	while(1){
 		ret						= input_check();
 		if(ret == ON){
@@ -345,7 +366,8 @@ void duty_setting(unsigned char speaker_num)
 			}
 		}
 	}
-	speaker[speaker_num].duty_value		= ret;
+	speaker[speaker_num - 1].duty_value		= ret;
+
 }
 
 

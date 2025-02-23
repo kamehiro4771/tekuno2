@@ -20,4 +20,5 @@ void sci0_receive_error(void);
 unsigned char sci0_enter_check(void);
 unsigned char sci0_find_received_data(unsigned char find_char);
 signed long a_to_i(void);
+unsigned char sci0_get_reg_0_flg(void);
 #endif /* SCI_H_ */
