@@ -6,7 +6,7 @@
 /********************************************************************************************/
 /*定数定義																					*/
 /********************************************************************************************/
-const unsigned char KEY_DISPLAY[] = "A	B	C	D	E	F	G	H	I	J	K	L	M\r\n";
+display KEY_DISPLAY[] = "A	B	C	D	E	F	G	H	I	J	K	L	M\r\n";
 /********************************************************************************************/
 /*ワークエリア定義																			*/
 /********************************************************************************************/
@@ -198,6 +198,7 @@ void create_send_data(unsigned char *battle_field_display)
 	battle_field_display[j++]	= '3';//色を元に戻す
 	battle_field_display[j++]	= '9';
 	battle_field_display[j++]	= 'm';
+	battle_field_display[j++]	= '\n';
 }
 
 /*****************************************************************
@@ -206,16 +207,18 @@ void create_send_data(unsigned char *battle_field_display)
  *****************************************************************/
 void output_battle_field(unsigned char sw)
 {
-	send_serial(KEY_DISPLAY,strlen((const char*)KEY_DISPLAY));
 	if(sw == NEW_FIELD){
+		send_serial(KEY_DISPLAY,strlen((const char*)KEY_DISPLAY));
 		create_new_battle_field();
 		create_send_data(battle_field_display);
-		send_serial(battle_field_display,101);
+		send_serial(battle_field_display,102);
 	}else if(sw == UPDATE_FIELD){
 		create_send_data(battle_field_display);
-		send_serial(battle_field_display,101);
-		send_serial(CURSOR_1LINE_BUCK,5);//その場で画面を更新するためにカーソルを一行上の左端に戻す
-	}else
-		send_serial(battle_field_display,101);
+		send_serial(battle_field_display,102);
+		send_serial(CURSOR_1LINE_BUCK,5);
+	}else{
+		send_serial(KEY_DISPLAY,strlen((const char*)KEY_DISPLAY));
+		send_serial(battle_field_display,102);
+	}
 }
 #endif

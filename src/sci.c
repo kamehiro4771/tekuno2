@@ -9,7 +9,7 @@
 #include "main.h"
 
 //ワークエリア定義
-struct SCI sci0 = {{0},0,{NULL},{0},0,0,ON,ON,OFF,10};
+SCI sci0 = {{0},0,{NULL},{0},0,0,ON,ON,OFF,10};
 /*
  * void sci0_init(void)
  *シリアル通信初期化関数
@@ -92,17 +92,12 @@ void sci0_send_comp(void)
 
 }
 
-/********************************************************************/
-/*送信開始															*/
-/*void sci0_send_start(const char *send_data,unsigned short rength)	*/
-/*	引数：const char *send_data 送信データへのポインタ				*/
-/*		  unsigned short rength 送信データの長さ					*/
-/********************************************************************/
-//void sci0_send_start(const unsigned char *send_data,unsigned short length)
-void sci0_send_start(void)
+/****************************************************/
+/*送信開始											*/
+/*void sci0_send_start(void)						*/
+/****************************************************/
+static void sci0_send_start(void)
 {
-//	sci0.send_data[sci0.reg_cnt]		= send_data;
-//	sci0.send_length[sci0.reg_cnt]		= length;
 	SCI0.SCR.BYTE						= 0xc0;
 	SCI0.SCR.BYTE						= 0xf0;
 	sci0.send_compflg 					= OFF;
@@ -238,22 +233,10 @@ unsigned char sci0_find_received_data(unsigned char find_char)
 }
 
 /****************************************************/
-/*送信と待機										*/
-/*void send_serial(const char *send_data)			*/
+/*送信										*/
+/*void send_serial(display *send_data)			*/
 /****************************************************/
-//引数にブロッキングかノンブロッキング指定
-//タイマでフラグチェック
-//送信中なら送信するデータを送信待ちバッファに登録
-//送信中でないなら送信開始
-//タイマで定期的に送信するデータがあるか確認してあれば送信開始
-/*void send_serial(const unsigned char *send_data,unsigned short length)
-{
-	sci0_send_start(send_data,length);
-	while(sci0_send_comp_check()){
-	}
-}*/
-
-void send_serial(const unsigned char *send_data,unsigned short length)
+void send_serial(display *send_data,unsigned short length)
 {
 	sci0.send_data[sci0.reg_cnt]	= send_data;
 	sci0.send_length[sci0.reg_cnt]	= length;
@@ -261,6 +244,11 @@ void send_serial(const unsigned char *send_data,unsigned short length)
 	sci0.reg_0_flg					= OFF;
 }
 
+/*******************************************
+ * タイマで1msごとに送信データがあるか確認する
+ * 送信データが登録されていて送信中ではない場合送信開始
+ * void send_data_is_exists_confirm(void)
+ *******************************************/
 void send_data_is_exists_confirm(void)
 {
 	if(sci0.reg_cnt != 0 && sci0.send_compflg == ON){

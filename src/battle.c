@@ -8,13 +8,13 @@
 /*********************************************************************/
 /*定数定義															 */
 /*********************************************************************/
-const unsigned char ATTACK[]			= {"の攻撃！\n"};
-const unsigned char COMBO[]				= {"コンボ！\n"};
-const unsigned char DAMAGE[]			= {"のダメージ！\n"};
-const unsigned char RECOVERY[]			= {"回復！\n"};
-const unsigned char APPEAR[]			= {"が現れた！\n"};
-const unsigned char OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
-const unsigned char INPUT_ERROR[]		= {"入力が正しくありません"};
+display ATTACK[]			= {"の攻撃！\n"};
+display COMBO[]				= {"コンボ！\n"};
+display DAMAGE[]			= {"のダメージ！\n"};
+display RECOVERY[]			= {"回復！\n"};
+display APPEAR[]			= {"が現れた！\n"};
+display OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
+display INPUT_ERROR[]		= {"入力が正しくありません"};
 
 /*********************************************************************/
 /*ワークエリア定義													 */
@@ -25,7 +25,7 @@ unsigned char first_turn_flg;
 /********************************************************************/
 /*プロトタイプ宣言													*/
 /********************************************************************/
-void player_turn(struct Enemy* enemy);
+void player_turn(Player *player,Enemy* enemy);
 void enemy_turn(Player *player,struct Enemy* enemy);
 void i_to_a(unsigned short i);
 void learn_resume_point(void);
@@ -105,6 +105,7 @@ void player_turn(Player *player,Enemy* enemy)
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
 	}
+	send_serial(CURSOR_2LINE_BUCK,5);//エンターが押されてカーソルが下がるので1行戻す
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す

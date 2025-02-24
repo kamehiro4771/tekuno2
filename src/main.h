@@ -75,13 +75,13 @@
 #define DEFAULT_BACKGROUND "\x1b[49m"
 #define CRLF "\r\n"
 #define DISPLAY_CLEAR "\x1b[2J"
-#define RESET "\x1b[2J\x1b[0;0H"
-//#define RESET "\x1b[2J\x1b[!p\x1b[0;0H"//画面をクリアして設定を初期化カーソルを原点に戻す
+#define RESET "\x1b[2J\x1b[0;0H"//画面をクリアして設定を初期化カーソルを原点に戻す
 #define CURSOR_3LINE_BUCK "\x1b[3F"
 #define CURSOR_2LINE_BUCK "\x1b[2F"
 #define CURSOR_1LINE_BUCK "\x1b[1F"
 #define CURSOR_2LINE_ADVANCE "\x1b[2E"
 #define CURSOR_3LINE_ADVANCE "\x1b[3E"
+#define CURSOR_MOVING_LEFT_MOST "\x1b[0`"//カーソルを左端に移動
 //#define CURSOR__BACK_ORIGIN "\x1b[0;0H"
 /*
 const unsigned char SCREEN_ERACE[]			= {"\x1b[2J"};
@@ -102,6 +102,7 @@ const unsigned char DEFAULT_BACKGROUND[]	= {"\x1b[49"};
 #define KEY_DOWN (80)//↓キー
 #define KEY_LEFT (75)//←キー
 #define KEY_RIGHT (77)//→キー
+typedef const unsigned char display;
 enum menu{ORGAN = 1,AUTOPLAY,GAME,SETTING};//メインメニューの項目
 //曲名
 enum title{AVE_MARIA = 1,SAINT_MARCH,MENUETT,JESU_JOY_OF_MAN_S,AURA_LEE,SAKURA,ZYOUNETUTAIRIKU,LET_IT_BE,NHK_NODOZIMAN,DORAGON_QUEST,LEVEL_UP,
@@ -114,7 +115,7 @@ enum{
 	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP = 73,NO_SELECT = 73,OFF = 73,
 };
 //構造体宣言
-struct SCI{
+typedef struct SCI{
 	unsigned char receive_data[128];
 	unsigned char receive_count;
 	const unsigned char *send_data[64]; //送信するデータへのポインタ
@@ -124,8 +125,8 @@ struct SCI{
 	unsigned char reg_0_flg;			//登録データ0フラグ
 	unsigned char send_compflg;			//送信が終了したか確認するフラグ
 	unsigned char enter_flg;			//エンターが押されたか確認するためのフラグ
-	signed long elapsed_time;			//タイマカウントエリア
-};
+	unsigned long elapsed_time;			//タイマカウントエリア
+}SCI;
 
 typedef struct SPEAKER{
 	const unsigned char *pscore;		//楽譜配列へのポインタ

@@ -59,7 +59,7 @@ signed short party_hp;//パーティー全体のHP
 /*ゲームモードメイン																		*/
 /*void game_mode(void)																		*/
 /********************************************************************************************/
-void game_mode(void)
+void game_main(void)
 {
 	unsigned char i;
 	G_speaker = get_speaker();

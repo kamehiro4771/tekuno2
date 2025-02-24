@@ -10,9 +10,7 @@
 /********************************************************************************************/
 /*プロトタイプ宣言																		*/
 /********************************************************************************************/
-void game_mode(void);
-struct Ally* get_ally_data(unsigned char type);
-struct Enemy* get_enemy_data(unsigned char num);
+void game_main(void);
 /********************************************************************************************/
 /*構造体宣言																				*/
 /********************************************************************************************/
@@ -39,5 +37,9 @@ typedef struct Player{
 	unsigned short mhp;
 	unsigned short gp;
 }Player;
+
+Ally* get_ally_data(unsigned char type);
+Enemy* get_enemy_data(unsigned char num);
+
 
 #endif /* GAME_H_ */
