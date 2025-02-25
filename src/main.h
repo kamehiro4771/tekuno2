@@ -59,6 +59,11 @@
 #define WIND (2)
 #define SOIL (3)
 #define LIFE (4)
+#define COLOR_NUM (5)
+#define APPEARANCE (0)
+#define ADD_ATTACK (1)
+#define TAKE_ATTACK (2)
+#define KILLED_ENEMY (3)
 #define WIN (1)
 #define LOSE (0)
 #define NEW_FIELD (0)
@@ -71,11 +76,14 @@
 #define YELLOW_CHAR "\x1b[33m"
 #define BLUE_CHAR "\x1b[36m"
 #define GREEN_CHAR "\x1b[32m"
+#define PURPLE_CHAR "\x1b[35m"
 #define DEFAULT_CHAR "\x1b[39m\r\n"
 #define DEFAULT_BACKGROUND "\x1b[49m"
 #define CRLF "\r\n"
 #define DISPLAY_CLEAR "\x1b[2J"
 #define RESET "\x1b[2J\x1b[0;0H"//画面をクリアして設定を初期化カーソルを原点に戻す
+#define CURSOR_5LINE_BUCK "\x1b[5F"
+#define CURSOR_4LINE_BUCK "\x1b[4F"
 #define CURSOR_3LINE_BUCK "\x1b[3F"
 #define CURSOR_2LINE_BUCK "\x1b[2F"
 #define CURSOR_1LINE_BUCK "\x1b[1F"

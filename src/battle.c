@@ -10,12 +10,14 @@
 /*********************************************************************/
 display ATTACK[]			= {"の攻撃！\n"};
 display COMBO[]				= {"コンボ！\n"};
-display DAMAGE[]			= {"のダメージ！\n"};
+display ADD_DAMAGE[]		= {"のダメージ！\n"};
+display TAKE_DAMAGE[]			= {"をうけた！\n"};
 display RECOVERY[]			= {"回復！\n"};
 display APPEAR[]			= {"が現れた！\n"};
+display REQUEST_COMMAND[]		= {"コマンド?>>"};
 display OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
 display INPUT_ERROR[]		= {"入力が正しくありません"};
-
+display COLOR_CHAR_ARRAY[COLOR_NUM][6] = {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
@@ -28,7 +30,7 @@ unsigned char first_turn_flg;
 void player_turn(Player *player,Enemy* enemy);
 void enemy_turn(Player *player,struct Enemy* enemy);
 void i_to_a(unsigned short i);
-void learn_resume_point(void);
+void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short damage);
 /********************************************************************/
 /*バトルメイン関数													*/
 /*unsigned char battle_main(struct Enemy* enemy)					*/
@@ -39,8 +41,7 @@ void learn_resume_point(void);
 unsigned char battle_main(Player *player, Enemy *enemy)
 {
 	first_turn_flg 					= ON;
-	send_serial(enemy->name,sizeof(enemy->name));//敵の名前表示
-	send_serial(APPEAR,sizeof(APPEAR));//「現れた！」表示
+	display_about_monster(enemy,APPEARANCE,0);
 	while(1){
 		player_turn(player,enemy);
 		if(enemy->hp == 0)
@@ -65,7 +66,7 @@ void player_turn(Player *player,Enemy* enemy)
 	struct SPEAKER *speaker = get_speaker();
 	unsigned char ret,deleted_type,deleted_number;
 	unsigned short combo_count = 0;
-	signed short damage;
+	unsigned short damage;
 	send_serial(enemy->name,strlen((const char*)enemy->name));//敵と自分のパラメーター表示
 	i_to_a(enemy->hp);
 	send_serial(CRLF,2);
@@ -99,8 +100,10 @@ void player_turn(Player *player,Enemy* enemy)
 					if(input[1] >= 'a' && input[1] < 'n')
 						break;
 				}
-			}else
+			}else{
+				//一行上に戻って「コマンド>>」表示
 				sci0_receive_start();
+			}
 		}else if(playing_flg == OFF){//何も入力されずに曲終了
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
@@ -118,7 +121,7 @@ void player_turn(Player *player,Enemy* enemy)
 			send_serial(output_string,strlen((const char*)output_string));//「〇コンボ！」表示
 			send_serial(COMBO,sizeof(COMBO));
 			damage						= damage_calculation(enemy,combo_count,deleted_type,deleted_number);//ダメージ計算
-			if(deleted_type != LIFE){//damageがマイナスなら敵へのダメージ、プラスなら回復表示
+			if(deleted_type != LIFE){
 				auto_play_end_processing();
 				resume_data[0]			= get_interrupt_data(0);
 				resume_data[1]			= get_interrupt_data(1);
@@ -127,10 +130,9 @@ void player_turn(Player *player,Enemy* enemy)
 				while(playing_flg == ON){
 					//nop
 				}
-				send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
 				i_to_a(damage);
-				send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
-				send_serial(DAMAGE,sizeof(DAMAGE));//のダメージ
+
+
 				if(enemy->hp >= damage)
 					enemy->hp 			= enemy->hp - damage;//モンスターのHPからダメージを引く
 				else
@@ -155,6 +157,7 @@ void player_turn(Player *player,Enemy* enemy)
 			speaker[1].elapsed_time = resume_data[1].elapsed_time;
 			speaker[2].elapsed_time = resume_data[2].elapsed_time;
 			automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
+			send_serial(CURSOR_5LINE_BUCK,sizeof(CURSOR_5LINE_BUCK));
 			free_padding(dladder);//空いた宝石配列を詰める
 		}else{
 			auto_play_end_processing();
@@ -176,12 +179,8 @@ void player_turn(Player *player,Enemy* enemy)
 void enemy_turn(Player *player,Enemy* enemy)
 {
 	unsigned short ret;
-	send_serial(enemy->name,strlen(enemy->name));
-	send_serial(ATTACK,sizeof(ATTACK));
-	ret = damge_from_enemy_calculation(player->gp,enemy);
-	i_to_a(ret);
-	send_serial(output_string,strlen((const char*)output_string));
-	send_serial(DAMAGE,sizeof(DAMAGE));//のダメージ
+	ret	= damge_from_enemy_calculation(player->gp,enemy);
+	display_about_monster(enemy,TAKE_ATTACK,ret);
 	player->hp = player->hp - ret;
 }
 
@@ -223,6 +222,31 @@ void i_to_a(unsigned short i)
 	}
 }
 
+//モンスターが現れた時、モンスターを攻撃したとき、モンスターが攻撃したとき、モンスターを倒した時の表示
+void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short damage)
+{
+	send_serial(COLOR_CHAR_ARRAY[enemy->el],sizeof(COLOR_CHAR_ARRAY[enemy->el]));
+	send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
+	send_serial(DEFAULT_CHAR,sizeof(DEFAULT_CHAR));
+	switch(activity){
+	case APPEARANCE:
+		send_serial(APPEAR,sizeof(APPEAR));
+		break;
+	case ADD_ATTACK:
+		i_to_a(damage);
+		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
+		send_serial(ADD_DAMAGE,sizeof(ADD_DAMAGE));//のダメージ
+		break;
+	case TAKE_ATTACK:
+		i_to_a(damage);
+		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
+		break;
+	case KILLED_ENEMY:
+
+		break;
+	}
+}
+//敵と味方のステータスを表示する
 /********************************************************************/
 /*else if(ret == 3){
 				if(input[i] < 0x41 || input[i] > 0x4d)//1文字目A~M以外の入力
