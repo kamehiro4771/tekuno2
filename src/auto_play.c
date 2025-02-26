@@ -523,9 +523,11 @@ void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,u
 void forward_score(void);
 void output_function_call(void);
 
-
-struct SPEAKER *g_speaker;				//スピーカー構造体へのポインタ
-struct SPEAKER interrupt_data[3];//エンターやスイッチで演奏終了したときのスピーカの情報を保存しておく
+/*
+ * ワークエリア定義
+ */
+AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,OFF},{SQUARE,NULL,NULL,0,0,0,OFF,OFF},{SQUARE,NULL,NULL,0,0,0,OFF,OFF},};
+AUTOPLAYER interrupt_data[3];//エンターやスイッチで演奏終了したときのスピーカの情報を保存しておく
 unsigned char g_use_speaker_num;		//使用するスピーカーの個数
 unsigned long common_timer = 1;
 unsigned char playing_flg = OFF;
@@ -535,7 +537,6 @@ void automatic_playing(unsigned short title,unsigned char wave_type,unsigned sho
 {
 	sci0_receive_start();//受信開始
 	playing_flg						= ON;//演奏中フラグON
-	g_speaker						= get_speaker();//スピーカへのポインタ貰う
 	score_set_speaker(title,wave_type,start1,start2,start3);//楽譜をセットする、曲の開始位置のセット
 }
 
@@ -552,14 +553,14 @@ void forward_score(void)
 {
 	unsigned char i;
 	for(i = 0;i < g_use_speaker_num;i++){
-		g_speaker[i].elapsed_time--;
-		if(g_speaker[i].elapsed_time == 0){
-			g_speaker[i].score_count++;//音符番号を進める
-			if(g_speaker[i].score_count >= g_speaker[i].note_size){//最後まで演奏したら
-				g_speaker[i].end_flg	= ON;
+		autoplayer[i].elapsed_time--;
+		if(autoplayer[i].elapsed_time == 0){
+			autoplayer[i].score_count++;//音符番号を進める
+			if(autoplayer[i].score_count >= autoplayer[i].note_size){//最後まで演奏したら
+				autoplayer[i].end_flg	= ON;
 			}
 			else
-				g_speaker[i].set_flg	= ON;
+				autoplayer[i].set_flg	= ON;
 		}
 	}
 	common_timer						= 1;
@@ -574,9 +575,9 @@ void output_function_call(void)
 	unsigned char i;
 	unsigned char output_pattern = 0;
 	for(i = 0;i < g_use_speaker_num;i++){
-		if(g_speaker[i].set_flg == ON){//スコアカウントが動いたか判定
-			set_output_value(g_speaker[i].pscore[g_speaker[i].score_count],i+1);
-			g_speaker[i].set_flg	= OFF;
+		if(autoplayer[i].set_flg == ON){//スコアカウントが動いたか判定
+			set_output_value(autoplayer[i].pscore[autoplayer[i].score_count],i+1);
+			autoplayer[i].set_flg	= OFF;
 			output_pattern				+= SET << i;
 		}
 	}
@@ -594,7 +595,7 @@ void output_function_call(void)
 //全てのエンドフラグを見てONなら自動演奏終了関数を呼び出す
 void end_flg_check(void)
 {
-	if(g_speaker[0].end_flg ==  ON && g_speaker[1].end_flg == ON && g_speaker[2].end_flg == ON){//演奏が最後まで終わったか判定
+	if(autoplayer[0].end_flg ==  ON && autoplayer[1].end_flg == ON && autoplayer[2].end_flg == ON){//演奏が最後まで終わったか判定
 		auto_play_end_processing();//タイマーストップ、変数初期化
 	}
 	common_timer = 1;
@@ -631,19 +632,19 @@ void auto_play_end_processing(void)
 	g_use_speaker_num	= 0;
 	output_led(REST);				//LED消灯
 	mute(ALL_SPEAKER);//スピーカーi消音
-	interrupt_data[0]			= g_speaker[0];
-	interrupt_data[1]			= g_speaker[1];
-	interrupt_data[2]			= g_speaker[2];
+	interrupt_data[0]			= autoplayer[0];
+	interrupt_data[1]			= autoplayer[1];
+	interrupt_data[2]			= autoplayer[2];
 	count_timer_dell(forward_score);
 	count_timer_dell(output_function_call);
 	count_timer_dell(end_flg_check);
 	count_timer_dell(input_check);
-	g_speaker[0].elapsed_time	= 0;
-	g_speaker[1].elapsed_time	= 0;
-	g_speaker[2].elapsed_time	= 0;
-	g_speaker[0].end_flg		= OFF;
-	g_speaker[1].end_flg		= OFF;
-	g_speaker[2].end_flg		= OFF;
+	autoplayer[0].elapsed_time	= 0;
+	autoplayer[1].elapsed_time	= 0;
+	autoplayer[2].elapsed_time	= 0;
+	autoplayer[0].end_flg		= OFF;
+	autoplayer[1].end_flg		= OFF;
+	autoplayer[2].end_flg		= OFF;
 	playing_flg					= OFF;//演奏中フラグOFF
 }
 
@@ -657,37 +658,37 @@ void auto_play_end_processing(void)
 void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
 {
 	unsigned char i;
-	g_speaker[0].score_count 		= start1;
-	g_speaker[1].score_count 		= start2;
-	g_speaker[2].score_count 		= start3;//演奏開始位置の設定
-	g_speaker[0].wave_type			= wave_type;
-	g_speaker[0].pscore				= score_pointer_array[title-1][0];
-	g_speaker[1].pscore				= score_pointer_array[title-1][1];
-	g_speaker[2].pscore				= score_pointer_array[title-1][2];
-	g_speaker[0].pnote_value		= note_pointer_array[title-1][0];
-	g_speaker[1].pnote_value		= note_pointer_array[title-1][1];
-	g_speaker[2].pnote_value		= note_pointer_array[title-1][2];
-	g_speaker[0].note_size			= note_size_array[title-1][0];
-	g_speaker[1].note_size			= note_size_array[title-1][1];
-	g_speaker[2].note_size			= note_size_array[title-1][2];
+	autoplayer[0].score_count 		= start1;
+	autoplayer[1].score_count 		= start2;
+	autoplayer[2].score_count 		= start3;//演奏開始位置の設定
+	autoplayer[0].wave_type			= wave_type;
+	autoplayer[0].pscore			= score_pointer_array[title-1][0];
+	autoplayer[1].pscore			= score_pointer_array[title-1][1];
+	autoplayer[2].pscore			= score_pointer_array[title-1][2];
+	autoplayer[0].pnote_value		= note_pointer_array[title-1][0];
+	autoplayer[1].pnote_value		= note_pointer_array[title-1][1];
+	autoplayer[2].pnote_value		= note_pointer_array[title-1][2];
+	autoplayer[0].note_size			= note_size_array[title-1][0];
+	autoplayer[1].note_size			= note_size_array[title-1][1];
+	autoplayer[2].note_size			= note_size_array[title-1][2];
 	g_use_speaker_num				= use_speaker_array[title-1];
 	if(start1 == 0 && start2 == 0 && start3 == 0){
 		switch(g_use_speaker_num){
 		case 1:
-			g_speaker[0].set_flg	= ON;
-			g_speaker[1].end_flg	= g_speaker[2].end_flg = ON;
+			autoplayer[0].set_flg	= ON;
+			autoplayer[1].end_flg	= autoplayer[2].end_flg = ON;
 			break;
 		case 2:
-			g_speaker[0].set_flg 	= g_speaker[1].set_flg = ON;
-			g_speaker[2].end_flg	= ON;
+			autoplayer[0].set_flg 	= autoplayer[1].set_flg = ON;
+			autoplayer[2].end_flg	= ON;
 			break;
 		case 3:
-			g_speaker[0].set_flg 	= g_speaker[1].set_flg = g_speaker[2].set_flg		= ON;
+			autoplayer[0].set_flg 	= autoplayer[1].set_flg = autoplayer[2].set_flg		= ON;
 			break;
 		}
 	}else{//途中から演奏する時は経過時間の更新をされたくないためset_flgをOFFでスタートする
 		for(i = 0;i < g_use_speaker_num;i++){
-			set_output_value(g_speaker[i].score_count,i);
+			set_output_value(autoplayer[i].score_count,i);
 		}
 		output_speaker_start(3);//出力開始
 
@@ -697,15 +698,19 @@ void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,u
 	count_timer_set(&common_timer,end_flg_check);
 }
 
+AUTOPLAYER *get_autoplayer(void)
+{
+	return &autoplayer;
+}
 /*
  * 自動演奏を中断したときのデータをもらう
  * struct SPEAKER get_interrupt_data(speaker_num)
  *
  *
  */
-struct SPEAKER get_interrupt_data(speaker_num)
+AUTOPLAYER *get_interrupt_data(void)
 {
-	return interrupt_data[speaker_num];
+	return interrupt_data;
 }
 
 

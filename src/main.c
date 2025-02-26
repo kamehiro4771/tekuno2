@@ -65,9 +65,7 @@ display error_message[]			= {"入力が正しくありません\n"};
 /*
  * ワークエリア定義
  */
-SPEAKER speaker[3]							= {{NULL,NULL,0,0,50,SQUARE,0,1,OFF,OFF},
-											{NULL,NULL,0,0,50,SQUARE,0,2,OFF,OFF},
-											{NULL,NULL,0,0,50,SQUARE,0,3,OFF,OFF}};
+SPEAKER autoplayer[3]							= {{50,SQUARE,1},{50,SQUARE,2},{50,SQUARE,3}};
 unsigned char electronic_organ_speaker		= 1;//電子オルガンモード時にいくつスピーカを鳴らすか//設定モードで変更して電子オルガンモードで参照する
 /*
  * プロトタイプ宣言
@@ -229,7 +227,7 @@ static void duty_setting(void)
 			}
 		}
 	}
-	speaker[speaker_num - 1].duty_value		= ret;
+	autoplayer[speaker_num - 1].duty_value		= ret;
 }
 /********************************************************************/
 /*選択したモードに遷移する											*/
@@ -358,7 +356,7 @@ static void setting_mode(void)
 		do{
 			setting_num = item_select_sequence(wavetype_select,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD1);
 		}while(setting_num == -1);
-		speaker[0].wave_type= setting_num;
+		autoplayer[0].wave_type= setting_num;
 		break;
 	case SPEAKER_NUM://電子オルガンモード時に鳴らすスピーカの番号指定
 		do{
@@ -374,7 +372,7 @@ static void setting_mode(void)
 
 struct SPEAKER *get_speaker(void)
 {
-	return speaker;
+	return autoplayer;
 }
 
 

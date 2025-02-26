@@ -127,11 +127,9 @@ void speaker_initialize(void)
 /*			引数：const char output_num 出力する音の番号、pwm_timer_valueの添え字番号		*/
 /*				  unsigned char speaker_num スピーカー番号									*/
 /********************************************************************************************/
-//スピーカー構造体ではなく鳴らす音、スピーカー番号、波形だけを受け取るようにする
-//mute関数なくしてこちらで消音する
-void set_output_value(const char output_num,unsigned char speaker_num)
+void set_output_value(unsigned char output_num,unsigned char speaker_num)
 {
-	struct SPEAKER *speaker						= get_speaker();
+	SPEAKER *speaker						= get_speaker();
 	switch(speaker_num){
 	case SPEAKER1:
 		output_led(OFF);
@@ -140,7 +138,7 @@ void set_output_value(const char output_num,unsigned char speaker_num)
 		DA.DACR.BIT.DAOE1					= 1;//DA出力許可
 		MTU6.TGRA 							= pwm_timer_value[output_num];
 		MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
-		da_process_each_waveform(speaker[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
+		da_process_each_waveform(autoplayer[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
 		output_led(output_num);
 		break;
 	case SPEAKER2:
@@ -155,39 +153,40 @@ void set_output_value(const char output_num,unsigned char speaker_num)
 		break;
 	}
 }
+
 void set_output_speaker_length(unsigned char set_pattern)
 {
 	unsigned char i;
-	struct SPEAKER *speaker						= get_speaker();
+	AUTOPLAYER *autoplayer						= get_autoplayer();
 	//スラーの時はforを通らないようにしたい
 //	for(i = 0;i < 200;i++){//音と音の間空ける
 //	}
 	switch(set_pattern){//セットパターンを見て経過時間カウントに音の長さをセットする
 	case 1://1のみ
-		speaker[0].elapsed_time = speaker[0].pnote_value[speaker[0].score_count];
+		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
 		break;
 	case 2://2のみ
-		speaker[1].elapsed_time = speaker[1].pnote_value[speaker[1].score_count];
+		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
 		break;
 	case 3://1と2
-		speaker[0].elapsed_time = speaker[0].pnote_value[speaker[0].score_count];
-		speaker[1].elapsed_time = speaker[1].pnote_value[speaker[1].score_count];
+		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
+		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
 		break;
 	case 4://3のみ
-		speaker[2].elapsed_time = speaker[2].pnote_value[speaker[2].score_count];
+		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
 		break;
 	case 5://1と3
-		speaker[0].elapsed_time = speaker[0].pnote_value[speaker[0].score_count];
-		speaker[2].elapsed_time = speaker[2].pnote_value[speaker[2].score_count];
+		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
+		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
 		break;
 	case 6://2と3
-		speaker[1].elapsed_time = speaker[1].pnote_value[speaker[1].score_count];
-		speaker[2].elapsed_time = speaker[2].pnote_value[speaker[2].score_count];
+		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
+		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
 		break;
 	case 7://1と2と3
-		speaker[0].elapsed_time = speaker[0].pnote_value[speaker[0].score_count];
-		speaker[1].elapsed_time = speaker[1].pnote_value[speaker[1].score_count];
-		speaker[2].elapsed_time = speaker[2].pnote_value[speaker[2].score_count];
+		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
+		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
+		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
 		break;
 	}
 }

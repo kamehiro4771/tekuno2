@@ -21,7 +21,7 @@ display COLOR_CHAR_ARRAY[COLOR_NUM][6] = {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_C
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
-struct SPEAKER resume_data[3];
+AUTOPLAYER *resume_data;
 unsigned char output_string[128];
 unsigned char first_turn_flg;
 /********************************************************************/
@@ -63,22 +63,18 @@ void player_turn(Player *player,Enemy* enemy)
 {
 	unsigned char input[2] = {0};
 	unsigned char *dladder;
-	struct SPEAKER *speaker = get_speaker();
+	AUTOPLAYER *pautoplayer = get_autoplayer();
 	unsigned char ret,deleted_type,deleted_number;
 	unsigned short combo_count = 0;
 	unsigned short damage;
-	send_serial(enemy->name,strlen((const char*)enemy->name));//敵と自分のパラメーター表示
-	i_to_a(enemy->hp);
-	send_serial(CRLF,2);
-	send_serial(output_string,strlen((const char*)output_string));
-	send_serial(CRLF,2);
+	display_about_monster(enemy,STATUS,enemy->hp);
 	if(first_turn_flg == ON){
 		automatic_playing(BATTLE1,SQUARE,0,0,0);
 		output_battle_field(NEW_FIELD);
 	}else{
-		speaker[0].elapsed_time = resume_data[0].elapsed_time;
-		speaker[1].elapsed_time = resume_data[1].elapsed_time;
-		speaker[2].elapsed_time = resume_data[2].elapsed_time;
+		pautoplayer[0].elapsed_time = resume_data[0].elapsed_time;
+		pautoplayer[1].elapsed_time = resume_data[1].elapsed_time;
+		pautoplayer[2].elapsed_time = resume_data[2].elapsed_time;
 		automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 		output_battle_field(CURRENT_FIELD);
 	}
@@ -108,7 +104,7 @@ void player_turn(Player *player,Enemy* enemy)
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
 	}
-	send_serial(CURSOR_2LINE_BUCK,5);//エンターが押されてカーソルが下がるので1行戻す
+//	send_serial(CURSOR_2LINE_BUCK,5);//エンターが押されてカーソルが下がるので1行戻す
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
@@ -123,9 +119,7 @@ void player_turn(Player *player,Enemy* enemy)
 			damage						= damage_calculation(enemy,combo_count,deleted_type,deleted_number);//ダメージ計算
 			if(deleted_type != LIFE){
 				auto_play_end_processing();
-				resume_data[0]			= get_interrupt_data(0);
-				resume_data[1]			= get_interrupt_data(1);
-				resume_data[2]			= get_interrupt_data(2);
+				resume_data			= get_interrupt_data;
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
 				while(playing_flg == ON){
 					//nop
@@ -139,9 +133,7 @@ void player_turn(Player *player,Enemy* enemy)
 					enemy->hp 			= 0;
 			}else{
 				auto_play_end_processing();
-				resume_data[0]			= get_interrupt_data(0);
-				resume_data[1]			= get_interrupt_data(1);
-				resume_data[2]			= get_interrupt_data(2);
+				resume_data			= get_interrupt_data();
 				automatic_playing(ALLY_ATACK,SQUARE,0,0,0);
 				while(playing_flg == ON){
 					//nop
@@ -153,9 +145,9 @@ void player_turn(Player *player,Enemy* enemy)
 				if(player->hp > player->mhp)
 					player->hp = player->mhp;
 			}
-			speaker[0].elapsed_time = resume_data[0].elapsed_time;
-			speaker[1].elapsed_time = resume_data[1].elapsed_time;
-			speaker[2].elapsed_time = resume_data[2].elapsed_time;
+			pautoplayer[0].elapsed_time = resume_data[0].elapsed_time;
+			pautoplayer[1].elapsed_time = resume_data[1].elapsed_time;
+			pautoplayer[2].elapsed_time = resume_data[2].elapsed_time;
 			automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 			send_serial(CURSOR_5LINE_BUCK,sizeof(CURSOR_5LINE_BUCK));
 			free_padding(dladder);//空いた宝石配列を詰める
@@ -222,8 +214,8 @@ void i_to_a(unsigned short i)
 	}
 }
 
-//モンスターが現れた時、モンスターを攻撃したとき、モンスターが攻撃したとき、モンスターを倒した時の表示
-void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short damage)
+//モンスターが現れた時、モンスターを攻撃したとき、モンスターが攻撃したとき、モンスターを倒した時、パラメータの表示
+void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short param)
 {
 	send_serial(COLOR_CHAR_ARRAY[enemy->el],sizeof(COLOR_CHAR_ARRAY[enemy->el]));
 	send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
@@ -233,16 +225,20 @@ void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short da
 		send_serial(APPEAR,sizeof(APPEAR));
 		break;
 	case ADD_ATTACK:
-		i_to_a(damage);
+		i_to_a(param);
 		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
 		send_serial(ADD_DAMAGE,sizeof(ADD_DAMAGE));//のダメージ
 		break;
 	case TAKE_ATTACK:
-		i_to_a(damage);
+		i_to_a(param);
 		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
 		break;
 	case KILLED_ENEMY:
 
+		break;
+	case STATUS:
+		i_to_a(param);
+		send_serial(output_string,strlen((const char*)output_string));//HP表示
 		break;
 	}
 }

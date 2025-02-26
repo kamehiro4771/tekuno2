@@ -13,7 +13,7 @@
 /********************************************************************************************/
 /*プロトタイプ宣言																				*/
 /********************************************************************************************/
-void game_sequence(void);
+void game_sequence(AUTOPLAYER *pautoplayer);
 /*
  * 定数定義
  */
@@ -53,7 +53,6 @@ unsigned char last_sw					= 'e';
 unsigned char output_num				= OFF;
 unsigned char last_output_num			= OFF;
 unsigned char g_sequence;//シーケンス番号
-SPEAKER *G_speaker;
 signed short party_hp;//パーティー全体のHP
 /********************************************************************************************/
 /*ゲームモードメイン																		*/
@@ -62,14 +61,14 @@ signed short party_hp;//パーティー全体のHP
 void game_main(void)
 {
 	unsigned char i;
-	G_speaker = get_speaker();
+	AUTOPLAYER *pautoplayer = get_autoplayer();
 	for(i = 0;i < ALLY_NUM;i++){
 		player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
 		player.gp = player.gp + ally[i].gp;
 	}
 	player.gp = player.gp / ALLY_NUM;
 	while(g_sequence != 11){
-		game_sequence();
+		game_sequence(pautoplayer);
 	}
 	send_serial(RESET,4);
 	g_sequence = 0;
@@ -79,30 +78,30 @@ void game_main(void)
 /*ゲームシーケンス																*/
 /*void game_sequence(void)													*/
 /****************************************************************************/
-void game_sequence(void)
+void game_sequence(AUTOPLAYER *pautoplayer)
 {
 	unsigned char i,ret;
 	switch(g_sequence){
 	case 0://タイトル表示
 		send_serial(GAME_TITLE,sizeof(GAME_TITLE));//タイトル表示
 		g_sequence++;//シーケンス番号＋１
-		G_speaker[0].score_count = G_speaker[1].score_count = G_speaker[2].score_count = 0;
+		pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
 		break;
 	case 1:
-		automatic_playing(DORAGON_QUEST,SQUARE,G_speaker[0].score_count,G_speaker[1].score_count,G_speaker[2].score_count);//オープニング曲を自動演奏
+		automatic_playing(DORAGON_QUEST,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);//オープニング曲を自動演奏
 		g_sequence++;
 	case 2:
 		ret	= input_check();
 		if(ret != OFF){
-			G_speaker[0].end_flg = G_speaker[1].end_flg = G_speaker[2].end_flg = ON;
+			pautoplayer[0].end_flg = pautoplayer[1].end_flg = pautoplayer[2].end_flg = ON;
 			g_sequence++;//スイッチ又はエンターが押された
 		}else if(playing_flg == OFF){//入力されていないのに演奏が終了した（最後まで演奏された）
 			//途中から演奏するための位置指定
-			G_speaker[0].score_count 	= G_speaker[1].score_count = 32;
-			G_speaker[2].score_count 	= 1;
-			G_speaker[0].elapsed_time	= 375;
-			G_speaker[1].elapsed_time	= 375;
-			G_speaker[2].elapsed_time	= 500;
+			pautoplayer[0].score_count 	= pautoplayer[1].score_count = 32;
+			pautoplayer[2].score_count 	= 1;
+			pautoplayer[0].elapsed_time	= 375;
+			pautoplayer[1].elapsed_time	= 375;
+			pautoplayer[2].elapsed_time	= 500;
 			g_sequence					= 1;
 		}
 		break;
