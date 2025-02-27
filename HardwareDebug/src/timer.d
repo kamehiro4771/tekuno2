@@ -33,3 +33,7 @@ src/timer.obj src/timer.d: ../src/ad.h
 ../src/ad.h:
 src/timer.obj src/timer.d: ../src/battle.h
 ../src/battle.h:
+src/timer.obj src/timer.d: ../src/score.h
+../src/score.h:
+src/timer.obj src/timer.d: ../src/main.h
+../src/main.h:

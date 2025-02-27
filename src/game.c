@@ -32,21 +32,24 @@ const unsigned char INPUT_NAME[] 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
 const unsigned char ARRIVAL[]				= {"はダンジョンに到着した\n"};
 const unsigned char GAME_CLEAR[] 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
 const unsigned char GAME_OVER[] 			= {"~~~~GAME_OVER~~~~"};
-
+const AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGONQUEST_NOTE_VALUE1,32,375,98,OFF,OFF},//オープニング曲を途中から
+													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
+													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
+													};
 /*const char map1[][]		= {""}
 const char map2[][]		= {""}
 const char map3[][]		= {""}*/
 /********************************************************************************************/
 /*ワークエリア定義																				*/
 /********************************************************************************************/
-Enemy enemy[ENEMY_NUM] = {{"スライム",100,100,WATER,10,5},{"ゴブリン",200,200,SOIL,20,15},
-						{"オオコウモリ",300,300,WIND,30,25},{"ウェアウルフ",400,400,WIND,40,30},
-						{"ドラゴン",800,800,FIRE,50,40},};
+Enemy enemy[ENEMY_NUM] = {{"~スライム~",100,100,WATER,10,5},{"#ゴブリン#",200,200,SOIL,20,15},
+						{"@オオコウモリ@",300,300,WIND,30,25},{"@ウェアウルフ@",400,400,WIND,40,30},
+						{"$ドラゴン$",800,800,FIRE,50,40},};
 
-Ally ally[ALLY_NUM] = {{"\x1b[31m$朱雀$",150,FIRE,25,10},
-						{"\x1b[35m~玄武~",150,WATER,20,15},
-						{"\x1b[34m@青龍@",150,WIND,15,10},
-						{"\x1b[33m#白虎#",150,SOIL,20,5},};
+Ally ally[ALLY_NUM] = {{"$朱雀$",150,FIRE,25,10},
+						{"~玄武~",150,WATER,20,15},
+						{"@青龍@",150,WIND,15,10},
+						{"#白虎#",150,SOIL,20,5},};
 Player player = {"アルス",0,0};
 unsigned char sw						= OFF;
 unsigned char last_sw					= 'e';
@@ -95,13 +98,10 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 		if(ret != OFF){
 			pautoplayer[0].end_flg = pautoplayer[1].end_flg = pautoplayer[2].end_flg = ON;
 			g_sequence++;//スイッチ又はエンターが押された
-		}else if(playing_flg == OFF){//入力されていないのに演奏が終了した（最後まで演奏された）
-			//途中から演奏するための位置指定
-			pautoplayer[0].score_count 	= pautoplayer[1].score_count = 32;
-			pautoplayer[2].score_count 	= 1;
-			pautoplayer[0].elapsed_time	= 375;
-			pautoplayer[1].elapsed_time	= 375;
-			pautoplayer[2].elapsed_time	= 500;
+		}else if(playing_flg == OFF){//最後まで演奏された時は途中から演奏
+			pautoplayer[0]	= REPEATING_FROM_INTERMEDIATE[0];
+			pautoplayer[1]	= REPEATING_FROM_INTERMEDIATE[1];
+			pautoplayer[2]	= REPEATING_FROM_INTERMEDIATE[2];
 			g_sequence					= 1;
 		}
 		break;

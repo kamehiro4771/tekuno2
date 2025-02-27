@@ -33,3 +33,7 @@ src/output_led.obj src/output_led.d: ../src/ad.h
 ../src/ad.h:
 src/output_led.obj src/output_led.d: ../src/battle.h
 ../src/battle.h:
+src/output_led.obj src/output_led.d: ../src/score.h
+../src/score.h:
+src/output_led.obj src/output_led.d: ../src/main.h
+../src/main.h:

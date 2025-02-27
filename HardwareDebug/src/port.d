@@ -33,3 +33,7 @@ src/port.obj src/port.d: ../src/ad.h
 ../src/ad.h:
 src/port.obj src/port.d: ../src/battle.h
 ../src/battle.h:
+src/port.obj src/port.d: ../src/score.h
+../src/score.h:
+src/port.obj src/port.d: ../src/main.h
+../src/main.h:

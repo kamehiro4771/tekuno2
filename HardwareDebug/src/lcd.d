@@ -33,3 +33,7 @@ src/lcd.obj src/lcd.d: ../src/ad.h
 ../src/ad.h:
 src/lcd.obj src/lcd.d: ../src/battle.h
 ../src/battle.h:
+src/lcd.obj src/lcd.d: ../src/score.h
+../src/score.h:
+src/lcd.obj src/lcd.d: ../src/main.h
+../src/main.h:

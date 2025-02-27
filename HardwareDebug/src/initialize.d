@@ -33,3 +33,7 @@ src/initialize.obj src/initialize.d: ../src/ad.h
 ../src/ad.h:
 src/initialize.obj src/initialize.d: ../src/battle.h
 ../src/battle.h:
+src/initialize.obj src/initialize.d: ../src/score.h
+../src/score.h:
+src/initialize.obj src/initialize.d: ../src/main.h
+../src/main.h:

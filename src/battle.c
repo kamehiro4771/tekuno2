@@ -8,16 +8,16 @@
 /*********************************************************************/
 /*定数定義															 */
 /*********************************************************************/
-display ATTACK[]			= {"の攻撃！\n"};
-display COMBO[]				= {"コンボ！\n"};
-display ADD_DAMAGE[]		= {"のダメージ！\n"};
-display TAKE_DAMAGE[]			= {"をうけた！\n"};
-display RECOVERY[]			= {"回復！\n"};
-display APPEAR[]			= {"が現れた！\n"};
-display REQUEST_COMMAND[]		= {"コマンド?>>"};
-display OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
-display INPUT_ERROR[]		= {"入力が正しくありません"};
-display COLOR_CHAR_ARRAY[COLOR_NUM][6] = {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
+T_DISPLAY ATTACK[]			= {"の攻撃！\n"};
+T_DISPLAY COMBO[]				= {"コンボ！\n"};
+T_DISPLAY ADD_DAMAGE[]		= {"のダメージ！\n"};
+T_DISPLAY TAKE_DAMAGE[]			= {"をうけた！\n"};
+T_DISPLAY RECOVERY[]			= {"回復！\n"};
+T_DISPLAY APPEAR[]			= {"が現れた！\n"};
+T_DISPLAY REQUEST_COMMAND[]		= {"コマンド?>>"};
+T_DISPLAY OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
+T_DISPLAY INPUT_ERROR[]		= {"入力が正しくありません"};
+T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM][6] = {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
@@ -153,9 +153,7 @@ void player_turn(Player *player,Enemy* enemy)
 			free_padding(dladder);//空いた宝石配列を詰める
 		}else{
 			auto_play_end_processing();
-			resume_data[0]			= get_interrupt_data(0);
-			resume_data[1]			= get_interrupt_data(1);
-			resume_data[2]			= get_interrupt_data(2);
+			resume_data			= get_interrupt_data();
 			break;
 		}
 	}

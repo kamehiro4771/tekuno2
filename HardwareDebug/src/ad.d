@@ -33,3 +33,7 @@ src/ad.obj src/ad.d: ../src/ad.h
 ../src/ad.h:
 src/ad.obj src/ad.d: ../src/battle.h
 ../src/battle.h:
+src/ad.obj src/ad.d: ../src/score.h
+../src/score.h:
+src/ad.obj src/ad.d: ../src/main.h
+../src/main.h:

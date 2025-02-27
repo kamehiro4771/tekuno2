@@ -19,6 +19,7 @@ C_SRCS += \
 ../src/port.c \
 ../src/puzzle.c \
 ../src/sci.c \
+../src/score.c \
 ../src/sw.c \
 ../src/timer.c 
 
@@ -38,6 +39,7 @@ src/output_speaker.obj \
 src/port.obj \
 src/puzzle.obj \
 src/sci.obj \
+src/score.obj \
 src/sw.obj \
 src/timer.obj 
 
@@ -57,6 +59,7 @@ src/output_speaker.d \
 src/port.d \
 src/puzzle.d \
 src/sci.d \
+src/score.d \
 src/sw.d \
 src/timer.d 
 

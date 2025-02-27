@@ -138,7 +138,7 @@ void set_output_value(unsigned char output_num,unsigned char speaker_num)
 		DA.DACR.BIT.DAOE1					= 1;//DA出力許可
 		MTU6.TGRA 							= pwm_timer_value[output_num];
 		MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
-		da_process_each_waveform(autoplayer[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
+		da_process_each_waveform(speaker[0].wave_type,output_num);//DA出力に必要な処理、波形ごとの処理
 		output_led(output_num);
 		break;
 	case SPEAKER2:

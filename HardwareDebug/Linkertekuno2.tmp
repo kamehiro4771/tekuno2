@@ -20,6 +20,7 @@
 -input=".\src\port.obj"
 -input=".\src\puzzle.obj"
 -input=".\src\sci.obj"
+-input=".\src\score.obj"
 -input=".\src\sw.obj"
 -input=".\src\timer.obj"
 -library=".\tekuno2.lib"

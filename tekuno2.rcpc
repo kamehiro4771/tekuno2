@@ -50,6 +50,8 @@
         <Path>src\puzzle.h</Path>
         <Path>src\sci.c</Path>
         <Path>src\sci.h</Path>
+        <Path>src\score.c</Path>
+        <Path>src\score.h</Path>
         <Path>src\sw.c</Path>
         <Path>src\sw.h</Path>
         <Path>src\timer.c</Path>
@@ -125,6 +127,7 @@
           <Path>HardwareDebug\port.obj</Path>
           <Path>HardwareDebug\puzzle.obj</Path>
           <Path>HardwareDebug\sci.obj</Path>
+          <Path>HardwareDebug\score.obj</Path>
           <Path>HardwareDebug\sw.obj</Path>
           <Path>HardwareDebug\timer.obj</Path>
           <Path>HardwareDebug\tekuno2.lib</Path>
@@ -385,6 +388,22 @@
             <Option>-obj_path=${CONFIGDIR}</Option>
           </CompileOptions>
         </IndividualOptions>
+        <IndividualOptions Target="src\score.c">
+          <CompileOptions>
+            <Option>-isa=rxv1</Option>
+            <Option>-fpu</Option>
+            <Option>-include="${ProjDirPath}\generate"</Option>
+            <Option>-lang=c</Option>
+            <Option>-nomessage</Option>
+            <Option>-debug</Option>
+            <Option>-outcode=utf8</Option>
+            <Option>-optimize=0</Option>
+            <Option>-nologo</Option>
+            <Option>-lang=cpp</Option>
+            <Option>-output=obj=${CONFIGDIR}\${FILELEAF}.obj</Option>
+            <Option>-obj_path=${CONFIGDIR}</Option>
+          </CompileOptions>
+        </IndividualOptions>
         <IndividualOptions Target="src\sw.c">
           <CompileOptions>
             <Option>-isa=rxv1</Option>
@@ -657,6 +676,22 @@
             <Option>-obj_path=${CONFIGDIR}</Option>
           </CompileOptions>
         </IndividualOptions>
+        <IndividualOptions Target="src\score.c">
+          <CompileOptions>
+            <Option>-isa=rxv1</Option>
+            <Option>-fpu</Option>
+            <Option>-include="${ProjDirPath}\generate"</Option>
+            <Option>-lang=c</Option>
+            <Option>-nomessage</Option>
+            <Option>-debug</Option>
+            <Option>-outcode=utf8</Option>
+            <Option>-optimize=0</Option>
+            <Option>-nologo</Option>
+            <Option>-lang=cpp</Option>
+            <Option>-output=obj=${CONFIGDIR}\${FILELEAF}.obj</Option>
+            <Option>-obj_path=${CONFIGDIR}</Option>
+          </CompileOptions>
+        </IndividualOptions>
         <IndividualOptions Target="src\sw.c">
           <CompileOptions>
             <Option>-isa=rxv1</Option>
@@ -760,6 +795,7 @@
           <Path>Debug\port.obj</Path>
           <Path>Debug\puzzle.obj</Path>
           <Path>Debug\sci.obj</Path>
+          <Path>Debug\score.obj</Path>
           <Path>Debug\sw.obj</Path>
           <Path>Debug\timer.obj</Path>
           <Path>Debug\tekuno2.lib</Path>

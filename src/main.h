@@ -30,6 +30,7 @@
 #include "game.h"
 #include "ad.h"
 #include "battle.h"
+
 /*定数定義*/
 #define ERROR (1)
 #define SUCCESS (0)
@@ -111,7 +112,9 @@ const unsigned char DEFAULT_BACKGROUND[]	= {"\x1b[49"};
 #define KEY_DOWN (80)//↓キー
 #define KEY_LEFT (75)//←キー
 #define KEY_RIGHT (77)//→キー
-typedef const unsigned char display;
+typedef const unsigned char T_DISPLAY;
+typedef const unsigned char T_SCORE;
+typedef const unsigned short T_NOTE;
 enum menu{ORGAN = 1,AUTOPLAY,GAME,SETTING};//メインメニューの項目
 //曲名
 enum title{AVE_MARIA = 1,SAINT_MARCH,MENUETT,JESU_JOY_OF_MAN_S,AURA_LEE,SAKURA,ZYOUNETUTAIRIKU,LET_IT_BE,NHK_NODOZIMAN,DORAGON_QUEST,LEVEL_UP,
@@ -155,7 +158,7 @@ typedef struct SPEAKER{
 	unsigned char wave_type;			//出力波形（スピーカー１の）
 	unsigned char speaker_num;			//スピーカー番号
 }SPEAKER;
-
+#include "score.h"
 extern unsigned char playing_flg;
 /****************************************************************************/
 /*プロトタイプ宣言																*/

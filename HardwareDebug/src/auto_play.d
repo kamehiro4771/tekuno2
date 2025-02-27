@@ -33,3 +33,7 @@ src/auto_play.obj src/auto_play.d: ../src/ad.h
 ../src/ad.h:
 src/auto_play.obj src/auto_play.d: ../src/battle.h
 ../src/battle.h:
+src/auto_play.obj src/auto_play.d: ../src/score.h
+../src/score.h:
+src/auto_play.obj src/auto_play.d: ../src/main.h
+../src/main.h:

@@ -33,3 +33,7 @@ src/puzzle.obj src/puzzle.d: ../src/ad.h
 ../src/ad.h:
 src/puzzle.obj src/puzzle.d: ../src/battle.h
 ../src/battle.h:
+src/puzzle.obj src/puzzle.d: ../src/score.h
+../src/score.h:
+src/puzzle.obj src/puzzle.d: ../src/main.h
+../src/main.h:

@@ -33,3 +33,7 @@ src/damage.obj src/damage.d: ../src/ad.h
 ../src/ad.h:
 src/damage.obj src/damage.d: ../src/battle.h
 ../src/battle.h:
+src/damage.obj src/damage.d: ../src/score.h
+../src/score.h:
+src/damage.obj src/damage.d: ../src/main.h
+../src/main.h:
