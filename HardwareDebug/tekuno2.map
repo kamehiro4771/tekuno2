@@ -1,4 +1,4 @@
-Renesas Optimizing Linker (W2.06.00 )             27-Feb-2025 21:58:59
+Renesas Optimizing Linker (W2.06.00 )             28-Feb-2025 07:39:58
 
 *** Options ***
 
@@ -64,38 +64,38 @@ R
 PResetPRG
                                   fff80000  fff8002f        30   1
 C_1
-                                  fff80030  fff81cf3      1cc4   1
+                                  fff80030  fff81cf7      1cc8   1
 C_2
-                                  fff81cf4  fff83afb      1e08   2
+                                  fff81cf8  fff83aff      1e08   2
 C
-                                  fff83afc  fff83d23       228   4
+                                  fff83b00  fff83d27       228   4
 C$DSEC
-                                  fff83d24  fff83d47        24   4
+                                  fff83d28  fff83d4b        24   4
 C$BSEC
-                                  fff83d48  fff83d5f        18   4
+                                  fff83d4c  fff83d63        18   4
 C$INIT
-                                  fff83d60  fff83d60         0   1
+                                  fff83d64  fff83d64         0   1
 C$VECT
-                                  fff83d60  fff8415f       400   4
+                                  fff83d64  fff84163       400   4
 C$VTBL
-                                  fff84160  fff84160         0   1
+                                  fff84164  fff84164         0   1
 D
-                                  fff84160  fff847e3       684   4
+                                  fff84164  fff847e7       684   4
 D_1
-                                  fff847e4  fff8483f        5c   1
+                                  fff847e8  fff84843        5c   1
 D_2
-                                  fff84840  fff84a79       23a   2
+                                  fff84844  fff84a7d       23a   2
 W
-                                  fff84a7c  fff84a7c         0   4
+                                  fff84a80  fff84a80         0   4
 W_1
-                                  fff84a7c  fff84a7c         0   1
+                                  fff84a80  fff84a80         0   1
 W_2
-                                  fff84a7c  fff84b23        a8   2
+                                  fff84a80  fff84b27        a8   2
 L
-                                  fff84b24  fff84b98        75   4
+                                  fff84b28  fff84ba0        79   4
 PIntPRG
-                                  fff84b99  fff84d36       19e   1
+                                  fff84ba1  fff84d3e       19e   1
 P
-                                  fff84d37  fff8a642      590c   1
+                                  fff84d3f  fff8a66e      5930   1
 FIXEDVECT
                                   ffffff80  ffffffff        80   4

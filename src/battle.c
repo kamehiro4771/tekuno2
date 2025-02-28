@@ -8,15 +8,17 @@
 /*********************************************************************/
 /*定数定義															 */
 /*********************************************************************/
-T_DISPLAY ATTACK[]			= {"の攻撃！\n"};
+T_DISPLAY ATTACK[]				= {"の攻撃！\n"};
 T_DISPLAY COMBO[]				= {"コンボ！\n"};
-T_DISPLAY ADD_DAMAGE[]		= {"のダメージ！\n"};
+T_DISPLAY ADD_DAMAGE[]			= {"のダメージ！\n"};
 T_DISPLAY TAKE_DAMAGE[]			= {"をうけた！\n"};
 T_DISPLAY RECOVERY[]			= {"回復！\n"};
-T_DISPLAY APPEAR[]			= {"が現れた！\n"};
+T_DISPLAY APPEAR[]				= {"が現れた！\n"};
+T_DISPLAY KILL[]				= ("を倒した！\n");
 T_DISPLAY REQUEST_COMMAND[]		= {"コマンド?>>"};
 T_DISPLAY OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
-T_DISPLAY INPUT_ERROR[]		= {"入力が正しくありません"};
+T_DISPLAY INPUT_ERROR[]			= {"入力が正しくありません"};
+T_DISPLAY HP[]					= {"HP="};
 T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM][6] = {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
 /*********************************************************************/
 /*ワークエリア定義													 */
@@ -104,6 +106,7 @@ void player_turn(Player *player,Enemy* enemy)
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
 	}
+	攻撃した後曲がおかしくなる
 //	send_serial(CURSOR_2LINE_BUCK,5);//エンターが押されてカーソルが下がるので1行戻す
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
@@ -228,6 +231,7 @@ void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short pa
 		send_serial(ADD_DAMAGE,sizeof(ADD_DAMAGE));//のダメージ
 		break;
 	case TAKE_ATTACK:
+		send_serial(ATTACK,sizeof(ATTACK));
 		i_to_a(param);
 		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
 		break;
@@ -235,8 +239,11 @@ void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short pa
 
 		break;
 	case STATUS:
+		send_serial("\n",1);
 		i_to_a(param);
+		send_serial(HP,sizeof(HP));
 		send_serial(output_string,strlen((const char*)output_string));//HP表示
+		send_serial("\n",1);
 		break;
 	}
 }
