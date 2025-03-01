@@ -17,7 +17,7 @@ void game_sequence(AUTOPLAYER *pautoplayer);
 /*
  * 定数定義
  */
-const unsigned char GAME_TITLE[] = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+const T_DISPLAY GAME_TITLE[] = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 						   "~                                          ~\n"
 						   "~               \x1b[37meNeiro QUEST\x1b[31m               ~\n"
 						   "~                                          ~\n"
@@ -26,13 +26,13 @@ const unsigned char GAME_TITLE[] = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~
 						   "~                                          ~\n"
 		                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\n"
 							};
-const unsigned char SAVE_DATA_CREATION[]	= {"1:ぼうけんのしょをつくる\n"};
-const unsigned char LOAD_SAVE_DATA[]		= {"2:ぼうけんをする\n"};
-const unsigned char INPUT_NAME[] 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
-const unsigned char ARRIVAL[]				= {"はダンジョンに到着した\n"};
-const unsigned char GAME_CLEAR[] 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
-const unsigned char GAME_OVER[] 			= {"~~~~GAME_OVER~~~~"};
-const AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGONQUEST_NOTE_VALUE1,32,375,98,OFF,OFF},//オープニング曲を途中から
+const T_DISPLAY SAVE_DATA_CREATION[]	= {"1:ぼうけんのしょをつくる\n"};
+const T_DISPLAY LOAD_SAVE_DATA[]		= {"2:ぼうけんをする\n"};
+const T_DISPLAY INPUT_NAME[] 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
+const T_DISPLAY ARRIVAL[]				= {"はダンジョンに到着した\n"};
+const T_DISPLAY GAME_CLEAR[] 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
+const T_DISPLAY GAME_OVER[] 			= {"~~~~GAME_OVER~~~~"};
+AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGONQUEST_NOTE_VALUE1,32,375,96,OFF,OFF},//オープニング曲を途中から
 													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
@@ -42,15 +42,15 @@ const char map3[][]		= {""}*/
 /********************************************************************************************/
 /*ワークエリア定義																				*/
 /********************************************************************************************/
-Enemy enemy[ENEMY_NUM] = {{"~スライム~",100,100,WATER,10,5},{"#ゴブリン#",200,200,SOIL,20,15},
+T_ENEMY enemy[ENEMY_NUM] = {{"~スライム~",100,100,WATER,10,5},{"#ゴブリン#",200,200,SOIL,20,15},
 						{"@オオコウモリ@",300,300,WIND,30,25},{"@ウェアウルフ@",400,400,WIND,40,30},
 						{"$ドラゴン$",800,800,FIRE,50,40},};
 
-Ally ally[ALLY_NUM] = {{"$朱雀$",150,FIRE,25,10},
+T_ALLY ally[ALLY_NUM] = {{"$朱雀$",150,FIRE,25,10},
 						{"~玄武~",150,WATER,20,15},
 						{"@青龍@",150,WIND,15,10},
 						{"#白虎#",150,SOIL,20,5},};
-Player player = {"アルス",0,0};
+T_PLAYER player = {"アルス",0,0};
 unsigned char sw						= OFF;
 unsigned char last_sw					= 'e';
 unsigned char output_num				= OFF;
@@ -63,13 +63,7 @@ signed short party_hp;//パーティー全体のHP
 /********************************************************************************************/
 void game_main(void)
 {
-	unsigned char i;
 	AUTOPLAYER *pautoplayer = get_autoplayer();
-	for(i = 0;i < ALLY_NUM;i++){
-		player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
-		player.gp = player.gp + ally[i].gp;
-	}
-	player.gp = player.gp / ALLY_NUM;
 	while(g_sequence != 11){
 		game_sequence(pautoplayer);
 	}
@@ -85,7 +79,12 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 {
 	unsigned char i,ret;
 	switch(g_sequence){
-	case 0://タイトル表示
+	case 0://タイトル表示、プレイヤーのパラメータ初期化
+		for(i = 0;i < ALLY_NUM;i++){
+			player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
+			player.gp = player.gp + ally[i].gp;
+		}
+		player.gp = player.gp / ALLY_NUM;//味方防御力の平均を防御力に設定
 		send_serial(GAME_TITLE,sizeof(GAME_TITLE));//タイトル表示
 		g_sequence++;//シーケンス番号＋１
 		pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
@@ -155,7 +154,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	case 7:
 		ret = input_check();
 		if(ret == ON){
-			ret = sci0_str_cpy(player.name);
+			ret = sci0_str_cpy(player.name);//入力をプレイヤーの名前に設定
 			if(ret >= 3)
 				g_sequence = 8;
 			else
@@ -194,23 +193,4 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	}
 }
 
-/****************************************************************************/
-/*敵情報取得																	*/
-/*struct Enemy* get_enemy_data(unsigned char num)							*/
-/****************************************************************************/
-struct Enemy* get_enemy_data(unsigned char num)
-{
-	return &enemy[num];
-}
-
-/****************************************************************************/
-/*味方モンスター情報取得													*/
-/*struct Ally* get_ally_data(unsigned char type)							*/
-/*	引数：unsigned char type モンスターの属性								*/
-/*	戻り値：struct Ally* モンスターへのポインタ								*/
-/****************************************************************************/
-struct Ally* get_ally_data(unsigned char type)
-{
-	return &ally[type];
-}
 

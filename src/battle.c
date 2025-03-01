@@ -8,18 +8,28 @@
 /*********************************************************************/
 /*定数定義															 */
 /*********************************************************************/
-T_DISPLAY ATTACK[]				= {"の攻撃！\n"};
-T_DISPLAY COMBO[]				= {"コンボ！\n"};
-T_DISPLAY ADD_DAMAGE[]			= {"のダメージ！\n"};
-T_DISPLAY TAKE_DAMAGE[]			= {"をうけた！\n"};
-T_DISPLAY RECOVERY[]			= {"回復！\n"};
-T_DISPLAY APPEAR[]				= {"が現れた！\n"};
-T_DISPLAY KILL[]				= ("を倒した！\n");
-T_DISPLAY REQUEST_COMMAND[]		= {"コマンド?>>"};
-T_DISPLAY OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
-T_DISPLAY INPUT_ERROR[]			= {"入力が正しくありません"};
-T_DISPLAY HP[]					= {"HP="};
-T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM][6] = {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
+//「のダメージは」プレイヤーモンスター共通「の攻撃」は今のところモンスターだけだが変更するかもしれないので名前に工夫
+const T_DISPLAY APPEAR[]			= {"が現れた！\n"};
+const T_DISPLAY ATTACK[]			= {"の攻撃！\n"};
+const T_DISPLAY COMBO[]				= {"コンボ！\n"};
+const T_DISPLAY TO[]				= {"に"};
+const T_DISPLAY DAMAGE[]			= {"のダメージ\n"};
+const T_DISPLAY TAKE[]				= {"をうけた！\n"};
+const T_DISPLAY RECOVERY[]			= {"回復！\n"};
+const T_DISPLAY KILL[]				= ("を倒した！\n");
+const T_DISPLAY REQUEST_COMMAND[]	= {"コマンド?>>"};
+const T_DISPLAY OPERATION_METHOD[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
+const T_DISPLAY INPUT_ERROR[]		= {"入力が正しくありません"};
+const T_DISPLAY HP[]				= {"HP="};
+//表示する文字列へのポインタ二次元配列の行は行動、列は表示する順番
+const T_DISPLAY *DISPLAY_POINTER_ARRAY[][]		= {{APPEAR,,},//モンスター登場
+													{,ATTACK,,TO,DAMAGE,},//モンスターに攻撃を与える
+													{ATTACK,DAMAGE,TAKE},//モンスターから攻撃をもらう
+													{KILL},//モンスターを倒した
+													{HP,},//ステータス表示
+													{},
+};
+const T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM][6] 	= {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
@@ -29,21 +39,21 @@ unsigned char first_turn_flg;
 /********************************************************************/
 /*プロトタイプ宣言													*/
 /********************************************************************/
-void player_turn(Player *player,Enemy* enemy);
+void player_turn(T_PLAYER *player,Enemy* enemy);
 void enemy_turn(Player *player,struct Enemy* enemy);
 void i_to_a(unsigned short i);
-void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short damage);
+void battle_display(T_ENEMY *enemy,unsigned char activity,unsigned short damage);
 /********************************************************************/
 /*バトルメイン関数													*/
-/*unsigned char battle_main(struct Enemy* enemy)					*/
-/*  引数：struct Enemy* enemy 対戦している敵情報					*/
+/*unsigned char battle_main(struct T_ENEMY* enemy)					*/
+/*  引数：struct T_ENEMY* enemy 対戦している敵情報					*/
 /*	戻り値：unsigned char ret 1勝利									*/
 /*							  0敗北									*/
 /********************************************************************/
 unsigned char battle_main(Player *player, Enemy *enemy)
 {
 	first_turn_flg 					= ON;
-	display_about_monster(enemy,APPEARANCE,0);
+	battle_display(enemy,APPEARANCE,0);
 	while(1){
 		player_turn(player,enemy);
 		if(enemy->hp == 0)
@@ -58,10 +68,10 @@ unsigned char battle_main(Player *player, Enemy *enemy)
 
 /********************************************************************/
 /*プレーヤーのターン関数											*/
-/*void player_turn(Player *player,Enemy* enemy)							*/
-/*	引数：struct Enemy* enemy 戦闘中の敵のデータ					*/
+/*void player_turn(T_PLAYER *player,T_ENEMY* enemy)							*/
+/*	引数：struct T_ENEMY* enemy 戦闘中の敵のデータ					*/
 /********************************************************************/
-void player_turn(Player *player,Enemy* enemy)
+void player_turn(T_PLAYER *player,T_ENEMY* enemy)
 {
 	unsigned char input[2] = {0};
 	unsigned char *dladder;
@@ -69,7 +79,7 @@ void player_turn(Player *player,Enemy* enemy)
 	unsigned char ret,deleted_type,deleted_number;
 	unsigned short combo_count = 0;
 	unsigned short damage;
-	display_about_monster(enemy,STATUS,enemy->hp);
+	battle_display(enemy,STATUS,enemy->hp);
 	if(first_turn_flg == ON){
 		automatic_playing(BATTLE1,SQUARE,0,0,0);
 		output_battle_field(NEW_FIELD);
@@ -165,7 +175,7 @@ void player_turn(Player *player,Enemy* enemy)
 
 /********************************************************************/
 /*敵のターン関数													*/
-/*void enemy_turn(Player *player,struct Enemy* enemy)					*/
+/*void enemy_turn(T_PLAYER *player,struct Enemy* enemy)					*/
 /*	引数：struct Enemy* enemy　攻撃する敵の情報
 /*	戻り値：unsigned char
 /********************************************************************/
@@ -173,7 +183,7 @@ void enemy_turn(Player *player,Enemy* enemy)
 {
 	unsigned short ret;
 	ret	= damge_from_enemy_calculation(player->gp,enemy);
-	display_about_monster(enemy,TAKE_ATTACK,ret);
+	battle_display(enemy,TAKE_ATTACK,ret);
 	player->hp = player->hp - ret;
 }
 
@@ -216,7 +226,8 @@ void i_to_a(unsigned short i)
 }
 
 //モンスターが現れた時、モンスターを攻撃したとき、モンスターが攻撃したとき、モンスターを倒した時、パラメータの表示
-void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short param)
+//バトル中のパズル以外の表示を行う
+static void battle_display(T_ENEMY *enemy,unsigned char activity,unsigned short param)
 {
 	send_serial(COLOR_CHAR_ARRAY[enemy->el],sizeof(COLOR_CHAR_ARRAY[enemy->el]));
 	send_serial(enemy->name,strlen((const char*)enemy->name));//モンスター名表示
@@ -225,12 +236,12 @@ void display_about_monster(Enemy *enemy,unsigned char activity,unsigned short pa
 	case APPEARANCE:
 		send_serial(APPEAR,sizeof(APPEAR));
 		break;
-	case ADD_ATTACK:
+	case ADD_ATTACK://モンスターにダメージを与える
 		i_to_a(param);
 		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
 		send_serial(ADD_DAMAGE,sizeof(ADD_DAMAGE));//のダメージ
 		break;
-	case TAKE_ATTACK:
+	case TAKE_ATTACK://モンスターからダメージをもらう
 		send_serial(ATTACK,sizeof(ATTACK));
 		i_to_a(param);
 		send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示

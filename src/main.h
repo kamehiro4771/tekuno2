@@ -50,28 +50,7 @@
 #define WAVE_NUM (4)//全波形の種類
 #define SETTING_ITEM_NUM (3)//設定項目数
 #define SPEAKER_NUM (3)
-//ゲームで使用する
-#define FIELD_NUM (13)//バトルフィールドの数
-#define ONE_JEWEL (6)//一つの宝石のバイト数
-#define ENEMY_NUM (5)//敵モンスターの数
-#define ALLY_NUM (4)//味方の数
-#define FIRE (0)
-#define WATER (1)
-#define WIND (2)
-#define SOIL (3)
-#define LIFE (4)
-#define COLOR_NUM (5)
-#define APPEARANCE (0)
-#define ADD_ATTACK (1)
-#define TAKE_ATTACK (2)
-#define KILLED_ENEMY (3)
-#define STATUS (4)
-#define WIN (1)
-#define LOSE (0)
-#define NEW_FIELD (0)
-#define CURRENT_FIELD (1)
-#define UPDATE_FIELD (2)
-#define ATTRIBUTE_NUM (4)
+
 //画面、文字制御
 #define SCREEN_ERACE "\x1b[2J"
 #define RED_CHAR "\x1b[31m"
@@ -112,7 +91,7 @@ const unsigned char DEFAULT_BACKGROUND[]	= {"\x1b[49"};
 #define KEY_DOWN (80)//↓キー
 #define KEY_LEFT (75)//←キー
 #define KEY_RIGHT (77)//→キー
-typedef const unsigned char T_DISPLAY;
+typedef unsigned char T_DISPLAY;
 typedef const unsigned char T_SCORE;
 typedef const unsigned short T_NOTE;
 enum menu{ORGAN = 1,AUTOPLAY,GAME,SETTING};//メインメニューの項目
@@ -126,6 +105,8 @@ enum setting{DUTY = 1,WAVE,};
 enum{
 	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP = 73,NO_SELECT = 73,OFF = 73,
 };
+enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,STATUS_DISPLAY};
+#include "score.h"
 //構造体宣言
 typedef struct SCI{
 	unsigned char receive_data[128];
@@ -143,8 +124,8 @@ typedef struct SCI{
 //スピーカと自動演奏で使う変数を分ける
 typedef struct AUTOPLAYER{
 	unsigned char wave_type;			//出力波形（スピーカー１の）
-	const unsigned char *pscore;		//楽譜配列へのポインタ
-	const unsigned short *pnote_value;	//音の長さ配列へのポインタ
+	T_SCORE *pscore;		//楽譜配列へのポインタ
+	T_NOTE *pnote_value;	//音の長さ配列へのポインタ
 	unsigned short score_count;			//スコアカウント
 	unsigned long elapsed_time;			//経過時間監視エリア
 	unsigned short note_size;			//音符の数
@@ -158,7 +139,7 @@ typedef struct SPEAKER{
 	unsigned char wave_type;			//出力波形（スピーカー１の）
 	unsigned char speaker_num;			//スピーカー番号
 }SPEAKER;
-#include "score.h"
+
 extern unsigned char playing_flg;
 /****************************************************************************/
 /*プロトタイプ宣言																*/

@@ -8,6 +8,6 @@
 #ifndef BATTLE_H_
 #define BATTLE_H_
 
-unsigned char battle_main(Player* player, Enemy* enemy);
+unsigned char battle_main(T_PLAYER* player, T_ENEMY* enemy);
 
 #endif /* BATTLE_H_ */

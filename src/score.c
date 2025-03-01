@@ -482,7 +482,7 @@ T_NOTE zennmetu_note_value2[]		= {250,250,250,250,250,250,250,250,250,250,250,25
 T_NOTE zennmetu_note_value3[]		= {250,500,500,500,500,500,2750};
 T_SCORE initial_check_score[]				= {24,26,28,29,31,33,35,36};
 T_NOTE initial_check_note_value[]			=	{500,500,500,500,500,500,500,500};
-T_SCORE *SCORE_POINTER_ARRAY[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_score,NULL,NULL},{saint_march_score,NULL,NULL},
+T_SCORE *const SCORE_POINTER_ARRAY[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_score,NULL,NULL},{saint_march_score,NULL,NULL},
 																		{menuett_score,NULL,NULL},{jesu_joy_of_man_s_score,NULL,NULL},
 																		{aura_lee_score,NULL,NULL},{sakura_score,NULL,NULL},
 																		{zyounetutairiku_score,NULL,NULL},{let_it_be_score,NULL,NULL},
@@ -494,7 +494,7 @@ T_SCORE *SCORE_POINTER_ARRAY[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_score,NULL,NUL
 																		{CANON_SCORE1,CANON_SCORE2,CANON_SCORE3},
 																		};
 
-T_NOTE *NOTE_POINTER_ARRAY[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_note_value,NULL,NULL},{saint_march_note_value,NULL,NULL},
+T_NOTE *const NOTE_POINTER_ARRAY[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_note_value,NULL,NULL},{saint_march_note_value,NULL,NULL},
 																		{menuett_note_value,NULL,NULL},{jesu_joy_of_man_s_note_value,NULL,NULL},
 																		{aura_lee_note_value,NULL,NULL},{sakura_note_value,NULL,NULL},
 																		{zyounetutairiku_note_value,NULL,NULL},{let_it_be_note_value,NULL,NULL},

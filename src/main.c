@@ -20,32 +20,32 @@
 /********************************************************************/
 #include "main.h"
 
-T_DISPLAY E_NEIRO[]								= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
-T_DISPLAY DUTY_VALUE[]							= {"デューティー比："};
-T_DISPLAY WAVE_TYPE[]								= {"波形："};
+const T_DISPLAY E_NEIRO[]								= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
+const T_DISPLAY DUTY_VALUE[]							= {"デューティー比："};
+const T_DISPLAY WAVE_TYPE[]								= {"波形："};
 /*項目の種類*/
-T_DISPLAY playlists_select[]						= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
-T_DISPLAY wavetype_select[]						= {"音の波形を選択してください\n"};
-T_DISPLAY setting_item_select[] 					= {"設定する項目を選択してください\n"};
-T_DISPLAY SETTING_SPEAKER_SELECT[]				= {"設定するスピーカを選択してください\n"};
-T_DISPLAY OUTPUT_SPEAKER_SELECT[]					= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
+const T_DISPLAY playlists_select[]						= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
+const T_DISPLAY wavetype_select[]						= {"音の波形を選択してください\n"};
+const T_DISPLAY setting_item_select[] 					= {"設定する項目を選択してください\n"};
+const T_DISPLAY SETTING_SPEAKER_SELECT[]				= {"設定するスピーカを選択してください\n"};
+const T_DISPLAY OUTPUT_SPEAKER_SELECT[]					= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
 /*項目名*/
-T_DISPLAY MODE_NAME[MODE_NUM][64]					= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
-T_DISPLAY TITLE_NAME[SONG_NUM][64]				= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
+const T_DISPLAY MODE_NAME[MODE_NUM][64]					= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
+const T_DISPLAY TITLE_NAME[SONG_NUM][64]				= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
 																"Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","冒険の書",
 																"宿屋","攻撃音","勝利","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
-T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM][64] 			= {{"矩形波"},
+const T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM][64] 			= {{"矩形波"},
 																{"のこぎり波"},
 																{"三角波"},
 																{"サイン波",}};
-T_DISPLAY SETTING_ITME_NAME[SETTING_ITEM_NUM][64] = {{"デューティー比"},
+const T_DISPLAY SETTING_ITME_NAME[SETTING_ITEM_NUM][64] = {{"デューティー比"},
 																{"波形"},
 																{"スピーカ数"}};
-T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM][64]	= {{"スピーカ１"},
+const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM][64]	= {{"スピーカ１"},
 																{"スピーカ２"},
 																{"スピーカ３"},
 																};
-T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64] = {{"ひとつ"},{"ふたつ"},{"みっつ"}};
+const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64] = {{"ひとつ"},{"ふたつ"},{"みっつ"}};
 
 /*選択出来る項目を変えたい時は以下の配列を変更して、増減があったら#defineのSELECT_NUMを変える*/
 const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]			= {ORGAN,AUTOPLAY,GAME,SETTING};//選択できるモード
@@ -55,13 +55,13 @@ const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]= {DUTY,WAV
 const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]	= {SPEAKER1,SPEAKER2,SPEAKER3,};
 const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] = {SPEAKER1,SPEAKER2,SPEAKER3,};
 /*終了方法*/
-T_DISPLAY END_METHOD1[]							= {"メニューに戻る e + エンター\n"};
+const T_DISPLAY END_METHOD1[]							= {"メニューに戻る e + エンター\n"};
 /*操作方法*/
-T_DISPLAY DUTY_SETTING_DISPLAY[] 	= {"デューティ比を入力してください（1~99％）\n"
+const T_DISPLAY DUTY_SETTING_DISPLAY[] 	= {"デューティ比を入力してください（1~99％）\n"
 										"SW1:1　～　SW9:9 SW10:0\n"};
 
-T_DISPLAY setting_comp[]			= {"に設定されました。\n"};
-T_DISPLAY error_message[]			= {"入力が正しくありません\n"};
+const T_DISPLAY setting_comp[]			= {"に設定されました。\n"};
+const T_DISPLAY error_message[]			= {"入力が正しくありません\n"};
 /*
  * ワークエリア定義
  */
@@ -131,7 +131,7 @@ static void main_sequence_process(void)
 /*			const unsigned char *select_num選択できる項目の配列番号の配列へのポインタ			*/
 /*			char item_num:項目の数													*/
 /************************************************************************************/
-static void selection_screen_display(T_DISPLAY *select_item,T_DISPLAY (*item_name)[64],T_DISPLAY *select_num,unsigned char item_num,T_DISPLAY *end_method)
+static void selection_screen_display(const T_DISPLAY *select_item,const T_DISPLAY (*item_name)[64],T_DISPLAY *select_num,unsigned char item_num,T_DISPLAY *end_method)
 {
 	unsigned char i;
 	unsigned char index_num[8];
@@ -159,7 +159,7 @@ static void selection_screen_display(T_DISPLAY *select_item,T_DISPLAY (*item_nam
  * 			const unsigned char *end_method
 /*			unsigned char item_num
 /*********************************************************************************************************************************/
-static signed short item_select_sequence(T_DISPLAY *item_select,T_DISPLAY (*item_name)[64],T_DISPLAY *select_num,unsigned char item_num,T_DISPLAY *end_method)
+static signed short item_select_sequence(const T_DISPLAY *item_select,const T_DISPLAY (*item_name)[64],const T_DISPLAY *select_num,unsigned char item_num,const T_DISPLAY *end_method)
 {
 	static unsigned char item_select_sequence_num = 0;
 	static signed char ret;

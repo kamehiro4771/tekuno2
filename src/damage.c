@@ -19,7 +19,7 @@ unsigned short damage_calculation(struct Enemy* enemy,unsigned short combo_count
 	float result = 1.0, base = 1.5;
 	signed short damage;
 	unsigned char random_num	= random_number_acquisition(21);
-	Ally *ally = get_ally_data(type);
+	T_ALLY *ally = get_ally_data(type);
 	exponent	= deleted_number - 3 + combo_count;//âΩèÊÇ∑ÇÈÇ©ãÅÇﬂÇÈ
 	for(i = 0;i < exponent;i++)//ó›èÊÇ∑ÇÈ
 		result *= base;

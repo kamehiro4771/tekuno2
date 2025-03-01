@@ -202,8 +202,8 @@ void create_send_data(unsigned char *battle_field_display)
 }
 
 /*****************************************************************
- *
- *
+ *ƒpƒYƒ‹‰æ–Ê‚Ì•\Ž¦
+ *void output_battle_field(unsigned char sw)
  *****************************************************************/
 void output_battle_field(unsigned char sw)
 {
