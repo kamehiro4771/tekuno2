@@ -55,9 +55,7 @@ typedef struct Player{
 	unsigned short gp;
 }T_PLAYER;
 
-typedef struct
-Ally* get_ally_data(unsigned char type);
-T_ENEMY* get_enemy_data(unsigned char num);
+T_ALLY* get_ally_data(unsigned char type);
 
 
 #endif /* GAME_H_ */

@@ -193,4 +193,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	}
 }
 
-
+T_ALLY *get_ally_data(unsigned char ally_num)
+{
+	return &ally[ally_num];
+}

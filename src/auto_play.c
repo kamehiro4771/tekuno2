@@ -205,9 +205,9 @@ AUTOPLAYER *get_autoplayer(void)
  *
  *
  */
-AUTOPLAYER *get_interrupt_data(void)
+AUTOPLAYER get_interrupt_data(unsigned char player_num)
 {
-	return interrupt_data;
+	return interrupt_data[player_num];
 }
 
 

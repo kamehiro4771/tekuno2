@@ -63,6 +63,7 @@
 #define CRLF "\r\n"
 #define DISPLAY_CLEAR "\x1b[2J"
 #define RESET "\x1b[2J\x1b[0;0H"//画面をクリアして設定を初期化カーソルを原点に戻す
+#define DELETING_LEFT_SIDE "\x1b[K"//カーソルと行末にある文字を削除
 #define CURSOR_5LINE_BUCK "\x1b[5F"
 #define CURSOR_4LINE_BUCK "\x1b[4F"
 #define CURSOR_3LINE_BUCK "\x1b[3F"
@@ -71,6 +72,7 @@
 #define CURSOR_2LINE_ADVANCE "\x1b[2E"
 #define CURSOR_3LINE_ADVANCE "\x1b[3E"
 #define CURSOR_MOVING_LEFT_MOST "\x1b[0`"//カーソルを左端に移動
+#define CURSOL_MOVING_SENTER "\x1b[40G"//カーソルを画面の中央に移動
 //#define CURSOR__BACK_ORIGIN "\x1b[0;0H"
 /*
 const unsigned char SCREEN_ERACE[]			= {"\x1b[2J"};
@@ -105,7 +107,7 @@ enum setting{DUTY = 1,WAVE,};
 enum{
 	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP = 73,NO_SELECT = 73,OFF = 73,
 };
-enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,STATUS_DISPLAY};
+enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS};
 #include "score.h"
 //構造体宣言
 typedef struct SCI{
