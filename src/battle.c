@@ -39,14 +39,18 @@ AUTOPLAYER *resume_data;
 T_ENEMY *penemy;//戦闘中のモンスターへのポインタ
 T_PLAYER *pplayer;//プレイヤーへのポインタ
 T_ALLY *pally;
-unsigned char output_string[128];//ダメージ計算して文字列に変換したやつが入る
+T_DISPLAY damage_num[6];//文字列に変換されたダメージが入る
+T_DISPLAY combo_num[6];//文字列に変換されたコンボ数が入る
+T_DISPLAY hp_num[6];
+T_DISPLAY max_hp_num[6];
+//unsigned char output_string[128];//ダメージ計算して文字列に変換したやつが入る
 unsigned char first_turn_flg;
 /********************************************************************/
 /*プロトタイプ宣言													*/
 /********************************************************************/
 void player_turn(void);
 void enemy_turn(void);
-void i_to_a(unsigned short i);
+void i_to_a(unsigned short i,unsigned char *output_string);
 static void battle_display(unsigned char activity,unsigned char *param);
 /********************************************************************/
 /*バトルメイン関数													*/
@@ -133,9 +137,10 @@ void player_turn(void)
 			while(playing_flg == ON){
 				//nop
 			}
-			if(*dladder != LIFE)
+			if(*dladder != LIFE){
+				pally = get_ally_data(*dladder);
 				battle_display(ADD_ATTACK,dladder);
-			else
+			}else
 				battle_display(RECOVERY,dladder);
 			pautoplayer[0] = resume_data[0];
 			pautoplayer[1] = resume_data[1];
@@ -173,38 +178,37 @@ void enemy_turn(void)
 
 static void battle_display(unsigned char activity,unsigned char *param)
 {
-	unsigned short damage_num;
-	static unsigned short combo_count = 0;//コンボカウントのリセットを忘れないように
+	unsigned short damage_value = 0;
+	unsigned short combo_value = 0;//コンボカウントのリセットを忘れないように
 	unsigned char deleted_number;
 	if(activity == ADD_ATTACK || activity == RECOVERY){
 		/*パズル画面操作のある時*/
-		combo_count++;//
+		combo_value++;//
 		deleted_number				= delete_jewel(param);//宝石を消して、消した宝石数をもらう
-		if(combo_count >= 2){//コンボカウントが２以上ならコンボ数表示
-			i_to_a(combo_count);//
-			send_serial(output_string,strlen((const char*)output_string));
+		if(combo_value >= 2){//コンボカウントが２以上ならコンボ数表示
+			i_to_a(combo_value,combo_num);//
+			send_serial(combo_num,strlen((const char*)combo_num));
 			send_serial(COMBO_DISPLAY,sizeof(COMBO_DISPLAY));//「〇コンボ！」表示
 		}
-		damage_num						= damage_calculation(penemy,combo_count,*param,deleted_number);//ダメージ計算
-		i_to_a(damage_num);//文字列に変換
+		damage_value						= damage_calculation(penemy,combo_value,*param,deleted_number);//ダメージ計算
+		i_to_a(damage_value,damage_num);//文字列に変換
 	}
 	if(activity == RECOVERY){
 		/*回復表示の時*/
 		send_serial((const T_DISPLAY*)pplayer->name,strlen((const char*)pplayer->name));
 		send_serial(LIFE_JEWEL_DISPLAY,sizeof(LIFE_JEWEL_DISPLAY));
-		send_serial(output_string,strlen((const char*)output_string));//回復値表示
+		send_serial(damage_num,strlen((const char*)damage_num));//回復値表示
 		send_serial(RECOVERY_DISPLAY,sizeof(RECOVERY_DISPLAY));
-		pplayer->hp = pplayer->hp + damage_num;//自分のHPにダメージを足す最大値を超えないように
+		pplayer->hp = pplayer->hp + damage_value;//自分のHPにダメージを足す最大値を超えないように
 		if(pplayer->hp > pplayer->mhp)
 			pplayer->hp = pplayer->mhp;
 	}else{
 		/*回復以外の表示の時*/
 		if(activity == ADD_ATTACK){//敵を攻撃する時
-			pally = get_ally_data(*param);
 			send_serial(pally->name,strlen((const char*)pally->name));
 			send_serial(ATTACK_DISPLAY,sizeof(ATTACK_DISPLAY));
-			if(penemy->hp >= damage_num)
-				penemy->hp 			= penemy->hp - damage_num;//モンスターのHPからダメージを引く
+			if(penemy->hp >= damage_value)
+				penemy->hp 			= penemy->hp - damage_value;//モンスターのHPからダメージを引く
 			else
 				penemy->hp 			= 0;
 		}else if(activity == STATUS){
@@ -218,11 +222,11 @@ static void battle_display(unsigned char activity,unsigned char *param)
 			send_serial(CRLF,2);
 			send_serial(CURSOL_MOVING_SENTER,sizeof(CURSOL_MOVING_SENTER));//ステータス表示の時は真ん中から表示
 			send_serial(HP_DISPLAY,sizeof(HP_DISPLAY));
-			i_to_a(penemy->hp);
-			send_serial(output_string,strlen((const char*)output_string));
+			i_to_a(penemy->hp,hp_num);
+			send_serial(hp_num,strlen((const char*)hp_num));
 			send_serial(SLASH_DISPLAY,sizeof(SLASH_DISPLAY));
-			i_to_a(penemy->mhp);
-			send_serial(output_string,strlen((const char*)output_string));
+			i_to_a(penemy->mhp,max_hp_num);
+			send_serial(max_hp_num,strlen((const char*)max_hp_num));
 			send_serial(CRLF,2);
 			break;
 		case APPEARANCE:
@@ -232,11 +236,8 @@ static void battle_display(unsigned char activity,unsigned char *param)
 			send_serial(KILL_DISPLAY,sizeof(KILL_DISPLAY));
 			break;
 		case ADD_ATTACK:
-			damage_num = damge_from_enemy_calculation(pplayer->gp,penemy);
-			i_to_a(damage_num);//文字列に変換
-			send_serial(output_string,strlen((const char*)output_string));
 			send_serial(TO_DISPLAY,sizeof(TO_DISPLAY));
-			send_serial(output_string,strlen((const char*)output_string));//ダメージ値表示
+			send_serial(damage_num,strlen((const char*)damage_num));//ダメージ値表示
 			send_serial(DAMAGE_DISPLAY,sizeof(DAMAGE_DISPLAY));//のダメージ
 			break;
 		}
@@ -251,7 +252,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 //入力は65535まで
 //出力はワークエリア定義のoutput_stringに変換される
 //最後にNULL文字を入れる
-void i_to_a(unsigned short i)
+void i_to_a(unsigned short i,unsigned char *output_string)
 {
 	if(i > 9999){
 		output_string[0]	= (i / 10000) + 0x30;

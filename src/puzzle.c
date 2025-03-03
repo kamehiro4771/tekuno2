@@ -147,7 +147,7 @@ void create_new_battle_field(void)
 /*battle_fieldに入っている数値をもとに、シリアル通信で送信するデータを作成する									*/
 /*void create_send_data(void)																*/
 /********************************************************************************************/
-void create_send_data(unsigned char *battle_field_display)
+void create_send_data(void)
 {
 	unsigned char i,j = 0;
 	for(i = 0;i < FIELD_NUM;i++){
