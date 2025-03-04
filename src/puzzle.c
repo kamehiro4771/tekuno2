@@ -103,6 +103,7 @@ unsigned char delete_jewel(unsigned char *first_address)
 		first_address[i]	= 5;
 	}
 	output_battle_field(UPDATE_FIELD);
+	send_serial(CRLF,2);
 	cmt2_wait(18750,CKS512);//200ƒ~ƒŠ•bŠÔŠu‚ğ‚ ‚¯‚é
 	return g_matched_count + 1;
 }

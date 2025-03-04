@@ -13,7 +13,7 @@ const T_DISPLAY APPEAR_DISPLAY[]			= {"が現れた！\n"};
 const T_DISPLAY ATTACK_DISPLAY[]			= {"の攻撃！\n"};
 const T_DISPLAY COMBO_DISPLAY[]				= {"コンボ！\n"};
 const T_DISPLAY TO_DISPLAY[]				= {"に"};
-const T_DISPLAY DAMAGE_DISPLAY[]			= {"のダメージ\n"};
+const T_DISPLAY DAMAGE_DISPLAY[]			= {"のダメージ"};
 const T_DISPLAY TAKE_DISPLAY[]				= {"をうけた！\n"};
 const T_DISPLAY LIFE_JEWEL_DISPLAY[]		= {"は命の宝石を使った"};
 const T_DISPLAY RECOVERY_DISPLAY[]			= {"回復！\n"};
@@ -92,12 +92,8 @@ void player_turn(void)
 	if(first_turn_flg == ON){
 		automatic_playing(BATTLE1,SQUARE,0,0,0);
 		output_battle_field(NEW_FIELD);
-	}else{
-		for(i= 0;i < 3;i++)
-			pautoplayer[i].elapsed_time = resume_data[i].elapsed_time;
-		automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
+	}else
 		output_battle_field(CURRENT_FIELD);
-	}
 	send_serial(REQUEST_COMMAND_DISPLAY,sizeof(REQUEST_COMMAND_DISPLAY));
 	while(1){
 		ret = input_check();
@@ -125,7 +121,7 @@ void player_turn(void)
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
 	}
-	//攻撃した後曲がおかしくなる
+	ml入力でバグる
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
@@ -154,17 +150,17 @@ void player_turn(void)
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
 
-/********************************************************************/
-/*敵のターン関数													*/
-/*void enemy_turn(void)					*/
+/********************************************************************
+/*敵のターン関数
+/*void enemy_turn(void)
 /*	引数：struct Enemy* enemy　攻撃する敵の情報
 /*	戻り値：unsigned char
-/********************************************************************/
+********************************************************************/
 void enemy_turn(void)
 {
 	battle_display(TAKE_ATTACK,NULL);
 }
-/*
+/**************************************************************************
  * バトル中の画面表示
  * static void battle_display(unsigned char activity,unsigned char *param)
  * 	引数：unsigned char activity　APPEARANCE　敵が現れた
@@ -205,7 +201,9 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	}else{
 		/*回復以外の表示の時*/
 		if(activity == ADD_ATTACK){//敵を攻撃する時
+			send_serial(COLOR_CHAR_ARRAY[pally->el],sizeof(COLOR_CHAR_ARRAY[pally->el]));
 			send_serial(pally->name,strlen((const char*)pally->name));
+			send_serial(DEFAULT_CHAR,sizeof(DEFAULT_CHAR));
 			send_serial(ATTACK_DISPLAY,sizeof(ATTACK_DISPLAY));
 			if(penemy->hp >= damage_value)
 				penemy->hp 			= penemy->hp - damage_value;//モンスターのHPからダメージを引く
@@ -218,6 +216,24 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		send_serial(penemy->name,strlen((const char*)penemy->name));//モンスター名表示
 		send_serial(DEFAULT_CHAR,sizeof(DEFAULT_CHAR));
 		switch(activity){
+		case APPEARANCE:
+			send_serial(APPEAR_DISPLAY,sizeof(APPEAR_DISPLAY));
+			break;
+		case ADD_ATTACK:
+			send_serial(TO_DISPLAY,sizeof(TO_DISPLAY));
+			send_serial(damage_num,strlen((const char*)damage_num));//ダメージ値表示
+			send_serial(DAMAGE_DISPLAY,sizeof(DAMAGE_DISPLAY));//のダメージ
+			send_serial(CRLF,2);
+			break;
+		case TAKE_ATTACK:
+			send_serial(ATTACK_DISPLAY,sizeof(ATTACK_DISPLAY));
+			send_serial(damage_num,strlen((const char*)damage_num));//ダメージ値表示
+			send_serial(DAMAGE_DISPLAY,sizeof(DAMAGE_DISPLAY));//のダメージ
+			send_serial(TAKE_DISPLAY,sizeof(TAKE_DISPLAY));
+			break;
+		case KILLED_ENEMY:
+			send_serial(KILL_DISPLAY,sizeof(KILL_DISPLAY));
+			break;
 		case STATUS:
 			send_serial(CRLF,2);
 			send_serial(CURSOL_MOVING_SENTER,sizeof(CURSOL_MOVING_SENTER));//ステータス表示の時は真ん中から表示
@@ -228,17 +244,6 @@ static void battle_display(unsigned char activity,unsigned char *param)
 			i_to_a(penemy->mhp,max_hp_num);
 			send_serial(max_hp_num,strlen((const char*)max_hp_num));
 			send_serial(CRLF,2);
-			break;
-		case APPEARANCE:
-			send_serial(APPEAR_DISPLAY,sizeof(APPEAR_DISPLAY));
-			break;
-		case KILLED_ENEMY:
-			send_serial(KILL_DISPLAY,sizeof(KILL_DISPLAY));
-			break;
-		case ADD_ATTACK:
-			send_serial(TO_DISPLAY,sizeof(TO_DISPLAY));
-			send_serial(damage_num,strlen((const char*)damage_num));//ダメージ値表示
-			send_serial(DAMAGE_DISPLAY,sizeof(DAMAGE_DISPLAY));//のダメージ
 			break;
 		}
 	}

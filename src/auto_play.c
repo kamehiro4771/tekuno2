@@ -185,9 +185,9 @@ void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,u
 		}
 	}else{//途中から演奏する時は経過時間の更新をされたくないためset_flgをOFFでスタートする
 		for(i = 0;i < g_use_speaker_num;i++){
-			set_output_value(autoplayer[i].score_count,i);
+			set_output_value(autoplayer[i].pscore[autoplayer[i].score_count],i + 1);
 		}
-		output_speaker_start(3);//出力開始
+		output_speaker_start(7);//出力開始
 
 	}
 	count_timer_set(&common_timer,output_function_call);//出力関数の登録

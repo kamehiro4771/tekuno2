@@ -1,4 +1,4 @@
-Renesas Optimizing Linker (W2.06.00 )             03-Mar-2025 21:58:34
+Renesas Optimizing Linker (W2.06.00 )             04-Mar-2025 22:06:22
 
 *** Options ***
 
@@ -64,7 +64,7 @@ R
 PResetPRG
                                   fff80000  fff8002f        30   1
 C_1
-                                  fff80030  fff81d0d      1cde   1
+                                  fff80030  fff81d0c      1cdd   1
 C_2
                                   fff81d0e  fff83b15      1e08   2
 C
@@ -96,6 +96,6 @@ L
 PIntPRG
                                   fff84bd5  fff84d72       19e   1
 P
-                                  fff84d73  fff8a855      5ae3   1
+                                  fff84d73  fff8a89a      5b28   1
 FIXEDVECT
                                   ffffff80  ffffffff        80   4
