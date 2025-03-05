@@ -211,10 +211,10 @@ void output_battle_field(unsigned char sw)
 	if(sw == NEW_FIELD){
 		send_serial(KEY_DISPLAY,strlen((const char*)KEY_DISPLAY));
 		create_new_battle_field();
-		create_send_data(battle_field_display);
+		create_send_data();
 		send_serial(battle_field_display,102);
 	}else if(sw == UPDATE_FIELD){
-		create_send_data(battle_field_display);
+		create_send_data();
 		send_serial(battle_field_display,102);
 		send_serial(CURSOR_1LINE_BUCK,5);
 	}else{

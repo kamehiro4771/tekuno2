@@ -107,7 +107,7 @@ enum setting{DUTY = 1,WAVE,};
 enum{
 	SW1 = 1,SW2,SW3,SW4,SW5,SW6,SW7,SW8,SW9,SW10,SW11,SW12,SW13,REST = 73,COMP = 73,NO_SELECT = 73,OFF = 73,
 };
-enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS};
+
 #include "score.h"
 //ç\ë¢ëÃêÈåæ
 typedef struct SCI{
