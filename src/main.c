@@ -91,7 +91,7 @@ void abort(void);
 /****************************************************************************/
 void main(void)
 {
-	eneiro_init();
+eneiro_init();
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
 	automatic_playing(INITIAL_CHECK,SQUARE,0,0,0);
 	while(playing_flg == ON){

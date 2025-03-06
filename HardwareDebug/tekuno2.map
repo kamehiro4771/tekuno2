@@ -1,4 +1,4 @@
-Renesas Optimizing Linker (W2.06.00 )             05-Mar-2025 21:33:01
+Renesas Optimizing Linker (W2.06.00 )             06-Mar-2025 21:59:28
 
 *** Options ***
 
@@ -41,61 +41,4 @@ Renesas Optimizing Linker (W2.06.00 )             05-Mar-2025 21:33:01
 
 *** Error information ***
 
-*** Mapping List ***
-
-SECTION                            START      END         SIZE   ALIGN
-
-SU
-                                  00000004  00000103       100   4
-SI
-                                  00000104  00000403       300   4
-B_1
-                                  00000404  00000796       393   1
-R_1
-                                  00000797  0000080e        78   1
-B_2
-                                  00000810  00000811         2   2
-R_2
-                                  00000812  00000a4b       23a   2
-B
-                                  00000a4c  00000edf       494   4
-R
-                                  00000ee0  000013e3       504   4
-PResetPRG
-                                  fff80000  fff8002f        30   1
-C_1
-                                  fff80030  fff81d08      1cd9   1
-C_2
-                                  fff81d0a  fff83b11      1e08   2
-C
-                                  fff83b14  fff83ebb       3a8   4
-C$DSEC
-                                  fff83ebc  fff83edf        24   4
-C$BSEC
-                                  fff83ee0  fff83ef7        18   4
-C$INIT
-                                  fff83ef8  fff83ef8         0   1
-C$VECT
-                                  fff83ef8  fff842f7       400   4
-C$VTBL
-                                  fff842f8  fff842f8         0   1
-D
-                                  fff842f8  fff847fb       504   4
-D_1
-                                  fff847fc  fff84873        78   1
-D_2
-                                  fff84874  fff84aad       23a   2
-W
-                                  fff84ab0  fff84ab0         0   4
-W_1
-                                  fff84ab0  fff84ab0         0   1
-W_2
-                                  fff84ab0  fff84b57        a8   2
-L
-                                  fff84b58  fff84c08        b1   4
-PIntPRG
-                                  fff84c09  fff84da6       19e   1
-P
-                                  fff84da7  fff8a90e      5b68   1
-FIXEDVECT
-                                  ffffff80  ffffffff        80   4
+E0562310:Undefined external symbol "_damage_calculation" referenced in ".\src\battle.obj"

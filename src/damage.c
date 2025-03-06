@@ -1,7 +1,7 @@
 #include "main.h"
 
 //’è”’è‹`
-const float ATTRIBUTE_CORRECTION_VALUE[ATTRIBUTE_NUM][ATTRIBUTE_NUM] = {
+const float ATTRIBUTE_CORRECTION_VALUE[ATTRIBUTE_NUM][ATTRIBUTE_NUM] = {//[UŒ‚‚·‚é‘¤‚Ì‘®«][UŒ‚‚³‚ê‚é‘¤‚Ì‘®«]
 											{1.0,0.5,2.0,1.0,},{2.0,1.0,1.0,0.5,},{0.5,1.0,1.0,2.0,},{1.0,2.0,0.5,1.0,},
 																};
 /************************************************************************************************************************************/
@@ -13,20 +13,20 @@ const float ATTRIBUTE_CORRECTION_VALUE[ATTRIBUTE_NUM][ATTRIBUTE_NUM] = {
 /*		@unsigned char deleted_number@Á–Å•óÎ”																					*/
 /*	–ß‚è’lFsigned short@ŒvZŒ‹‰Ê																									*/
 /************************************************************************************************************************************/
-unsigned short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)
+unsigned short damage_to_enemy_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)
 {
 	unsigned char i,exponent;
 	float result = 1.0, base = 1.5;
-	signed short damage;
+	unsigned short damage,ally_ap;
 	unsigned char random_num	= random_number_acquisition(21);
-	T_ALLY *ally = get_ally_data(type);
+	ally_ap = get_ally_data(type).ap;
 	exponent	= deleted_number - 3 + combo_count;//‰½æ‚·‚é‚©‹‚ß‚é
 	for(i = 0;i < exponent;i++)//—İæ‚·‚é
 		result *= base;
 	if(type == LIFE)//Á‚µ‚½•óÎ‚ª–½‘®«‚Ì
 		damage	= ((20 * result) * (90 + random_num)) / 100;
 	else{
-		damage	= ((ally->ap - enemy->gp) * ATTRIBUTE_CORRECTION_VALUE[enemy->el][type] * result * (90 + random_num)) / 100;
+		damage	= ((ally_ap - enemy->gp) * ATTRIBUTE_CORRECTION_VALUE[type][enemy->el] * result * (90 + random_num)) / 100;
 		if(damage < 1)
 			damage = 1;//‚P–¢–‚Ìê‡‚P‚Æ‚·‚é
 	}
