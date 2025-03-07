@@ -55,6 +55,7 @@ static void battle_display(unsigned char activity,unsigned char *param);
 /********************************************************************/
 unsigned char battle_main(T_PLAYER *player, T_ENEMY *enemy)
 {
+	//モンスターを倒した時おかしくなる
 	first_turn_flg 					= ON;
 	penemy					= enemy;
 	pplayer					= player;
@@ -138,7 +139,6 @@ void player_turn(void)
 			pautoplayer[2] = resume_data[2];
 			//演奏再開
 			automatic_playing(BATTLE1,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);
-//			send_serial(CURSOR_5LINE_BUCK,sizeof(CURSOR_5LINE_BUCK));
 			free_padding(dladder);//空いた宝石配列を詰める
 		}else{
 			sci0_receive_start();//受信が終わっているので開始
@@ -194,10 +194,10 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	}else{
 		switch(activity){
 		case APPEARANCE:
-			sprintf(output_string[APPEARANCE] + strlen(output_string[APPEARANCE]),"%s",APPEAR_DISPLAY);
+			sprintf(output_string[APPEARANCE],"%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,APPEAR_DISPLAY);
 			break;
 		case ADD_ATTACK:
-			sprintf(output_string[ADD_ATTACK] + strlen(output_string[ADD_ATTACK]),"%s%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[attack_ally.el],attack_ally.name,DEFAULT_CHAR,ATTACK_DISPLAYTO_DISPLAY,damage_value,DAMAGE_DISPLAY,CRLF);
+			sprintf(output_string[ADD_ATTACK],"%s%s%s%s%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[attack_ally.el],attack_ally.name,DEFAULT_CHAR,ATTACK_DISPLAY,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,TO_DISPLAY,damage_value,DAMAGE_DISPLAY,CRLF);
 			if(penemy->hp >= damage_value)
 				penemy->hp 			= penemy->hp - damage_value;//モンスターのHPからダメージを引く
 			else
@@ -206,14 +206,14 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		case TAKE_ATTACK:
 			damage_value			= damge_from_enemy_calculation(pplayer->gp,penemy);
 			pplayer->hp				= pplayer->hp - damage_value;
-			sprintf(output_string[TAKE_ATTACK],"%s%d%s%s",ATTACK_DISPLAY,damage_value,DAMAGE_DISPLAY,TAKE_DISPLAY);
+			sprintf(output_string[TAKE_ATTACK],"%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,ATTACK_DISPLAY,damage_value,DAMAGE_DISPLAY,TAKE_DISPLAY);
 			break;
 		case KILLED_ENEMY:
-			sprintf(output_string[KILLED_ENEMY],"%s%s%s%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHARCOLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,KILL_DISPLAY);
+			sprintf(output_string[KILLED_ENEMY],"%s%s%s%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,KILL_DISPLAY);
 			send_serial(KILL_DISPLAY,sizeof(KILL_DISPLAY));
 			break;
 		case STATUS:
-			sprintf(output_string[STATUS]"%s%s%s%s%d/%d%s",CURSOL_MOVING_SENTER,CRLF,CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->mhp,CRLF);
+			sprintf(output_string[STATUS],"%s%s%s%s%s%s%s%d/%d%s",CURSOL_MOVING_SENTER,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,CRLF,CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->mhp,CRLF);
 			break;
 		}
 	}
