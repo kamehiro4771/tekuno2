@@ -37,8 +37,9 @@ enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS,COM
 AUTOPLAYER *resume_data;
 T_ENEMY *penemy;//戦闘中のモンスターへのポインタ
 T_PLAYER *pplayer;//プレイヤーへのポインタ
+T_ALLY *pally;//味方モンスター達へのポインタ
 T_ALLY attack_ally;//攻撃したモンスター
-unsigned char output_string[8][1024];//ダメージ計算して文字列に変換したやつが入る
+unsigned char output_string[8][512];//ダメージ計算して文字列に変換したやつが入る
 unsigned char first_turn_flg;
 /********************************************************************/
 /*プロトタイプ宣言													*/
@@ -54,12 +55,13 @@ static void battle_display(unsigned char activity,unsigned char *param);
 /*	戻り値：unsigned char ret 1勝利									*/
 /*							  0敗北									*/
 /********************************************************************/
-unsigned char battle_main(T_PLAYER *player, T_ENEMY *enemy)
+unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 {
 	//モンスターを倒した時おかしくなる
 	first_turn_flg 					= ON;
 	penemy					= enemy;
 	pplayer					= player;
+	pally					= ally;
 	battle_display(APPEARANCE,NULL);
 	while(1){
 		player_turn();
@@ -84,6 +86,7 @@ void player_turn(void)
 	unsigned char input[2] = {0};
 	unsigned char *dladder = NULL;
 	AUTOPLAYER *pautoplayer = get_autoplayer();
+	battle_display(TURN,NULL);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
 		automatic_playing(BATTLE1,SQUARE,0,0,0);
@@ -118,7 +121,7 @@ void player_turn(void)
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
 	}
-//	ml入力でバグる
+コンボすると音がバグる
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
@@ -215,20 +218,21 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		break;
 	case STATUS:
 		//味方のステータスも表示する
-		sprintf(output_string[STATUS],"%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s%s%s%s%s%s%s%d/%d%s",
+		sprintf(output_string[STATUS],"%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s",
 																LINE_DISPLAY,CRLF,CRLF,
 																CURSOL_MOVING_SENTER,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,CRLF,
 																CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->mhp,CRLF,
-																COLOR_CHAR_ARRAY[get_ally_data(FIRE).el],get_ally_data(FIRE).name,
-																COLOR_CHAR_ARRAY[get_ally_data(WATER).el],get_ally_data(WATER).name,
-																COLOR_CHAR_ARRAY[get_ally_data(WIND).el],get_ally_data(WIND).name,
-																COLOR_CHAR_ARRAY[get_ally_data(SOIL).el],get_ally_data(SOIL).name,CRLF,
-																CURSOL_MOVING_SENTER,HP_DISPLAY,pplayer->hp,pplayer->mhp,CRLF);
+																COLOR_CHAR_ARRAY[pally[FIRE].el],pally[FIRE].name,
+																COLOR_CHAR_ARRAY[pally[WATER].el],pally[WATER].name,
+																COLOR_CHAR_ARRAY[pally[WIND].el],pally[WIND].name,
+																COLOR_CHAR_ARRAY[pally[SOIL].el],pally[SOIL].name,DEFAULT_CHAR,CRLF,
+																CURSOL_MOVING_SENTER,HP_DISPLAY,pplayer->hp,pplayer->mhp,CRLF,
+																CRLF,CRLF,LINE_DISPLAY,CRLF);
 		combo_value 			= 0;
 		break;
 	case TURN:
 		//ターン表示
-		sprintf(output_string[TURN],"【%sのターン】",pplayer->name);
+		sprintf(output_string[TURN],"【%sのターン】\r\n",pplayer->name);
 		break;
 	}
 	send_serial(output_string[activity],strlen(output_string[activity]));
