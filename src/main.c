@@ -46,6 +46,7 @@ const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM][64]	= {{"スピーカ１"},
 																{"スピーカ３"},
 																};
 const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64] = {{"ひとつ"},{"ふたつ"},{"みっつ"}};
+//const T_DISPLAY DORAGON_DISPLAY[]
 
 /*選択出来る項目を変えたい時は以下の配列を変更して、増減があったら#defineのSELECT_NUMを変える*/
 const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]			= {ORGAN,AUTOPLAY,GAME,SETTING};//選択できるモード

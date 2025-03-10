@@ -21,6 +21,7 @@ const T_DISPLAY OPERATION_METHOD_DISPLAY[]	= {"一文字目動かす宝石の現在地、2文字
 const T_DISPLAY INPUT_ERROR_DISPLAY[]		= {"入力が正しくありません"};
 const T_DISPLAY HP_DISPLAY[]				= {"HP="};
 const T_DISPLAY  LINE_DISPLAY[]				= {"----------------------------------------------------------------------------------------------------"};
+
 //表示する文字列へのポインタ二次元配列の行は行動、列は表示する順番
 /*const T_DISPLAY *DISPLAY_POINTER_ARRAY[][]		= {{APPEAR,,},//モンスター登場
 													{,ATTACK,,TO,DAMAGE,},//モンスターに攻撃を与える
@@ -86,7 +87,7 @@ void player_turn(void)
 	unsigned char input[2] = {0};
 	unsigned char *dladder = NULL;
 	AUTOPLAYER *pautoplayer = get_autoplayer();
-	battle_display(TURN,NULL);
+	battle_display(TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
 		automatic_playing(BATTLE1,SQUARE,0,0,0);
@@ -121,7 +122,7 @@ void player_turn(void)
 			automatic_playing(BATTLE1,SQUARE,0,0,0);
 		}
 	}
-コンボすると音がバグる
+//コンボすると音がバグる
 	move_jewel(input[0],input[1]);//宝石を動かす
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
@@ -144,7 +145,7 @@ void player_turn(void)
 			//演奏再開
 			automatic_playing(BATTLE1,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);
 			free_padding(dladder);//空いた宝石配列を詰める
-		}else{
+		}else{//自分のターン終了
 			sci0_receive_start();//受信が終わっているので開始
 			break;
 		}
@@ -218,11 +219,11 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		break;
 	case STATUS:
 		//味方のステータスも表示する
-		sprintf(output_string[STATUS],"%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s",
+		sprintf(output_string[STATUS],"%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s",
 																LINE_DISPLAY,CRLF,CRLF,
 																CURSOL_MOVING_SENTER,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,CRLF,
-																CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->mhp,CRLF,
-																COLOR_CHAR_ARRAY[pally[FIRE].el],pally[FIRE].name,
+																CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->mhp,CRLF,CRLF,CRLF,
+																CURSOL_MOVING_SENTER,COLOR_CHAR_ARRAY[pally[FIRE].el],pally[FIRE].name,
 																COLOR_CHAR_ARRAY[pally[WATER].el],pally[WATER].name,
 																COLOR_CHAR_ARRAY[pally[WIND].el],pally[WIND].name,
 																COLOR_CHAR_ARRAY[pally[SOIL].el],pally[SOIL].name,DEFAULT_CHAR,CRLF,
@@ -232,7 +233,10 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		break;
 	case TURN:
 		//ターン表示
-		sprintf(output_string[TURN],"【%sのターン】\r\n",pplayer->name);
+		if(param != NULL)//プレーヤーのターンならプレイヤー名
+			sprintf(output_string[TURN],"【%sのターン】\r\n",pplayer->name);
+		else
+			sprintf(output_string[TURN],"【%s%s%sのターン】\r\n",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR);
 		break;
 	}
 	send_serial(output_string[activity],strlen(output_string[activity]));

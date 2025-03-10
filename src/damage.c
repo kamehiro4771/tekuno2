@@ -19,13 +19,13 @@ unsigned short damage_to_enemy_calculation(struct Enemy* enemy,unsigned short co
 	float result = 1.0, base = 1.5;
 	unsigned short damage,ally_ap;
 	unsigned char random_num	= random_number_acquisition(21);
-	ally_ap = get_ally_data(type).ap;
 	exponent	= deleted_number - 3 + combo_count;//‰½æ‚·‚é‚©‹‚ß‚é
 	for(i = 0;i < exponent;i++)//—İæ‚·‚é
 		result *= base;
 	if(type == LIFE)//Á‚µ‚½•óÎ‚ª–½‘®«‚Ì
 		damage	= ((20 * result) * (90 + random_num)) / 100;
 	else{
+		ally_ap = get_ally_data(type).ap;
 		damage	= ((ally_ap - enemy->gp) * ATTRIBUTE_CORRECTION_VALUE[type][enemy->el] * result * (90 + random_num)) / 100;
 		if(damage < 1)
 			damage = 1;//‚P–¢–‚Ìê‡‚P‚Æ‚·‚é
