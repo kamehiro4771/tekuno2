@@ -175,10 +175,6 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 				g_sequence =11;
 				break;
 			}
-			automatic_playing(WINNING,SQUARE,0,0,0);
-			while(playing_flg == ON){
-				/*nop*/
-			}
 		}
 		g_sequence++;
 		break;
