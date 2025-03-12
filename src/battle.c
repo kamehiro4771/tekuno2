@@ -102,33 +102,15 @@ void player_turn(void)
 		output_battle_field(CURRENT_FIELD);
 	}
 	send_serial(REQUEST_COMMAND_DISPLAY,sizeof(REQUEST_COMMAND_DISPLAY));
-	while(1){
-		ret = input_check();
-		if(ret == ON){
-			ret						= sci0_get_receive_count();
-			if(ret == 4){//2文字入力された
-				sci0_data_cpy(&input[0]);
-				if(input[0] >= 'A' && input[0] < 'N'){//1文字目判定
-					if(input[1] >= 'A' && input[1] < 'N')//2文字目判定
-						break;
-					if(input[1] >= 'a' && input[1] < 'n')
-						break;
-				}
-				if(input[0] >= 'a' && input[0] < 'n'){//1文字目a~m以外の入力
-					if(input[1] >= 'A' && input[1] < 'N')//2文字目判定
-						break;
-					if(input[1] >= 'a' && input[1] < 'n')
-						break;
-				}
-			}else{
-				//一行上に戻って「コマンド>>」表示
-				sci0_receive_start();
-			}
-		}else if(playing_flg == OFF){//何も入力されずに曲終了
-			automatic_playing(BATTLE1,SQUARE,0,0,0);
-		}
+
+	ret									= puzzle_operation();
+	if(ret == ON){
+
 	}
-//コンボすると音がバグる
+	if(playing_flg == OFF){//戦闘の曲が終了したとき
+		automatic_playing(BATTLE1,SQUARE,0,0,0);
+
+	//宝石を移動中に曲が終了したときかもしれない
 	move_jewel(input[0],input[1]);
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
@@ -141,13 +123,13 @@ void player_turn(void)
 				//nop
 			}
 			if(*dladder != LIFE){
-				attack_ally = get_ally_data(*dladder);
+				attack_ally 			= get_ally_data(*dladder);
 				battle_display(ADD_ATTACK,dladder);
 			}else
 				battle_display(RECOVERY,dladder);
-			pautoplayer[0] = resume_data[0];
-			pautoplayer[1] = resume_data[1];
-			pautoplayer[2] = resume_data[2];
+			pautoplayer[0] 				= resume_data[0];
+			pautoplayer[1] 				= resume_data[1];
+			pautoplayer[2] 				= resume_data[2];
 			//演奏再開
 			automatic_playing(BATTLE1,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);
 			free_padding(dladder);//空いた宝石配列を詰める
@@ -158,7 +140,37 @@ void player_turn(void)
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
-
+/**********************************************************
+ *　パズルを操作する入力を判定する
+ * unsigned char puzzle_operation(void)
+ * 		戻り値：unsigned char ON：正しい入力があった
+ * 						   OFF:入力なし又は正しくない入力
+ */
+unsigned char puzzle_operation(void)
+{
+	unsigned char ret;
+	ret = input_check();
+	if(ret == ON){
+		ret						= sci0_get_receive_count();
+		if(ret == 4){//2文字入力された
+			sci0_data_cpy(&input[0]);
+			if(input[0] >= 'A' && input[0] <= 'M'){//1文字目判定
+				if(input[1] >= 'A' && input[1] <= 'M')//2文字目判定
+					return ON;
+				if(input[1] >= 'a' && input[1] <= 'm')
+					return ON;
+			}
+			if(input[0] >= 'a' && input[0] <= 'm'){//
+				if(input[1] >= 'A' && input[1] <= 'M')//2文字目判定
+					return ON;
+				if(input[1] >= 'a' && input[1] <= 'm')
+					return ON;
+			}
+		}
+		sci0_receive_start();
+	}
+	return OFF;
+}
 /********************************************************************
 /*敵のターン関数
 /*void enemy_turn(void)
@@ -167,6 +179,7 @@ void player_turn(void)
 ********************************************************************/
 void enemy_turn(void)
 {
+	//敵の攻撃音も追加
 	battle_display(TAKE_ATTACK,NULL);
 }
 /**************************************************************************
