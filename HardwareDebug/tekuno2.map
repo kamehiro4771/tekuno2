@@ -1,4 +1,4 @@
-Renesas Optimizing Linker (W2.06.00 )             12-Mar-2025 21:26:26
+Renesas Optimizing Linker (W2.06.00 )             13-Mar-2025 22:04:11
 
 *** Options ***
 
@@ -52,11 +52,11 @@ SI
 B_1
                                   00000404  00001496      1093   1
 R_1
-                                  00001497  0000150e        78   1
+                                  00001497  00001510        7a   1
 B_2
-                                  00001510  00001559        4a   2
+                                  00001512  0000155b        4a   2
 R_2
-                                  0000155a  00001795       23c   2
+                                  0000155c  00001797       23c   2
 B
                                   00001798  00001c2b       494   4
 R
@@ -82,20 +82,20 @@ C$VTBL
 D
                                   fff8435c  fff8485f       504   4
 D_1
-                                  fff84860  fff848d7        78   1
+                                  fff84860  fff848d9        7a   1
 D_2
-                                  fff848d8  fff84b13       23c   2
+                                  fff848da  fff84b15       23c   2
 W
-                                  fff84b14  fff84b14         0   4
+                                  fff84b18  fff84b18         0   4
 W_1
-                                  fff84b14  fff84b14         0   1
+                                  fff84b18  fff84b18         0   1
 W_2
-                                  fff84b14  fff84bbb        a8   2
+                                  fff84b18  fff84bbf        a8   2
 L
-                                  fff84bbc  fff84cf8       13d   4
+                                  fff84bc0  fff84cfc       13d   4
 PIntPRG
-                                  fff84cf9  fff84e96       19e   1
+                                  fff84cfd  fff84e9a       19e   1
 P
-                                  fff84e97  fff8ab6b      5cd5   1
+                                  fff84e9b  fff8abb8      5d1e   1
 FIXEDVECT
                                   ffffff80  ffffffff        80   4

@@ -42,6 +42,7 @@ T_ALLY *pally;//味方モンスター達へのポインタ
 T_ALLY attack_ally;//攻撃したモンスター
 char output_string[8][512];//ダメージ計算して文字列に変換したやつが入る
 unsigned char first_turn_flg;
+unsigned char input[2] = {0};
 /********************************************************************/
 /*プロトタイプ宣言													*/
 /********************************************************************/
@@ -49,6 +50,8 @@ void player_turn(void);
 void enemy_turn(void);
 void i_to_a(unsigned short i,unsigned char *output_string);
 static void battle_display(unsigned char activity,unsigned char *param);
+unsigned char puzzle_operation_check(void);
+void motion_after_input(void);
 /********************************************************************/
 /*バトルメイン関数													*/
 /*unsigned char battle_main(struct T_ENEMY* enemy)					*/
@@ -89,10 +92,7 @@ unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 /********************************************************************/
 void player_turn(void)
 {
-	unsigned char i,ret;
-	unsigned char input[2] = {0};
-	unsigned char *dladder = NULL;
-	AUTOPLAYER *pautoplayer = get_autoplayer();
+	unsigned char ret;
 	battle_display(TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
@@ -102,51 +102,24 @@ void player_turn(void)
 		output_battle_field(CURRENT_FIELD);
 	}
 	send_serial(REQUEST_COMMAND_DISPLAY,sizeof(REQUEST_COMMAND_DISPLAY));
-
-	ret									= puzzle_operation();
-	if(ret == ON){
-
-	}
-	if(playing_flg == OFF){//戦闘の曲が終了したとき
-		automatic_playing(BATTLE1,SQUARE,0,0,0);
-
-	//宝石を移動中に曲が終了したときかもしれない
-	move_jewel(input[0],input[1]);
 	while(1){
-		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
-		if(dladder != NULL){
-			auto_play_end_processing();
-			for(i = 0;i < 3;i++)
-				resume_data[i]			= get_interrupt_data(i);
-			automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
-			while(playing_flg == ON){
-				//nop
-			}
-			if(*dladder != LIFE){
-				attack_ally 			= get_ally_data(*dladder);
-				battle_display(ADD_ATTACK,dladder);
-			}else
-				battle_display(RECOVERY,dladder);
-			pautoplayer[0] 				= resume_data[0];
-			pautoplayer[1] 				= resume_data[1];
-			pautoplayer[2] 				= resume_data[2];
-			//演奏再開
-			automatic_playing(BATTLE1,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);
-			free_padding(dladder);//空いた宝石配列を詰める
-		}else{//自分のターン終了
-			sci0_receive_start();//受信が終わっているので開始
+		ret									= puzzle_operation_check();
+		if(ret == ON){
+			motion_after_input();
 			break;
 		}
+		if(playing_flg == OFF)//戦闘の曲が終了したとき
+			automatic_playing(BATTLE1,SQUARE,0,0,0);
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
 /**********************************************************
- *　パズルを操作する入力を判定する
+ *　パズル操作の入力を判定する
  * unsigned char puzzle_operation(void)
  * 		戻り値：unsigned char ON：正しい入力があった
  * 						   OFF:入力なし又は正しくない入力
  */
-unsigned char puzzle_operation(void)
+unsigned char puzzle_operation_check(void)
 {
 	unsigned char ret;
 	ret = input_check();
@@ -170,6 +143,47 @@ unsigned char puzzle_operation(void)
 		sci0_receive_start();
 	}
 	return OFF;
+}
+/******************************************************************************
+ *
+ *void motion_after_input(unsigned char *input1,unsigned char *input2)
+ */
+void motion_after_input(void)
+{
+	unsigned char i;
+	unsigned char *dladder = NULL;
+	AUTOPLAYER *pautoplayer = get_autoplayer();
+	move_jewel(input[0],input[1]);
+	while(1){
+		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
+		if(dladder != NULL){
+			if(playing_flg == ON){
+				auto_play_end_processing();
+				for(i = 0;i < 3;i++){
+					resume_data[i]		= get_interrupt_data(i);
+				}
+			}else
+				pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
+			automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
+			while(playing_flg == ON){
+				//nop
+			}
+			if(*dladder != LIFE){
+				attack_ally 			= get_ally_data(*dladder);
+				battle_display(ADD_ATTACK,dladder);
+			}else
+				battle_display(RECOVERY,dladder);
+			//演奏再開
+			for(i = 0;i < 3;i++){
+				pautoplayer[i] 		= resume_data[i];
+			}
+			automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
+			free_padding(dladder);//空いた宝石配列を詰める
+		}else{//自分のターン終了
+			sci0_receive_start();//受信が終わっているので開始
+			break;
+		}
+	}
 }
 /********************************************************************
 /*敵のターン関数
