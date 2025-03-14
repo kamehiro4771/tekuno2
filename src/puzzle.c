@@ -70,6 +70,10 @@ void move_jewel(unsigned char input1,unsigned char input2)
 /*	戻り値：unsigned char* 3つ以上一致した先頭のアドレス									*/
 /********************************************************************************************/
 //最初に三つ以上一致した先頭のアドレスを返す
+/**
+ * 回復の宝石と風の宝石を消したのに白虎が攻撃した
+ * 2種類の宝石を同時にけすとおかしくなる？
+ */
 unsigned char* count_jewel(void)
 {
 	unsigned char i = 0;
