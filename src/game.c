@@ -9,7 +9,7 @@
  */
 
 #include "main.h"
-
+#define GAME_END (11)
 /********************************************************************************************/
 /*プロトタイプ宣言																				*/
 /********************************************************************************************/
@@ -84,6 +84,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 			player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
 			player.gp = player.gp + ally[i].gp;
 		}
+		player.hp = 1;
 		player.gp = player.gp / ALLY_NUM;//味方防御力の平均を防御力に設定
 		send_serial(GAME_TITLE,sizeof(GAME_TITLE));//タイトル表示
 		g_sequence++;//シーケンス番号＋１
@@ -181,11 +182,12 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	case 10:
 		send_serial(player.name,sizeof(player.name));
 		send_serial(GAME_CLEAR,sizeof(GAME_CLEAR));
-		g_sequence++;
+		g_sequence	= GAME_END;
 		break;
 	default:
 		send_serial(GAME_OVER,sizeof(GAME_OVER));
 		automatic_playing(ZENNMETU,SQUARE,0,0,0);
+		g_sequence = GAME_END;
 	}
 }
 

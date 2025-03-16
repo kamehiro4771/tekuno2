@@ -194,6 +194,7 @@ void motion_after_input(void)
 void enemy_turn(void)
 {
 	//敵の攻撃音も追加
+	battle_display(TURN,NULL);
 	battle_display(TAKE_ATTACK,NULL);
 }
 /**************************************************************************
@@ -283,6 +284,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 //入力は65535まで
 //出力はワークエリア定義のoutput_stringに変換される
 //最後にNULL文字を入れる
+/*
 void i_to_a(unsigned short i,unsigned char *output_string)
 {
 	if(i > 9999){
@@ -311,7 +313,7 @@ void i_to_a(unsigned short i,unsigned char *output_string)
 		output_string[0]	= (i % 10) + 0x30;
 		output_string[1]		= '\0';
 	}
-}
+}*/
 
 /********************************************************************/
 /*else if(ret == 3){

@@ -149,12 +149,11 @@ void cmt1_initiralize(void)
 }
 
 /********************************************************************/
-/*乱数値取得														*/
-/*unsigned char random_number_acquisition(unsigned char upper_limit)*/
-/*	引数：unsigned char upper_limit 乱数の上限値					*/
-/*	戻り値：unsigned char 乱数										*/
+/*乱数値取得															*/
+/*unsigned short random_number_acquisition(void)					*/
+/*	戻り値：unsigned char 乱数											*/
 /********************************************************************/
-unsigned char random_number_acquisition(unsigned char upper_limit)
+unsigned short random_number_acquisition(void)
 {
-	return  CMT1.CMCNT % upper_limit;
+	return  CMT1.CMCNT;
 }

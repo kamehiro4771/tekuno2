@@ -20,7 +20,9 @@ unsigned short damage_or_recovery_value_calculate(struct Enemy* enemy,unsigned s
 	float result = 1.0, base = 1.5;
 	unsigned short ally_ap;
 	signed short value;
-	unsigned char random_num	= random_number_acquisition(21);
+	unsigned char random_num;
+	srand(random_number_acquisition());
+	random_num	= rand() % 21;
 	exponent	= deleted_number - 3 + combo_count;//‰½æ‚·‚é‚©‹‚ß‚é
 	for(i = 0;i < exponent;i++)//—İæ‚·‚é
 		result *= base;
@@ -30,8 +32,6 @@ unsigned short damage_or_recovery_value_calculate(struct Enemy* enemy,unsigned s
 		ally_ap = get_ally_data(type).ap;
 		//“G‚Ì–hŒä—Í‚ª–¡•û‚ÌUŒ‚—Í‚ğã‰ñ‚é‚Æunsigned short ‚Ì’l‚ª‚·‚²‚­‘å‚«‚­‚È‚è‚½‚­‚³‚ñƒ_ƒ[ƒW‚ğ—^‚¦‚é‚±‚Æ‚É‚È‚é
 		value	= ((((ally_ap - enemy->gp) > 0) ? (ally_ap - enemy->gp) : 1) * ATTRIBUTE_CORRECTION_VALUE[type][enemy->el] * result * (90 + random_num)) / 100;
-		if(value < 1)
-			value = 1;//‚P–¢–‚Ìê‡‚P‚Æ‚·‚é
 	}
 	return value;
 }
@@ -43,7 +43,9 @@ unsigned short damage_or_recovery_value_calculate(struct Enemy* enemy,unsigned s
 unsigned short damge_from_enemy_calculation(unsigned short player_gp,struct Enemy* enemy)
 {
 	unsigned short damage;
-	unsigned char random_num	= random_number_acquisition(21);
+	unsigned char random_num;
+	srand(random_number_acquisition());
+	random_num = rand() % 21;
 	damage = enemy->ap - player_gp * (90 + random_num) / 100;
 	return damage;
 }

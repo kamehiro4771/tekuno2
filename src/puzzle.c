@@ -123,13 +123,14 @@ void free_padding(unsigned char *first_address)
 {
 	unsigned char i,j,moving_times;
 	unsigned char *padding_address;
+	srand(random_number_acquisition());
 	for(i = 0;i <= g_matched_count;i++){//消した宝石の数繰り返す
 		padding_address				= &first_address[g_matched_count - i];
 		moving_times							= &battle_field[FIELD_NUM - 1] - padding_address;//宝石の移動回数を求める一番右端のアドレスとの差
 		for(j = 0;j <= moving_times;j++){
 			padding_address[j]					= padding_address[j + 1];
 		}
-		battle_field[FIELD_NUM - 1]				= random_number_acquisition(5);//右端に新しい宝石発生させる
+		battle_field[FIELD_NUM - 1]				= rand() % 5;//右端に新しい宝石発生させる
 		output_battle_field(UPDATE_FIELD);//送信データ作成
 		cmt2_wait(37500,CKS512);//200ミリ秒間隔をあける
 	}
@@ -143,8 +144,9 @@ void free_padding(unsigned char *first_address)
 void create_new_battle_field(void)
 {
 	unsigned char i;
+	srand(random_number_acquisition());
 	for(i = 0;i < FIELD_NUM;i++){
-		battle_field[i]	= random_number_acquisition(5);//ランダムに宝石を発生させてバトルフィールドに入れる
+		battle_field[i]	= rand() % 5;//ランダムに宝石を発生させてバトルフィールドに入れる
 	}
 }
 
@@ -155,42 +157,47 @@ void create_new_battle_field(void)
 void create_send_data(void)
 {
 	unsigned char i,j = 0;
+	battle_field_display[j++]	= '\x1b';
+	battle_field_display[j++]	= '[';
+	battle_field_display[j++]	= '3';
+	battle_field_display[j++]	= '0';
+	battle_field_display[j++]	= 'm';
 	for(i = 0;i < FIELD_NUM;i++){
 		battle_field_display[j++]	= '\x1b';
 		battle_field_display[j++]	= '[';
 		switch(battle_field[i]){
 		case 0://火属性
-			battle_field_display[j++]	= '3';//文字色赤
+			battle_field_display[j++]	= '4';//背景色赤
 			battle_field_display[j++]	= '1';
 			battle_field_display[j++]	= 'm';
 			battle_field_display[j++]	= '$';
 			break;
 		case 1://水属性
-			battle_field_display[j++]	= '3';//文字色水色
+			battle_field_display[j++]	= '4';//背景色水色
 			battle_field_display[j++]	= '6';
 			battle_field_display[j++]	= 'm';
 			battle_field_display[j++]	= '~';
 			break;
 		case 2://風属性
-			battle_field_display[j++]	= '3';//文字色緑
+			battle_field_display[j++]	= '4';//背景色緑
 			battle_field_display[j++]	= '2';
 			battle_field_display[j++]	= 'm';
 			battle_field_display[j++]	= '@';
 			break;
 		case 3://土属性
-			battle_field_display[j++]	= '3';//文字色黄色
+			battle_field_display[j++]	= '4';//背景色黄色
 			battle_field_display[j++]	= '3';
 			battle_field_display[j++]	= 'm';
 			battle_field_display[j++]	= '#';
 			break;
 		case 4://命属性
-			battle_field_display[j++]	= '3';//文字色紫
+			battle_field_display[j++]	= '4';//背景色紫
 			battle_field_display[j++]	= '5';
 			battle_field_display[j++]	= 'm';
 			battle_field_display[j++]	= '&';
 			break;
 		case 5://スペース
-			battle_field_display[j++]	= '3';//色を元に戻す
+			battle_field_display[j++]	= '4';//背景色を元に戻す
 			battle_field_display[j++]	= '9';
 			battle_field_display[j++]	= 'm';
 			battle_field_display[j++]	= ' ';
@@ -200,7 +207,12 @@ void create_send_data(void)
 	}
 	battle_field_display[j++]	= '\x1b';
 	battle_field_display[j++]	= '[';
-	battle_field_display[j++]	= '3';//色を元に戻す
+	battle_field_display[j++]	= '4';//背景色を元に戻す
+	battle_field_display[j++]	= '9';
+	battle_field_display[j++]	= 'm';
+	battle_field_display[j++]	= '\x1b';
+	battle_field_display[j++]	= '[';
+	battle_field_display[j++]	= '3';
 	battle_field_display[j++]	= '9';
 	battle_field_display[j++]	= 'm';
 	battle_field_display[j++]	= '\n';
@@ -216,14 +228,14 @@ void output_battle_field(unsigned char sw)
 		send_serial(KEY_DISPLAY,strlen((const char*)KEY_DISPLAY));
 		create_new_battle_field();
 		create_send_data();
-		send_serial(battle_field_display,102);
+		send_serial(battle_field_display,107);
 	}else if(sw == UPDATE_FIELD){
 		create_send_data();
-		send_serial(battle_field_display,102);
+		send_serial(battle_field_display,107);
 		send_serial(CURSOR_1LINE_BUCK,5);
 	}else{
 		send_serial(KEY_DISPLAY,strlen((const char*)KEY_DISPLAY));
-		send_serial(battle_field_display,102);
+		send_serial(battle_field_display,107);
 	}
 }
 #endif

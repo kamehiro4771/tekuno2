@@ -15,4 +15,5 @@ void count_timer_start(void);
 unsigned char count_timer_set(unsigned long *timer,void func(void));
 void count_timer_dell(void func(void));
 void cmt2_wait(unsigned long cnt,unsigned char cks);
+unsigned short random_number_acquisition(void);
 #endif /* TIMER_H_ */
