@@ -187,6 +187,9 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	default:
 		send_serial(GAME_OVER,sizeof(GAME_OVER));
 		automatic_playing(ZENNMETU,SQUARE,0,0,0);
+		while(playing_flg == ON){
+
+		}
 		g_sequence = GAME_END;
 	}
 }

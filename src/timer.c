@@ -87,13 +87,13 @@ void cmt2_wait(unsigned long cnt,unsigned char cks)
 void count_time(void)
 {
 	unsigned char i;
-	IEN(MTU0,TGIA0)				= 0;//割り込み禁止
+	__clrpsw_i();//割り込み禁止
 	for(i = 0;i < g_timer_cnt;i++){
 		(*(g_count_time[i]))--;//カウントエリアをダウンカウント
 		if((*(g_count_time[i])) == 0)
 			func_array[i]();
 	}
-	IEN(MTU0,TGIA0)				= 1;//割り込み禁止解除
+	__setpsw_i();//割り込み許可
 }
 
 /********************************************************************/
@@ -106,14 +106,14 @@ void count_time(void)
 unsigned char count_timer_set(unsigned long *timer,void func(void))
 {
 	unsigned char ret;
-	IEN(MTU0,TGIA0)				= 0;//割り込み禁止
+	__clrpsw_i();//割り込み禁止
 	if(g_timer_cnt < MAX_TIMER_NUM){
 		g_count_time[g_timer_cnt]  	= timer;
 		func_array[g_timer_cnt++]	= func;
 		ret							= SUCCESS;
 	}else
 		ret							= ERROR;
-	IEN(MTU0,TGIA0)				= 1;//割り込み禁止解除
+	__setpsw_i();//割り込み許可
 	return ret;
 }
 
@@ -125,7 +125,7 @@ unsigned char count_timer_set(unsigned long *timer,void func(void))
 void count_timer_dell(void func(void))
 {
 	unsigned char i;
-	IEN(MTU0,TGIA0)				= 0;//割り込み禁止
+	__clrpsw_i();//割り込み禁止
 	for(i = 0;i < MAX_TIMER_NUM;i++){
 		if(func == func_array[i]){
 			g_count_time[i]	= NULL;
@@ -134,7 +134,7 @@ void count_timer_dell(void func(void))
 			g_timer_cnt--;
 		}
 	}
-	IEN(MTU0,TGIA0)				= 1;//割り込み禁止解除
+	__setpsw_i();//割り込み許可
 }
 /********************************************************************/
 /*乱数生成用タイマCMT1の設定										*/
