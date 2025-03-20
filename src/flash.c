@@ -16,19 +16,31 @@ unsigned char e2_FLASH;
 //FCUコマンドの使用方法P1844
 /*ブランクチェックの第一サイクルでは、７１hをデータフラッシュ領域のアドレスにバイト書き込みします。
  * コマンドの第二サイクルでは、ブランクチェック対象領域を含む消去ブロック内の任意のアドレスにD0h
- * をバイト書き込みすると、FCUがデータフラッシュのブランクチェック処理を開始します。*/
+ * をバイト書き込みすると、FCUがデータフラッシュのブランクチェック処理を開始します。
+ * P1847にフローチャート
+ * 2Kバイトデータのブランクチェック書き込み時間700μs
+ * 書き込み・消去中のリセットパルス幅
+ * */
+
 unsigned char blank_check(void)
 {
-	unsigned short offset;//アドレスを2Kバイトづつオフセットさせる変数
+	unsigned short offset = 0;//アドレスを2Kバイトづつオフセットさせる変数
 	FLASH.FMODR.BIT.FRDMD		= 1;//FCUリードモードをレジスタリードモードに設定
 	FLASH.DFLBCCNT.BIT.BCSIZE	= 1;//ブランクチェックのサイズを2Kバイトに指定
-	for(offset = 0;offset < 32000;offset += 2000){
+	while(offset < 32000){
 		e2_FLASH					= 0x71;//ブランクチェック第一サイクル
-		*(&e2_FLASH + offset)		= 0xd0;//ブランクチェック第二サイクル
+		*(&e2_FLASH + offset)		= 0xd0;//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
+		while(FLASH.FSTATR0.BIT.FRDY == 0){
+			//ブランクチェックが終わるまで待機
+//			if(){//タイムアウト判定
+
+//			}
+		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == 1){
 			//データが書き込まれた状態
 		}
+		offset						+= 2000;//次の2Kバイトをブランクチェックする
 	}
-
+	return;
 }
 
