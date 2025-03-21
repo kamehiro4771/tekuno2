@@ -84,7 +84,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 			player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
 			player.gp = player.gp + ally[i].gp;
 		}
-		player.hp = 1;
+//		player.hp = 1;
 		player.gp = player.gp / ALLY_NUM;//味方防御力の平均を防御力に設定
 		send_serial(GAME_TITLE,sizeof(GAME_TITLE));//タイトル表示
 		g_sequence++;//シーケンス番号＋１

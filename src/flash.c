@@ -33,7 +33,11 @@ unsigned char blank_check(void)
 		while(FLASH.FSTATR0.BIT.FRDY == 0){
 			//ブランクチェックが終わるまで待機
 //			if(){//タイムアウト判定
-
+//				FRASH.FRESETR.BIT.FRESET = 1;
+//				while(){//待機
+//					cmt2_wait();
+				//}
+//				FRASH.FRESETR.BIT.FRESET = 0;
 //			}
 		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == 1){
@@ -41,6 +45,6 @@ unsigned char blank_check(void)
 		}
 		offset						+= 2000;//次の2Kバイトをブランクチェックする
 	}
-	return;
+//	return;
 }
 
