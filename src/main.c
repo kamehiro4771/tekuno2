@@ -32,8 +32,8 @@ const T_DISPLAY OUTPUT_SPEAKER_SELECT[]					= {"電子オルガンモード時に出力するス
 /*項目名*/
 const T_DISPLAY MODE_NAME[MODE_NUM][64]					= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
 const T_DISPLAY TITLE_NAME[SONG_NUM][64]				= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
-																"Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","冒険の書",
-																"宿屋","攻撃音","勝利","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
+																"Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","勝利",
+																"宿屋","攻撃音","冒険の書","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
 const T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM][64] 			= {{"矩形波"},
 																{"のこぎり波"},
 																{"三角波"},
@@ -50,7 +50,7 @@ const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64] = {{"ひとつ"},{"ふた
 
 /*選択出来る項目を変えたい時は以下の配列を変更して、増減があったら#defineのSELECT_NUMを変える*/
 const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]			= {ORGAN,AUTOPLAY,GAME,SETTING};//選択できるモード
-const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]	= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1};//この配列に入っている曲が自動演奏される
+const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]	= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING};//この配列に入っている曲が自動演奏される
 const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]			= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//選択できる波形
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]= {DUTY,WAVE,SPEAKER_NUM};
 const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]	= {SPEAKER1,SPEAKER2,SPEAKER3,};
@@ -92,9 +92,9 @@ void abort(void);
 /****************************************************************************/
 void main(void)
 {
-eneiro_init();
+	eneiro_init();
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
-	automatic_playing(INITIAL_CHECK,SQUARE,0,0,0);
+	automatic_playing_start(INITIAL_CHECK,SQUARE,0,0,0);
 	while(playing_flg == ON){
 		//nop
 	}
@@ -321,7 +321,7 @@ static void autplay_mode(void)
 		return;//波形選択でeが入力されたら自動演奏モード終了
 	send_serial(TITLE_NAME[title - 1],sizeof(TITLE_NAME[title - 1]));
 	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
-	automatic_playing((unsigned short)title,wave_type,0,0,0);
+	automatic_playing_start((unsigned short)title,wave_type,0,0,0);
 	while(playing_flg == ON){
 		ret = input_check();
 		if(ret != OFF)

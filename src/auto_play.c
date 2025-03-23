@@ -26,15 +26,22 @@ void output_function_call(void);
 AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,OFF},{SQUARE,NULL,NULL,0,0,0,OFF,OFF},{SQUARE,NULL,NULL,0,0,0,OFF,OFF},};
 AUTOPLAYER interrupt_data[3];//エンターやスイッチで演奏終了したときのスピーカの情報を保存しておく
 unsigned char g_use_speaker_num;		//使用するスピーカーの個数
-unsigned long common_timer = 1;
 unsigned char playing_flg = OFF;
 
-
-void automatic_playing(unsigned short title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
+/*
+ * 自動演奏開始関数
+ *
+ */
+//演奏中は演奏開始出来ないようにする
+unsigned char automatic_playing_start(unsigned short title,unsigned char wave_type,unsigned short start1,unsigned short start2,unsigned short start3)
 {
-	sci0_receive_start();//受信開始
-	playing_flg						= ON;//演奏中フラグON
-	score_set_speaker(title,wave_type,start1,start2,start3);//楽譜をセットする、曲の開始位置のセット
+	if(playing_flg == OFF){
+		sci0_receive_start();//受信開始
+		playing_flg						= ON;//演奏中フラグON
+		score_set_speaker(title,wave_type,start1,start2,start3);//楽譜をセットする、曲の開始位置のセット
+		return ON;
+	}
+	return OFF;
 }
 
 /********************************************************************/
@@ -60,7 +67,6 @@ void forward_score(void)
 				autoplayer[i].set_flg	= ON;
 		}
 	}
-	common_timer						= 1;
 }
 
 /********************************************************************************************/
@@ -82,7 +88,6 @@ void output_function_call(void)
 		set_output_speaker_length(output_pattern);
 		output_speaker_start(output_pattern);//出力開始
 	}
-	common_timer = 1;
 }
 
 /*
@@ -95,7 +100,6 @@ void end_flg_check(void)
 	if(autoplayer[0].end_flg ==  ON && autoplayer[1].end_flg == ON && autoplayer[2].end_flg == ON){//演奏が最後まで終わったか判定
 		auto_play_end_processing();//タイマーストップ、変数初期化
 	}
-	common_timer = 1;
 }
 
 /*
@@ -129,7 +133,7 @@ void auto_play_end_processing(void)
 	g_use_speaker_num	= 0;
 	output_led(REST);				//LED消灯
 	mute(ALL_SPEAKER);//スピーカーi消音
-	interrupt_data[0]			= autoplayer[0];
+	interrupt_data[0]			= autoplayer[0];//演奏中断データを保存
 	interrupt_data[1]			= autoplayer[1];
 	interrupt_data[2]			= autoplayer[2];
 	count_timer_dell(forward_score);
@@ -190,9 +194,9 @@ void score_set_speaker(int title,unsigned char wave_type,unsigned short start1,u
 		output_speaker_start(7);//出力開始
 
 	}
-	count_timer_set(&common_timer,output_function_call);//出力関数の登録
-	count_timer_set(&common_timer,forward_score);//経過時間監視のエリアを登録
-	count_timer_set(&common_timer,end_flg_check);
+	interval_function_set(1,output_function_call);//出力関数の登録
+	interval_function_set(1,forward_score);//経過時間監視のエリアを登録
+	interval_function_set(1,end_flg_check);
 }
 
 AUTOPLAYER *get_autoplayer(void)
@@ -209,5 +213,3 @@ AUTOPLAYER get_interrupt_data(unsigned char player_num)
 {
 	return interrupt_data[player_num];
 }
-
-

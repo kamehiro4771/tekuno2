@@ -5,7 +5,12 @@
  *      Author: kameyamahiroki
  */
 #include "main.h"
+
+/****************************************
+ * ワークエリア定義							*
+ ***************************************/
 unsigned char e2_FLASH;
+unsigned long e2_timeout_check_area;
 //E2データフラッシュのブランクチェック
 //ブランクなら0をデータが書かれていたら1を返す
 //ロックビットリード２コマンドはデータフラッシュのブランクチェックを兼ねている
@@ -27,24 +32,23 @@ unsigned char blank_check(void)
 	unsigned short offset = 0;//アドレスを2Kバイトづつオフセットさせる変数
 	FLASH.FMODR.BIT.FRDMD		= 1;//FCUリードモードをレジスタリードモードに設定
 	FLASH.DFLBCCNT.BIT.BCSIZE	= 1;//ブランクチェックのサイズを2Kバイトに指定
-	while(offset < 32000){
+	while(offset < 32000){//最大32Kバイトブランクチェック
 		e2_FLASH					= 0x71;//ブランクチェック第一サイクル
 		*(&e2_FLASH + offset)		= 0xd0;//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
+		e2_timeout_check_area		= 1;//1msでタイムアウト
 		while(FLASH.FSTATR0.BIT.FRDY == 0){
-			//ブランクチェックが終わるまで待機
-//			if(){//タイムアウト判定
-//				FRASH.FRESETR.BIT.FRESET = 1;
-//				while(){//待機
-//					cmt2_wait();
-				//}
-//				FRASH.FRESETR.BIT.FRESET = 0;
-//			}
+			timer_area_registration(e2_timeout_check_area);
+			if(e2_timeout_check_area == 0){//タイムアウト判定
+				FLASH.FRESETR.BIT.FRESET = 1;
+				cmt2_wait(210,0);//35μs待機
+				FLASH.FRESETR.BIT.FRESET = 0;
+			}
 		}
-		if(FLASH.DFLBCSTAT.BIT.BCST == 1){
+		if(FLASH.DFLBCSTAT.BIT.BCST == 1){//ブランクチェック結果確認
 			//データが書き込まれた状態
 		}
 		offset						+= 2000;//次の2Kバイトをブランクチェックする
 	}
-//	return;
+	return;
 }
 

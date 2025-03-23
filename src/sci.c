@@ -45,7 +45,7 @@ void sci0_init(int baudrate)
 	IR(SCI0,ERI0)		= 0;
 	IPR(SCI0,ERI0)		= 1;
 	IEN(SCI0,ERI0)		= 1;
-	count_timer_set(&sci0.elapsed_time,send_data_is_exists_confirm);
+	interval_function_set(1,send_data_is_exists_confirm);
 }
 /****************************************************/
 /*受信データフル割り込み（RXI）							*/

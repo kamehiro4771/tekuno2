@@ -6,14 +6,18 @@
  */
 #include "iodefine.h"
 #include "main.h"
-#define MAX_TIMER_NUM (5)
+#define MAX_FUNC_NUM (5)
+#define MAX_AREA_NUM (5)
 /*
  * ワークエリア定義
  */
-unsigned long *g_count_time[MAX_TIMER_NUM];//カウントエリア登録変数
+unsigned long *area_array[MAX_AREA_NUM];//カウントエリア登録変数
 typedef void (*func_ptr)(void);//登録関数へのポインタ
-func_ptr func_array[MAX_TIMER_NUM];//登録配列へのポインタ配列
-unsigned char g_timer_cnt;//登録したタイマ数
+unsigned long func_interval_array[MAX_FUNC_NUM];//関数呼び出しの間隔配列
+func_ptr func_array[MAX_FUNC_NUM];//登録配列へのポインタ配列
+unsigned char function_cnt;//登録した関数の数
+unsigned char area_cnt;//登録したタイマエリアの数
+unsigned long timer_cnt_array[MAX_FUNC_NUM];//タイマーカウント
 /*
  *
  */
@@ -42,7 +46,8 @@ void  mtu0_initialize(void)
 /********************************************************************/
 void mtu1_initialize(void)
 {
-	SYSTEM.MSTPCRA.BIT.MSTPA9	= 0;
+	SYSTEM.MSTPCRA.BIT.MSTPA9	= 0;//?}???`?t?@???N?V?????p???X???j?b?g?i???j?b?g?O?j?X?g?b?v??????
+	//?}???`?t?@???N?V?????^?C?}?p???X???j?b?g?O?`?????l??1????
 	MTU1.TCR.BIT.TPSC			= 0;//48MHz
 	MTU1.TCR.BIT.CCLR			= 1;//?R???y?A?}?b?`A??N???A
 	MTU1.TIER.BIT.TGIEA			= 1;//TGIA?????????
@@ -63,7 +68,7 @@ void cmt2_wait(unsigned long cnt,unsigned char cks)
 {
 	MSTP(CMT2)			= 0;//モジュールストップ解除
 	CMT.CMSTR1.BIT.STR2 = 0;//タイマ停止
-	CMT2.CMCR.BIT.CMIE	= 1;//?R???y?A?}?b?`?????????
+	CMT2.CMCR.BIT.CMIE	= 1;//割り込み許可
 	CMT2.CMCR.BIT.CKS	= cks;//クロックの分周設定
 	CMT2.CMCNT			= 0;
 	CMT2.CMCOR			= cnt;
@@ -79,55 +84,86 @@ void cmt2_wait(unsigned long cnt,unsigned char cks)
 /*マルチファンクションタイマのコンペアマッチA割り込みで呼ばれる		*/
 /*void count_time(void)												*/
 /********************************************************************/
-//関数のポインタを使って
 void count_time(void)
 {
-	unsigned char i;
+	unsigned char i = 0;
 	__clrpsw_i();//割り込み禁止
-	for(i = 0;i < g_timer_cnt;i++){
-		(*(g_count_time[i]))--;//カウントエリアをダウンカウント
-		if((*(g_count_time[i])) == 0)
-			func_array[i]();
+	for(i = 0;i < MAX_FUNC_NUM;i++){
+		if(func_array[i] == NULL){
+			/*nop*/
+		}else{
+			timer_cnt_array[i]++;
+			if(func_interval_array[i] == timer_cnt_array[i]){//カウントが呼び出しカウントと一致した
+				func_array[i]();//登録された関数呼び出し
+				timer_cnt_array[i] = 0;//タイマーカウントクリア
+			}
+		}
+	}
+	for(i = 0;i < area_cnt;i++){
+		if(*(area_array[i]) != 0)
+			(*(area_array[i]))--;//カウントエリアをダウンカウント
 	}
 	__setpsw_i();//割り込み許可
 }
 
 /********************************************************************/
-/*カウントするエリアとコールバック関数を登録する										*/
+/*タイマカウントで呼び出される関数を登録する										*/
 /*void count_timer_set(unsigned long *timer)						*/
 /*	引数：unsigned long *timer 登録するエリア						*/
 /*		：void func(unsigned char)  登録するコールバック関数ポインタ*/
 /*	戻り値：SUCCESS又はERROR										*/
 /********************************************************************/
-unsigned char count_timer_set(unsigned long *timer,void func(void))
+unsigned char interval_function_set(unsigned long interval,void func(void))
 {
-	unsigned char ret;
+	unsigned char ret,i;
 	__clrpsw_i();//割り込み禁止
-	if(g_timer_cnt < MAX_TIMER_NUM){
-		g_count_time[g_timer_cnt]  	= timer;
-		func_array[g_timer_cnt++]	= func;
+	if(function_cnt < MAX_FUNC_NUM){
+		for(i = 0;i < MAX_FUNC_NUM;i++){
+			if(func_array[i] == func)
+				return SUCCESS;//関数が既に登録されている
+		}
+
+		func_interval_array[function_cnt]  	= interval;
+		func_array[function_cnt++]	= func;
 		ret							= SUCCESS;
 	}else
-		ret							= ERROR;
+		ret							= ERROR;//登録数オーバー
 	__setpsw_i();//割り込み許可
 	return ret;
 }
-
-
+/*
+ * タイマカウントエリア登録
+ *
+ */
+unsigned char timer_area_registration(unsigned long* area)
+{
+	unsigned char ret,i;
+	__clrpsw_i();//割り込み禁止
+	for(i = 0;i < area_cnt;i++){
+		if(area_array[i] == area)//既に登録済みのエリア
+			break;
+	}
+	if(i == area_cnt){
+		area_array[area_cnt++] = area;
+		ret = SUCCESS;
+	}else
+		ret = ERROR;
+	__setpsw_i();//割り込み許可
+	return ret;
+}
 /********************************************************************/
-/*周期起動関数解除												*/
+/*周期起動関数削除											*/
 /*void count_timer_dell(void func(unsigned char))										*/
 /********************************************************************/
 void count_timer_dell(void func(void))
 {
 	unsigned char i;
 	__clrpsw_i();//割り込み禁止
-	for(i = 0;i < MAX_TIMER_NUM;i++){
+	for(i = 0;i < MAX_FUNC_NUM;i++){
 		if(func == func_array[i]){
-			g_count_time[i]	= NULL;
+			function_cnt--;
 //			g_count_time[i]		= 0;
 			func_array[i]		= NULL;
-			g_timer_cnt--;
 		}
 	}
 	__setpsw_i();//割り込み許可

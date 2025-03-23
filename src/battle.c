@@ -31,7 +31,7 @@ const T_DISPLAY  LINE_DISPLAY[]				= {"-----------------------------------------
 													{},
 };*/
 const T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM][6] 	= {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
-enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS,COMBO,TURN};
+enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS,COMBO,PLAYER_TURN,ENEMY_TURN};
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
@@ -40,7 +40,7 @@ T_ENEMY *penemy;//戦闘中のモンスターへのポインタ
 T_PLAYER *pplayer;//プレイヤーへのポインタ
 T_ALLY *pally;//味方モンスター達へのポインタ
 T_ALLY attack_ally;//攻撃したモンスター
-char output_string[8][512];//ダメージ計算して文字列に変換したやつが入る
+char output_string[9][512];//ダメージ計算して文字列に変換したやつが入る
 unsigned char first_turn_flg;
 unsigned char input[2] = {0};
 /********************************************************************/
@@ -71,7 +71,8 @@ unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 		player_turn();
 		if(penemy->hp == 0){
 			battle_display(KILLED_ENEMY,NULL);
-			automatic_playing(WINNING,SQUARE,0,0,0);
+			auto_play_end_processing();
+			automatic_playing_start(WINNING,SQUARE,0,0,0);
 			while(playing_flg == ON){
 				/*nop*/
 			}
@@ -93,10 +94,10 @@ unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 void player_turn(void)
 {
 	unsigned char ret;
-	battle_display(TURN,&ret);
+	battle_display(PLAYER_TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
-		automatic_playing(BATTLE1,SQUARE,0,0,0);
+		automatic_playing_start(BATTLE1,SQUARE,0,0,0);//戦闘テーマ演奏開始
 		output_battle_field(NEW_FIELD);
 	}else{
 		output_battle_field(CURRENT_FIELD);
@@ -109,7 +110,7 @@ void player_turn(void)
 			break;
 		}
 		if(playing_flg == OFF)//戦闘の曲が終了したとき
-			automatic_playing(BATTLE1,SQUARE,0,0,0);
+			automatic_playing_start(BATTLE1,SQUARE,0,0,0);
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
@@ -164,7 +165,7 @@ void motion_after_input(void)
 				}
 			}else
 				pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
-			automatic_playing(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
+			automatic_playing_start(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
 			while(playing_flg == ON){
 				//nop
 			}
@@ -177,7 +178,7 @@ void motion_after_input(void)
 			for(i = 0;i < 3;i++){
 				pautoplayer[i] 		= resume_data[i];
 			}
-			automatic_playing(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
+			automatic_playing_start(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 			free_padding(dladder);//空いた宝石配列を詰める
 		}else{//自分のターン終了
 			sci0_receive_start();//受信が終わっているので開始
@@ -194,7 +195,7 @@ void motion_after_input(void)
 void enemy_turn(void)
 {
 	//敵の攻撃音も追加
-	battle_display(TURN,NULL);
+	battle_display(ENEMY_TURN,NULL);
 	battle_display(TAKE_ATTACK,NULL);
 }
 /**************************************************************************
@@ -265,12 +266,13 @@ static void battle_display(unsigned char activity,unsigned char *param)
 																CRLF,CRLF,LINE_DISPLAY,CRLF);
 		combo_value 			= 0;
 		break;
-	case TURN:
+	case ENEMY_TURN:
+	case PLAYER_TURN:
 		//ターン表示
 		if(param != NULL)//プレーヤーのターンならプレイヤー名
-			sprintf(output_string[TURN],"【%sのターン】\r\n",pplayer->name);
+			sprintf(output_string[PLAYER_TURN],"【%sのターン】\r\n",pplayer->name);
 		else
-			sprintf(output_string[TURN],"【%s%s%sのターン】\r\n",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR);
+			sprintf(output_string[ENEMY_TURN],"【%s%s%sのターン】\r\n",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR);
 		break;
 	}
 	send_serial((const unsigned char *)output_string[activity],strlen(output_string[activity]));
@@ -339,5 +341,4 @@ void i_to_a(unsigned short i,unsigned char *output_string)
 			g_start[2]	= speaker[2].score_count;
 			input[i]	= ret;
 			i++;*/
-
 

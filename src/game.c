@@ -64,7 +64,7 @@ signed short party_hp;//パーティー全体のHP
 void game_main(void)
 {
 	AUTOPLAYER *pautoplayer = get_autoplayer();
-	while(g_sequence != 11){
+	while(g_sequence != GAME_END){
 		game_sequence(pautoplayer);
 	}
 	send_serial(RESET,4);
@@ -91,7 +91,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 		pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
 		break;
 	case 1:
-		automatic_playing(DORAGON_QUEST,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);//オープニング曲を自動演奏
+		automatic_playing_start(DORAGON_QUEST,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);//オープニング曲を自動演奏
 		g_sequence++;
 	case 2:
 		ret	= input_check();
@@ -117,8 +117,9 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 		g_sequence++;
 		break;
 	case 4://冒険の書自動演奏開始
-		automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
-		g_sequence++;
+		ret = automatic_playing_start(BOUKENNNOSYO,SQUARE,0,0,0);
+		if(ret == ON)
+			g_sequence++;
 		break;
 	case 5:
 		ret = input_check();
@@ -161,7 +162,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 			else
 				sci0_receive_start();//受信開始
 		}else if(playing_flg == OFF)
-			automatic_playing(BOUKENNNOSYO,SQUARE,0,0,0);
+			automatic_playing_start(BOUKENNNOSYO,SQUARE,0,0,0);
 		break;
 	case 8:
 		auto_play_end_processing();
@@ -186,7 +187,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 		break;
 	default:
 		send_serial(GAME_OVER,sizeof(GAME_OVER));
-		automatic_playing(ZENNMETU,SQUARE,0,0,0);
+		automatic_playing_start(ZENNMETU,SQUARE,0,0,0);
 		while(playing_flg == ON){
 
 		}
