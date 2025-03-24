@@ -32,8 +32,8 @@ void game_main(void);
 /*\‘¢‘ÌéŒ¾																				*/
 /********************************************************************************************/
 typedef struct Enemy{
-	unsigned char name[32];
-	signed short hp;
+	unsigned char name[64];
+	unsigned short hp;
 	unsigned short mhp;
 	unsigned short el;
 	unsigned short ap;
@@ -50,7 +50,7 @@ typedef struct Ally{
 
 typedef struct Player{
 	unsigned char name[64];
-	signed short hp;
+	unsigned short hp;
 	unsigned short mhp;
 	unsigned short gp;
 }T_PLAYER;

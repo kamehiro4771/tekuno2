@@ -26,16 +26,21 @@ unsigned long e2_timeout_check_area;
  * 2Kバイトデータのブランクチェック書き込み時間700μs
  * 書き込み・消去中のリセットパルス幅
  * */
-
+何バイト保存するか決める
+//プレーヤー情報 		= 72バイト
+//自動演奏情報 		= 19バイト
+//敵情報 = 74 * 5 	= 370バイト
+//味方情報　= 72 * 4 	= 288バイト
+//合計　				　　749バイト
 unsigned char blank_check(void)
 {
-	unsigned short offset = 0;//アドレスを2Kバイトづつオフセットさせる変数
-	FLASH.FMODR.BIT.FRDMD		= 1;//FCUリードモードをレジスタリードモードに設定
-	FLASH.DFLBCCNT.BIT.BCSIZE	= 1;//ブランクチェックのサイズを2Kバイトに指定
-	while(offset < 32000){//最大32Kバイトブランクチェック
-		e2_FLASH					= 0x71;//ブランクチェック第一サイクル
-		*(&e2_FLASH + offset)		= 0xd0;//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
-		e2_timeout_check_area		= 1;//1msでタイムアウト
+	unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
+	FLASH.FMODR.BIT.FRDMD				= 1;//FCUリードモードをレジスタリードモードに設定
+	FLASH.DFLBCCNT.BIT.BCSIZE			= 1;//ブランクチェックのサイズを2Kバイトに指定
+	while(offset < 32768){//最大32Kバイトブランクチェック
+		e2_FLASH						= 0x71;//ブランクチェック第一サイクル
+		*(&e2_FLASH + offset)			= 0xd0;//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
+		e2_timeout_check_area			= 1;//1msでタイムアウト
 		while(FLASH.FSTATR0.BIT.FRDY == 0){
 			timer_area_registration(e2_timeout_check_area);
 			if(e2_timeout_check_area == 0){//タイムアウト判定
@@ -44,11 +49,15 @@ unsigned char blank_check(void)
 				FLASH.FRESETR.BIT.FRESET = 0;
 			}
 		}
-		if(FLASH.DFLBCSTAT.BIT.BCST == 1){//ブランクチェック結果確認
-			//データが書き込まれた状態
+		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){//ブランクチェック結果確認
+			break;//チェック対象領域が消去状態
 		}
-		offset						+= 2000;//次の2Kバイトをブランクチェックする
+		offset						+= 2048;//次の2Kバイトをブランクチェックする
 	}
-	return;
+	if(offset == 32768)
+		return BLANK;//全ての領域が消去状態
+	else{
+		FLASH.DFLBCCNT.BIT.BCSIZE			= 0;//ブランクチェックのサイズを8バイトに変更
+	}
 }
 

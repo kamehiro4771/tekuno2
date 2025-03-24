@@ -37,6 +37,8 @@
 #define SUCCESS (0)
 #define ON (0)
 #define SET (1)
+#define BLANK (0)
+#define WRITTEN_STATE (1)
 #define NOT_FOUND (0)
 //選択できる項目数
 #define SELECT_MODE_NUM (4)//選択するモード数
