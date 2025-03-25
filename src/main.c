@@ -92,9 +92,11 @@ void abort(void);
 /****************************************************************************/
 void main(void)
 {
+	unsigned char ret;
 	eneiro_init();
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
 	automatic_playing_start(INITIAL_CHECK,SQUARE,0,0,0);
+	ret = e2_blank_check();
 	while(playing_flg == ON){
 		//nop
 	}

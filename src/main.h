@@ -30,6 +30,7 @@
 #include "game.h"
 #include "ad.h"
 #include "battle.h"
+#include "flash.h"
 
 #pragma address e2_FLASH = 0x00100000
 /*’è”’è‹`*/
