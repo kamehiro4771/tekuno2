@@ -40,6 +40,7 @@ unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
  * 	戦闘中の敵情報
  * 	演奏中の曲
  */
+//128の倍数で
 //データROMのアドレスの先頭からブランクチェックして書き込まれているアドレスを求める
 //書き込まれていなかったらBLANKを返す
 unsigned char e2_blank_check(void)
@@ -56,6 +57,7 @@ unsigned char e2_blank_check(void)
 				FLASH.FRESETR.BIT.FRESET = 1;
 				cmt2_wait(210,0);//35μs待機
 				FLASH.FRESETR.BIT.FRESET = 0;
+				return ERROR;
 			}
 		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){
@@ -66,6 +68,7 @@ unsigned char e2_blank_check(void)
 		}
 		offset						+= 2048;//次の2Kバイトをブランクチェックする
 	}
+	offset								= 0;
 	return WRITTEN_STATE;//32Kバイト書き込まれていた時
 }
 
@@ -75,6 +78,6 @@ unsigned char e2_blank_check(void)
 unsigned char e2_writing(unsigned short addr)
 {
 	e2_FLASH				= 0xe8;
-	e2_FLASH				= 0x40;
+	e2_FLASH				= 0x40;//ワード数を64（128バイト）に設定
 	*(&e2_FLASH + offset)	= ;
 }
