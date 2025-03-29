@@ -371,7 +371,27 @@ static void setting_mode(void)
 		break;
 	}
 }
-
+/*
+ * エンターキーとスイッチ入力の判定
+ *unsigned char input_check(void)
+ *	戻り値：unsigned char ON:スイッチかエンターキーが入力されていた　OFF:入力なし
+ */
+unsigned char input_check(void)
+{
+	unsigned char ret						= OFF;
+	static unsigned char sw_state			= OFF;
+	static unsigned char last_sw_state		= OFF;
+	sw_state				= sw_check();
+	if(sw_state != OFF){//スイッチが押されていたら
+		last_sw_state		= sw_state;//スイッチの状態記録
+	}else if(sci0_enter_check() == ON){//スイッチが押されている時はエンターは見ない
+		ret				= ON;
+	}else if(last_sw_state != OFF){//スイッチが離された
+		ret				= last_sw_state;
+		last_sw_state	= OFF;
+	}
+	return ret;
+}
 
 struct SPEAKER *get_speaker(void)
 {

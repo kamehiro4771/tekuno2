@@ -43,6 +43,11 @@ unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
 //128の倍数で
 //データROMのアドレスの先頭からブランクチェックして書き込まれているアドレスを求める
 //書き込まれていなかったらBLANKを返す
+/*
+ * アドレス0x0010　0000から書き込み
+ * 128バイトずつ書き込む
+ * 最初にブランクチェックして消去状態のアドレス保持しておく
+ */
 unsigned char e2_blank_check(void)
 {
 	FLASH.FMODR.BIT.FRDMD				= 1;//FCUリードモードをレジスタリードモードに設定
@@ -79,5 +84,6 @@ unsigned char e2_writing(unsigned short addr)
 {
 	e2_FLASH				= 0xe8;
 	e2_FLASH				= 0x40;//ワード数を64（128バイト）に設定
-	*(&e2_FLASH + offset)	= ;
+//	*(&e2_FLASH + offset)	= ;
+	cmt2_wait(1875,2);//5ms待機
 }

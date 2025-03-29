@@ -102,27 +102,6 @@ void end_flg_check(void)
 	}
 }
 
-/*
- * エンターキーとスイッチ入力の判定
- *
- */
-//自動演奏以外にも使える汎用的なスイッチ、エンターポーリング関数にする
-unsigned char input_check(void)
-{
-	unsigned char ret						= OFF;
-	static unsigned char sw_state			= OFF;
-	static unsigned char last_sw_state		= OFF;
-	sw_state				= sw_check();
-	if(sw_state != OFF){//スイッチが押されていたら
-		last_sw_state		= sw_state;//スイッチの状態記録
-	}else if(sci0_enter_check() == ON){//スイッチが押されている時はエンターは見ない
-		ret				= ON;
-	}else if(last_sw_state != OFF){//スイッチが離された
-		ret				= last_sw_state;
-		last_sw_state	= OFF;
-	}
-	return ret;
-}
 
 /********************************************************************/
 /*自動演奏終了処理													*/
@@ -139,7 +118,6 @@ void auto_play_end_processing(void)
 	count_timer_dell(forward_score);
 	count_timer_dell(output_function_call);
 	count_timer_dell(end_flg_check);
-	count_timer_dell(input_check);
 	autoplayer[0].elapsed_time	= 0;
 	autoplayer[1].elapsed_time	= 0;
 	autoplayer[2].elapsed_time	= 0;

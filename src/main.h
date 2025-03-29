@@ -151,5 +151,6 @@ extern unsigned char playing_flg;
 /*プロトタイプ宣言																*/
 /****************************************************************************/
 struct SPEAKER *get_speaker(void);
+unsigned char input_check(void);
 
 #endif /* MAIN_H_ */

@@ -173,6 +173,7 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	case 9:
 		for(i = 0;i < ENEMY_NUM;i++){
 			ret = battle_main(&player,&ally,&enemy[i]);
+			ƒoƒgƒ‹‚ªI‚í‚Á‚½‚ç1•bŠÔŠu‚ð‚ ‚¯‚é‚æ‚¤‚É‚·‚é
 			if(ret == LOSE){
 				g_sequence =11;
 				break;
