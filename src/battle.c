@@ -113,6 +113,7 @@ void player_turn(void)
  * 		戻り値：unsigned char ON：正しい入力があった
  * 						   OFF:入力なし又は正しくない入力
  */
+//saveコマンドでセーブできるように
 unsigned char puzzle_operation_check(void)
 {
 	unsigned char ret;

@@ -37,7 +37,7 @@ AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGON
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
 /*const char map1[][]		= {""}
-const char map2[][]		= {""}
+const char map2[][]		= {""}//
 const char map3[][]		= {""}*/
 /********************************************************************************************/
 /*ワークエリア定義																				*/
@@ -173,7 +173,9 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	case 9:
 		for(i = 0;i < ENEMY_NUM;i++){
 			ret = battle_main(&player,&ally,&enemy[i]);
-			バトルが終わったら1秒間隔をあけるようにする
+
+			cmt2_wait(65535,11);//バトルが終わったら間隔をあけるようにする
+	//		戦闘の曲、曲調早くする。
 			if(ret == LOSE){
 				g_sequence =11;
 				break;

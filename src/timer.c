@@ -62,7 +62,7 @@ void mtu1_initialize(void)
 /*一定時間待機																*/
 /*void cmt0_wait(unsigned short cnt)										*/
 /*	引数：unsigned short cnt 												*/
-/*		unsigned char cks 分周設定：00:8分周 01:32分周 10:128分周 11:512分周*/
+/*		unsigned char cks 分周設定：00:8分周 01:32分周 10:128分周 11:512分周		*/
 /****************************************************************************/
 void cmt2_wait(unsigned long cnt,unsigned char cks)
 {
