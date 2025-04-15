@@ -31,9 +31,7 @@
 #include "ad.h"
 #include "battle.h"
 #include "flash.h"
-
 #pragma address e2_FLASH = 0x00100000
-/*定数定義*/
 #define ERROR (1)
 #define SUCCESS (0)
 #define ON (0)
@@ -42,17 +40,17 @@
 #define WRITTEN_STATE (1)
 #define NOT_FOUND (0)
 //選択できる項目数
-#define SELECT_MODE_NUM (4)//選択するモード数
-#define SELECT_PLAY_TITLE_NUM (8)//自動演奏モードで演奏する曲数
-#define SELECT_WAVE_NUM (4)//選択する波形の種類
+#define SELECT_MODE_NUM (4)					//選択するモード数
+#define SELECT_PLAY_TITLE_NUM (8)			//自動演奏モードで演奏する曲数
+#define SELECT_WAVE_NUM (4)					//選択する波形の種類
 #define SELECT_SETTING_ITEM_NUM (3)
 #define SELECT_SPEAKER_NUM (3)
 #define SELECT_OUTPUT_SPEAKER_NUM (3)
 //全項目数
-#define MODE_NUM (4)//全モード数
-#define SONG_NUM (19)//全部の曲数
-#define WAVE_NUM (4)//全波形の種類
-#define SETTING_ITEM_NUM (3)//設定項目数
+#define MODE_NUM (4)							//全モード数
+#define SONG_NUM (19)							//全部の曲数
+#define WAVE_NUM (4)							//全波形の種類
+#define SETTING_ITEM_NUM (3)					//設定項目数
 #define SPEAKER_NUM (3)
 
 //画面、文字制御
@@ -66,8 +64,8 @@
 #define DEFAULT_BACKGROUND "\x1b[49m"
 #define CRLF "\r\n"
 #define DISPLAY_CLEAR "\x1b[2J"
-#define RESET "\x1b[2J\x1b[0;0H"//画面をクリアして設定を初期化カーソルを原点に戻す
-#define DELETING_LEFT_SIDE "\x1b[K"//カーソルと行末にある文字を削除
+#define RESET "\x1b[2J\x1b[0;0H"				//画面をクリアして設定を初期化カーソルを原点に戻す
+#define DELETING_LEFT_SIDE "\x1b[K"				//カーソルと行末にある文字を削除
 #define CURSOR_5LINE_BUCK "\x1b[5F"
 #define CURSOR_4LINE_BUCK "\x1b[4F"
 #define CURSOR_3LINE_BUCK "\x1b[3F"
@@ -75,8 +73,8 @@
 #define CURSOR_1LINE_BUCK "\x1b[1F"
 #define CURSOR_2LINE_ADVANCE "\x1b[2E"
 #define CURSOR_3LINE_ADVANCE "\x1b[3E"
-#define CURSOR_MOVING_LEFT_MOST "\x1b[0`"//カーソルを左端に移動
-#define CURSOL_MOVING_SENTER "\x1b[40G"//カーソルを画面の中央に移動
+#define CURSOR_MOVING_LEFT_MOST "\x1b[0`"		//カーソルを左端に移動
+#define CURSOL_MOVING_SENTER "\x1b[40G"			//カーソルを画面の中央に移動
 //#define CURSOR__BACK_ORIGIN "\x1b[0;0H"
 /*
 const unsigned char SCREEN_ERACE[]			= {"\x1b[2J"};
@@ -89,14 +87,14 @@ const unsigned char DEFAULT_BACKGROUND[]	= {"\x1b[49"};
 */
 #define PCLK (48000000)
 #define BAUD_RATE (115200)
-#define CKS8 (0)//コンペアマッチタイマのPCLKの分周/8
-#define CKS32 (1)//コンペアマッチタイマのPCLKの分周/32
-#define CKS128 (2)//コンペアマッチタイマのPCLKの分周/128
-#define CKS512 (3)//コンペアマッチタイマのPCLKの分周/512
-#define KEY_UP (72)//↑キー
-#define KEY_DOWN (80)//↓キー
-#define KEY_LEFT (75)//←キー
-#define KEY_RIGHT (77)//→キー
+#define CKS8 (0)								//コンペアマッチタイマのPCLKの分周/8
+#define CKS32 (1)								//コンペアマッチタイマのPCLKの分周/32
+#define CKS128 (2)								//コンペアマッチタイマのPCLKの分周/128
+#define CKS512 (3)								//コンペアマッチタイマのPCLKの分周/512
+#define KEY_UP (72)								//↑キー
+#define KEY_DOWN (80)							//↓キー
+#define KEY_LEFT (75)							//←キー
+#define KEY_RIGHT (77)							//→キー
 typedef unsigned char T_DISPLAY;
 typedef const unsigned char T_SCORE;
 typedef const unsigned short T_NOTE;

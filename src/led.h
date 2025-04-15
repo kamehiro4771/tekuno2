@@ -15,7 +15,7 @@
 #define RE_2 (14)					//2オクターブ目レ
 #define RE_3 (26)					//3オクターブ目レ
 #define RE_4 (38)					//4オクターブ目レ
-#define RE_5 (50)					//オクターブ目レ
+#define RE_5 (50)					//5オクターブ目レ
 #define RE_6 (62)//
 #define DO_SH_1 (1)//ド＃//オクターブ目
 #define DO_SH_2 (13)//オクターブ目
@@ -81,35 +81,34 @@
 #define DO_6 (60)//オクターブ目
 #define DO_7 (72)//オクターブ目
 #define NONE (0x00)
-#define FON_0 ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
-#define FON_ ()
+#define FON_SP (0x00)
+#define FON_MI (0x)
+#define FON_0 (0x3f)
+#define FON_1 (0x06)
+#define FON_2 (0x5b)
+#define FON_3 (0x4f)
+#define FON_4 (0x66)
+#define FON_5 (0x75)
+#define FON_6 (0x7c)
+#define FON_7 (0x27)
+#define FON_8 (0x7f)
+#define FON_9 (0x6f)
+#define FON_A (0x77)
+#define FON_B (0x7c)
+#define FON_C (0x39)
+#define FON_D (0x5b)
+#define FON_E (0x79)
+#define FON_F (0x71)
+#define FON_H ()
+#define FON_J ()
+#define FON_L ()
+#define FON_O ()
+#define FON_P ()
+#define FON_Q ()
+#define FON_R ()
+#define FON_Y ()
+#define FON__ ()
+#define SEG7_DIGIT_NUM (3)
 void output_led(int sw_no);
 void out_put_segled(unsigned char *display,long interval);
 #endif /* OUTPUT_LED_H_ */
