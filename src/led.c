@@ -22,8 +22,8 @@ const unsigned char string[]	= {NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  
 /************************************************************/
 long led_state;												//ポートDとポートEとポートBの点灯したときの状態
 long led_blink_state;										//ポートDとポートEとポートBの消灯したときの状態（点滅指定されたLED以外はついている）
-char segled_state[SEG7_DIGIT_NUM]							//ポートAの点灯したときの状態
-char segled_blink_state[SEG7_DIGIT_NUM]						//ポートAの消灯したときの状態
+char segled_state[SEG7_DIGIT_NUM];							//ポートAの点灯したときの状態
+char segled_blink_state[SEG7_DIGIT_NUM];						//ポートAの消灯したときの状態
 
 //音階とLED色の関係　１オクターブ目赤　2オクターブ目緑　３オクターブ目青　４オクターブ目白 5オクターブ目紫 6オクターブ目黄色
 /************************************************************/
@@ -34,6 +34,8 @@ char segled_blink_state[SEG7_DIGIT_NUM]						//ポートAの消灯したときの状態
 /************************************************************/
 void output_led(int scale,long interval)
 {
+	if(interval != 0)
+		led_blink_state	= led_state;
 	switch(scale){
 	case DO_1:
 	case DO_SH_1:
@@ -214,12 +216,12 @@ void output_led(int scale,long interval)
 /******************************************************************/
 /*7セグLEDに表示する											  */
 /*void out_put_segled(unsigned char *display,long interval)		　*/
-/*		unsigned char *value
+/*		unsigned char *value 文字列へのポインタ
 /*		long interval:点滅間隔
 /****************************************************/
 void out_put_segled(unsigned char *display,long interval)
 {
-	
+    
 }
 
 void segled_blink(void)

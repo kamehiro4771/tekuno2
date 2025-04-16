@@ -106,41 +106,43 @@ void count_time(void)
 	__setpsw_i();//割り込み許可
 }
 
-/********************************************************************/
-/*タイマカウントで呼び出される関数を登録する										*/
-/*void count_timer_set(unsigned long *timer)						*/
-/*	引数：unsigned long *timer 登録するエリア						*/
-/*		：void func(unsigned char)  登録するコールバック関数ポインタ*/
-/*	戻り値：SUCCESS又はERROR										*/
-/********************************************************************/
+/********************************************************************************/
+/*タイマカウントで呼び出される関数を登録する									*/
+/*unsigned char interval_function_set(unsigned long interval,void func(void))	*/
+/*	引数：unsigned long interval 	呼び出す周期(ms)							*/
+/*		：void func(unsigned char)  登録するコールバック関数ポインタ			*/
+/*	戻り値：SUCCESS又はERROR													*/
+/********************************************************************************/
 unsigned char interval_function_set(unsigned long interval,void func(void))
 {
 	unsigned char ret,i;
-	__clrpsw_i();//割り込み禁止
+	__clrpsw_i();											//割り込み禁止
 	if(function_cnt < MAX_FUNC_NUM){
 		for(i = 0;i < MAX_FUNC_NUM;i++){
 			if(func_array[i] == func)
-				return SUCCESS;//関数が既に登録されている
+				return SUCCESS;								//関数が既に登録されている
 		}
-
 		func_interval_array[function_cnt]  	= interval;
-		func_array[function_cnt++]	= func;
-		ret							= SUCCESS;
+		func_array[function_cnt++]			= func;
+		ret									= SUCCESS;
 	}else
-		ret							= ERROR;//登録数オーバー
-	__setpsw_i();//割り込み許可
+		ret									= ERROR;		//登録数オーバー
+	__setpsw_i();											//割り込み許可
 	return ret;
 }
-/*
- * タイマカウントエリア登録
- *
- */
+
+/****************************************************************/
+/* タイマカウントエリア登録										*/
+/*unsigned char timer_area_registration(unsigned long* area)	*/
+/*	引数：unsigned long* areaダウンカウントするエリア			*/
+/*	戻り値：SUCCESS登録完了　ERROR：既に登録済み				*/
+/****************************************************************/
 unsigned char timer_area_registration(unsigned long* area)
 {
 	unsigned char ret,i;
-	__clrpsw_i();//割り込み禁止
+	__clrpsw_i();											//割り込み禁止
 	for(i = 0;i < area_cnt;i++){
-		if(area_array[i] == area)//既に登録済みのエリア
+		if(area_array[i] == area)							//既に登録済みのエリア
 			break;
 	}
 	if(i == area_cnt){
@@ -152,8 +154,9 @@ unsigned char timer_area_registration(unsigned long* area)
 	return ret;
 }
 /********************************************************************/
-/*周期起動関数削除											*/
-/*void count_timer_dell(void func(unsigned char))										*/
+/*周期起動関数削除													*/
+/*void count_timer_dell(void func(unsigned char))					*/
+/*	引数：削除する関数のポインタ									*/
 /********************************************************************/
 void count_timer_dell(void func(void))
 {
