@@ -109,6 +109,8 @@
 #define FON_Y (0x6e)
 #define FON__ (0x08)
 #define SEG7_DIGIT_NUM (3)
+#define LED_NUM (8)
+#define LED_COLOR_NUM (8)
 void output_led(int sw_no);
 void out_put_segled(unsigned char *display,long interval);
 #endif /* OUTPUT_LED_H_ */
