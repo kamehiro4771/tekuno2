@@ -33,6 +33,8 @@ src/sci.obj src/sci.d: ../src/ad.h
 ../src/ad.h:
 src/sci.obj src/sci.d: ../src/battle.h
 ../src/battle.h:
+src/sci.obj src/sci.d: ../src/flash.h
+../src/flash.h:
 src/sci.obj src/sci.d: ../src/score.h
 ../src/score.h:
 src/sci.obj src/sci.d: ../src/main.h

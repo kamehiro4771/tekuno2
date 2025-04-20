@@ -27,17 +27,16 @@ unsigned long timer_cnt_array[MAX_FUNC_NUM];//タイマーカウント
 /********************************************************************/
 void  mtu0_initialize(void)
 {
- 	SYSTEM.MSTPCRA.BIT.MSTPA9	= 0;
-
-	MTU0.TCR.BIT.TPSC			= 1;//PCLKの４分周12MHzでカウント
-	MTU0.TCR.BIT.CCLR			= 1;//TGRAのコンペアマッチでTCNTクリア
-	MTU0.TIER.BIT.TGIEA			= 1;//TGIA
-	MTU0.TGRA					= 12000;//1msでコンペアマッチ
+ 	SYSTEM.MSTPCRA.BIT.MSTPA9	= 0;		//マルチファンクションタイマパルスユニット（ユニット０）のモジュールストップ解除
+	MTU0.TCR.BIT.TPSC			= 1;		//PCLKの４分周でカウント
+	MTU0.TCR.BIT.CCLR			= 1;		//TGRAのコンペアマッチでTCNTクリア
+	MTU0.TIER.BIT.TGIEA			= 1;		//TGIA割り込み許可
+	MTU0.TGRA					= 12000;	//1msでコンペアマッチ
 	//割り込みコントローラの設定
 	IEN(MTU0,TGIA0)				= 1;
-	IPR(MTU0,TGIA0)				= 2;
+	IPR(MTU0,TGIA0)				= 1;
 	IR(MTU0,TGIA0)				= 0;
-	MTUA.TSTR.BIT.CST0			= 1;//MTU0.TCNTのカウントスタート
+	MTUA.TSTR.BIT.CST0			= 1;		//MTU0.TCNTのカウントスタート
 }
 
 /********************************************************************/
@@ -119,8 +118,10 @@ unsigned char interval_function_set(unsigned long interval,void func(void))
 	__clrpsw_i();											//割り込み禁止
 	if(function_cnt < MAX_FUNC_NUM){
 		for(i = 0;i < MAX_FUNC_NUM;i++){
-			if(func_array[i] == func)
+			if(func_array[i] == func){
+				__setpsw_i();											//割り込み許可
 				return SUCCESS;								//関数が既に登録されている
+			}
 		}
 		func_interval_array[function_cnt]  	= interval;
 		func_array[function_cnt++]			= func;

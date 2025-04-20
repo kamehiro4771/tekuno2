@@ -33,6 +33,8 @@ src/output_speaker.obj src/output_speaker.d: ../src/ad.h
 ../src/ad.h:
 src/output_speaker.obj src/output_speaker.d: ../src/battle.h
 ../src/battle.h:
+src/output_speaker.obj src/output_speaker.d: ../src/flash.h
+../src/flash.h:
 src/output_speaker.obj src/output_speaker.d: ../src/score.h
 ../src/score.h:
 src/output_speaker.obj src/output_speaker.d: ../src/main.h

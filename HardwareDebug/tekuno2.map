@@ -1,4 +1,4 @@
-Renesas Optimizing Linker (W2.06.00 )             20-Mar-2025 22:26:21
+Renesas Optimizing Linker (W2.06.00 )             09-Apr-2025 07:40:18
 
 *** Options ***
 
@@ -50,54 +50,54 @@ SU
 SI
                                   00000104  00000403       300   4
 B_1
-                                  00000404  00001496      1093   1
+                                  00000404  00001699      1296   1
 R_1
-                                  00001497  00001510        7a   1
+                                  0000169a  00001711        78   1
 B_2
-                                  00001512  0000155b        4a   2
+                                  00001712  0000175b        4a   2
 R_2
-                                  0000155c  00001797       23c   2
+                                  0000175c  00001a39       2de   2
 B
-                                  00001798  00001c2b       494   4
+                                  00001a3c  00001efb       4c0   4
 R
-                                  00001c2c  00002133       508   4
+                                  00001efc  000023ff       504   4
 $ADDR_B_100000
                                   00100000  00100000         1   1
 PResetPRG
                                   fff80000  fff8002f        30   1
 C_1
-                                  fff80030  fff81d6f      1d40   1
+                                  fff80030  fff81d70      1d41   1
 C_2
-                                  fff81d70  fff83b77      1e08   2
+                                  fff81d72  fff83b79      1e08   2
 C
-                                  fff83b78  fff83f1f       3a8   4
+                                  fff83b7c  fff83f23       3a8   4
 C$DSEC
-                                  fff83f20  fff83f43        24   4
+                                  fff83f24  fff83f47        24   4
 C$BSEC
-                                  fff83f44  fff83f5b        18   4
+                                  fff83f48  fff83f5f        18   4
 C$INIT
-                                  fff83f5c  fff83f5c         0   1
+                                  fff83f60  fff83f60         0   1
 C$VECT
-                                  fff83f5c  fff8435b       400   4
+                                  fff83f60  fff8435f       400   4
 C$VTBL
-                                  fff8435c  fff8435c         0   1
+                                  fff84360  fff84360         0   1
 D
-                                  fff8435c  fff84863       508   4
+                                  fff84360  fff84863       504   4
 D_1
-                                  fff84864  fff848dd        7a   1
+                                  fff84864  fff848db        78   1
 D_2
-                                  fff848de  fff84b19       23c   2
+                                  fff848dc  fff84bb9       2de   2
 W
-                                  fff84b1c  fff84b1c         0   4
+                                  fff84bbc  fff84bbc         0   4
 W_1
-                                  fff84b1c  fff84b1c         0   1
+                                  fff84bbc  fff84bbc         0   1
 W_2
-                                  fff84b1c  fff84bc3        a8   2
+                                  fff84bbc  fff84c63        a8   2
 L
-                                  fff84bc4  fff84d00       13d   4
+                                  fff84c64  fff84da0       13d   4
 PIntPRG
-                                  fff84d01  fff84e9e       19e   1
+                                  fff84da1  fff84f3e       19e   1
 P
-                                  fff84e9f  fff8abb5      5d17   1
+                                  fff84f3f  fff8adde      5ea0   1
 FIXEDVECT
                                   ffffff80  ffffffff        80   4

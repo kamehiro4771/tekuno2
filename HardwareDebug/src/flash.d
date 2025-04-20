@@ -33,6 +33,8 @@ src/flash.obj src/flash.d: ../src/ad.h
 ../src/ad.h:
 src/flash.obj src/flash.d: ../src/battle.h
 ../src/battle.h:
+src/flash.obj src/flash.d: ../src/flash.h
+../src/flash.h:
 src/flash.obj src/flash.d: ../src/score.h
 ../src/score.h:
 src/flash.obj src/flash.d: ../src/main.h

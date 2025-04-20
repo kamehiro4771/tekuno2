@@ -32,6 +32,7 @@
         <Path>src\damage.c</Path>
         <Path>src\damage.h</Path>
         <Path>src\flash.c</Path>
+        <Path>src\flash.h</Path>
         <Path>src\game.c</Path>
         <Path>src\game.h</Path>
         <Path>src\initialize.c</Path>
