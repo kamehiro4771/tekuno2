@@ -68,7 +68,7 @@ const T_DISPLAY error_message[]										= {"入力が正しくありません\n"};
  */
 SPEAKER speaker[3]													= {{50,SQUARE,1},{50,SQUARE,2},{50,SQUARE,3}};
 unsigned char electronic_organ_speaker								= 1;//電子オルガンモード時にいくつスピーカを鳴らすか//設定モードで変更して電子オルガンモードで参照する
-unsigned char seg_value[3]											= {"123"};
+unsigned char seg_value[3]											= {"423"};
 /*
  * プロトタイプ宣言
  */

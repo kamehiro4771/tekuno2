@@ -39,7 +39,7 @@ long led_state;												//7セグ以外のLEDの状態、ポートDとポートEとポートBの点
 long led_blink_state;										//ポートDとポートEとポートBの消灯したときの状態（点滅指定されたLED以外はついている）
 long led_current_interval;
 unsigned char segled_state[SEG7_DIGIT_NUM];					//ポートAの点灯したときの状態
-unsigned char current_digit;
+unsigned char current_digit = 0;
 unsigned char segled_blink_state[SEG7_DIGIT_NUM];					//ポートAの消灯したときの状態
 
 /***********************************************************************/
@@ -74,27 +74,6 @@ void output_led(unsigned char led,unsigned char color,long interval)
 }
 
 /******************************************************************/
-/*7セグLEDに表示する											  */
-/*void out_put_segled_start(unsigned char *display)				　*/
-/*		unsigned char *value 文字列へのポインタ					  */
-/*		long interval:点滅間隔									  */
-/******************************************************************/
-//ダイナミック点灯なのでシステムタイマ起動
-//void out_put_segled_start(unsigned char *display,long interval)
-void out_put_segled_start(unsigned char *display)
-{
-	unsigned char i;
-	for(i = 0;i < 3;i++){
-		if(display[i] > 0x7a)
-    		segled_state[i]	= NONE;
-    	else
-    		segled_state[i]	= string[display[i]];
-    }
-    current_digit			= 1;
-    interval_function_set(1,segled_flush);
-}
-
-/******************************************************************/
 /*
 /*void led_blink(void)											  */
 /******************************************************************/
@@ -110,14 +89,89 @@ void led_blink(void)
 }
 
 /******************************************************************/
+/*7セグLEDに表示開始する										  		　　*/
+/*void out_put_segled_start(unsigned char *display)				　　*/
+/*		unsigned char *value 文字列へのポインタ						  */
+/*		long interval:点滅間隔									  */
+/******************************************************************/
+void out_put_segled_start(unsigned char *display)
+{
+    current_digit			= 0;
+    seg_led_update(display);
+    interval_function_set(1,segled_flush);
+}
+
+/******************************************************************/
+/*
+/* void seg_led_update(unsigned char *display)
+/******************************************************************/
+void segled_update(unsigned char *display)
+{
+	unsigned char i;
+	for(i = 0;i < 3;i++){
+		if(display[i] > 0x7a)
+    		segled_state[i]	= NONE;
+    	else
+    		segled_state[i]	= string[display[i]];
+    }
+}
+/**********************************************************************/
+/*7セグタイマスタート入力の判定、スタート値のセット、システムタイマへのセット				　　	  */
+/*void segled_timer_start(unsigned char *display)				  	  */
+/* 	引数：unsigned char *start									  	  */
+/* 	戻り値：unsigned char ERROR:入力した値が不正,タイマに空き無し　SUCCESS：タイマスタート*/
+/**********************************************************************/
+unsigned char segled_timer_start(unsigned char *start)
+{
+	unsigned char i;
+	//引数の判定
+	for(i = 0;i < SEG7_DIGIT_NUM;i++){
+		if(start[i] < 0x30 || start[i] > 0x39)
+			return ERROR;
+	}
+	segled_update(start);
+	if(ERROR == interval_function_set(1000,segled_timer_update))
+		return ERROR;
+	return interval_function_set(1,segled_flush);
+}
+
+/******************************************************************/
+/*7セグタイマ停止													  */
+/* void segled_timer_stop(void)									  */
+/******************************************************************/
+void segled_timer_stop(void)
+{
+//	count_timer_dell();
+	count_timer_dell(segled_timer_update);
+}
+
+/******************************************************************/
+/*1秒ごとに呼び出されて表示をダウンカウント０００になったら自動演奏開始
+ *
+ */
+/******************************************************************/
+void segled_timer_update(void)
+{
+	unsigned char i = 0;
+	display[i]--;
+	if(display[i])
+	segled_update();
+	if(display[0] == 0x30 && display[1] == 0x30 && display[3] == 0x30){
+		automatic_playing_start();
+		segled_timer_stop()//
+	}
+}
+
+/******************************************************************/
 /*
 /*
 /******************************************************************/
 void segled_flush(void)
 {
-	PORT4.DR.BYTE			= segled_state[current_digit];
-	PORTA.DR.BYTE			= 1 << current_digit;
+	unsigned char digit_direction[3]	= {0x02,0x04,0x08};
+	PORT4.DR.BYTE						= segled_state[current_digit];
+	PORTA.DR.BYTE						= digit_direction[current_digit];
 	current_digit ++;
-	if(current_digit > SEG7_DIGIT_NUM)
-		current_digit		= 1;
+	if(current_digit >= SEG7_DIGIT_NUM)
+		current_digit					= 0;
 }
