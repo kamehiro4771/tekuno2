@@ -17,7 +17,7 @@
 #define FON_2 (0x5b)
 #define FON_3 (0x4f)
 #define FON_4 (0x66)
-#define FON_5 (0x75)
+#define FON_5 (0x6d)
 #define FON_6 (0x7c)
 #define FON_7 (0x27)
 #define FON_8 (0x7f)
@@ -58,4 +58,7 @@
 #define BLACK (8)
 void output_led(unsigned char led,unsigned char color,long interval);
 void out_put_segled(unsigned char *display,long interval);
+unsigned char segled_timer_start(unsigned char *start_value);
+void segled_timer_stop(void);
+
 #endif /* OUTPUT_LED_H_ */

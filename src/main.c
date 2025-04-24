@@ -20,55 +20,56 @@
 /********************************************************************/
 #include "main.h"
 
-const T_DISPLAY E_NEIRO[]											= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
-const T_DISPLAY DUTY_VALUE[]										= {"デューティー比："};
-const T_DISPLAY WAVE_TYPE[]											= {"波形："};
+const T_DISPLAY E_NEIRO[]														= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
+const T_DISPLAY DUTY_VALUE[]													= {"デューティー比："};
+const T_DISPLAY WAVE_TYPE[]														= {"波形："};
 /*項目の種類*/
-const T_DISPLAY playlists_select[]									= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
-const T_DISPLAY wavetype_select[]									= {"音の波形を選択してください\n"};
-const T_DISPLAY setting_item_select[] 								= {"設定する項目を選択してください\n"};
-const T_DISPLAY SETTING_SPEAKER_SELECT[]							= {"設定するスピーカを選択してください\n"};
-const T_DISPLAY OUTPUT_SPEAKER_SELECT[]								= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
+const T_DISPLAY PLAYLIST_SELECT[]												= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
+const T_DISPLAY wavetype_select[]												= {"音の波形を選択してください\n"};
+const T_DISPLAY setting_item_select[] 											= {"設定する項目を選択してください\n"};
+const T_DISPLAY SETTING_SPEAKER_SELECT[]										= {"設定するスピーカを選択してください\n"};
+const T_DISPLAY OUTPUT_SPEAKER_SELECT[]											= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
 /*項目名*/
-const T_DISPLAY MODE_NAME[MODE_NUM][64]								= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
-const T_DISPLAY TITLE_NAME[SONG_NUM][64]							= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
-																	   "Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","勝利",
-																	   "宿屋","攻撃音","冒険の書","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
-const T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM][64] 						= {{"矩形波"},
-																	   {"のこぎり波"},
-																	   {"三角波"},
-																	   {"サイン波",}};
-const T_DISPLAY SETTING_ITME_NAME[SETTING_ITEM_NUM][64] 			= {{"デューティー比"},
-																	   {"波形"},
-																	   {"スピーカ数"}};
-const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM][64]				= {{"スピーカ１"},
-																	   {"スピーカ２"},
-																	   {"スピーカ３"},
-																	  };
-const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64]			= {{"ひとつ"},{"ふたつ"},{"みっつ"}};
+const T_DISPLAY MODE_NAME[MODE_NUM][64]											= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
+const T_DISPLAY TITLE_NAME[SONG_NUM][64]										= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
+																	   	   	   	   "Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","勝利",
+																	   	   	   	   "宿屋","攻撃音","冒険の書","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
+const T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM][64] 									= {{"矩形波"},
+																	   	   	   	   {"のこぎり波"},
+																	   	   	   	   {"三角波"},
+																	   	   	   	   {"サイン波",}};
+const T_DISPLAY SETTING_ITME_NAME[SETTING_ITEM_NUM][64] 						= {{"デューティー比"},
+																	   	   	   	   {"波形"},
+																				   {"スピーカ数"}};
+const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM][64]							= {{"スピーカ１"},
+																	   	   	   	   {"スピーカ２"},
+																				   {"スピーカ３"},
+																	  	  	  	  };
+const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM][64]						= {{"ひとつ"},{"ふたつ"},{"みっつ"}};
 //const T_DISPLAY DORAGON_DISPLAY[]
 
 /*選択出来る項目を変えたい時は以下の配列を変更して、増減があったら#defineのSELECT_NUMを変える*/
-const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]			= {ORGAN,AUTOPLAY,GAME,SETTING};//選択できるモード
-const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]	= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING};//この配列に入っている曲が自動演奏される
-const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]			= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//選択できる波形
-const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]= {DUTY,WAVE,SPEAKER_NUM};
-const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]	= {SPEAKER1,SPEAKER2,SPEAKER3,};
-const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] = {SPEAKER1,SPEAKER2,SPEAKER3,};
+const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,SETTING};//選択できるモード
+const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]				= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING};//この配列に入っている曲がメニューに表示され選択できる
+const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//選択できる波形
+const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
+const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]				= {SPEAKER1,SPEAKER2,SPEAKER3,};
+const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] 	= {SPEAKER1,SPEAKER2,SPEAKER3,};
 /*終了方法*/
-const T_DISPLAY END_METHOD1[]										= {"メニューに戻る e + エンター\n"};
+const T_DISPLAY END_METHOD1[]													= {"メニューに戻る e + エンター\n"};
 /*操作方法*/
-const T_DISPLAY DUTY_SETTING_DISPLAY[] 								= {"デューティ比を入力してください（1~99％）\n"
-																	   "SW1:1　～　SW9:9 SW10:0\n"};
+const T_DISPLAY DUTY_SETTING_DISPLAY[] 											= {"デューティ比を入力してください（1~99％）\n"
+																					"SW1:1　～　SW9:9 SW10:0\n"};
 
-const T_DISPLAY setting_comp[]										= {"に設定されました。\n"};
-const T_DISPLAY error_message[]										= {"入力が正しくありません\n"};
+const T_DISPLAY setting_comp[]													= {"に設定されました。\n"};
+const T_DISPLAY error_message[]													= {"入力が正しくありません\n"};
 /*
  * ワークエリア定義
  */
 SPEAKER speaker[3]													= {{50,SQUARE,1},{50,SQUARE,2},{50,SQUARE,3}};
 unsigned char electronic_organ_speaker								= 1;//電子オルガンモード時にいくつスピーカを鳴らすか//設定モードで変更して電子オルガンモードで参照する
-unsigned char seg_value[3]											= {"423"};
+unsigned char seg_timer_song										= 0;
+unsigned char timer_value[3]										= {"100"};
 /*
  * プロトタイプ宣言
  */
@@ -97,12 +98,10 @@ void main(void)
 	unsigned char ret;
 	eneiro_init();
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
+	segled_timer_start(timer_value);
 	while(1)
 	{
-		out_put_segled_start(seg_value);
-		while(1){
-
-		}
+		
 	}
 }
 
@@ -134,6 +133,7 @@ static void main_sequence_process(void)
 /*			const unsigned char *select_num選択できる項目の配列番号の配列へのポインタ			*/
 /*			char item_num:項目の数													*/
 /************************************************************************************/
+//こんなにたくさんsend_serialしないといけないか
 static void selection_screen_display(const T_DISPLAY *select_item,const T_DISPLAY (*item_name)[64],T_DISPLAY *select_num,unsigned char item_num,T_DISPLAY *end_method)
 {
 	unsigned char i;
@@ -249,6 +249,9 @@ static void selected_mode_transition(unsigned char select)
 	case GAME:
 		game_mode();
 		break;
+	case TIMER:
+		timer_mode:
+		break;
 	case SETTING:
 		setting_mode();
 		break;
@@ -261,7 +264,6 @@ static void selected_mode_transition(unsigned char select)
 /*電子オルガンモード関数											*/
 /*unsigned char electronic_organ_mode(void)							*/
 /********************************************************************/
-//スイッチを押しながらエンターが押されるとスイッチを離した時にメニューに戻る音が鳴りっぱなしになる
 static void electronic_organ_mode(void)
 {
 	unsigned char ret				= OFF,i;
@@ -313,7 +315,7 @@ static void autplay_mode(void)
 	signed short title			= -1;
 	signed short wave_type		= -1;
 	while(title == -1){
-		title = item_select_sequence(playlists_select,TITLE_NAME,SELECTABLE_TITLE_ARREY,SELECT_PLAY_TITLE_NUM,END_METHOD1);
+		title = item_select_sequence(PLAYLIST_SELECT,TITLE_NAME,SELECTABLE_TITLE_ARREY,SELECT_PLAY_TITLE_NUM,END_METHOD1);
 	}
 	if(title == 'e')
 		return;//タイトル選択でeが入力されたらメニューへ戻る
@@ -321,7 +323,7 @@ static void autplay_mode(void)
 		wave_type = item_select_sequence(wavetype_select,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD1);
 	}
 	if(wave_type == 'e')
-		return;//波形選択でeが入力されたら自動演奏モード終了
+		return;//波形選択でeが入力されたらメニューへ戻る
 	send_serial(TITLE_NAME[title - 1],sizeof(TITLE_NAME[title - 1]));
 	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
 	automatic_playing_start((unsigned short)title,wave_type,0,0,0);
@@ -341,6 +343,16 @@ static void game_mode(void)
 	game_main();
 }
 
+/********************************************************************/
+/*7セグを利用したタイマ
+/*static void timer_mode(void)
+/*
+/********************************************************************/
+static void timer_mode(void)
+{
+	//時間入力待ち
+	//
+}
 /********************************************************************/
 /*設定モード関数													*/
 /*void setting_mode(void)											*/

@@ -9,7 +9,7 @@
 /************************************************************/
 /* 定数定義													*/
 /************************************************************/
-const unsigned char string[]	= {NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE ,
+const unsigned char DISPLAY[]	= {NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE ,
 				 				   NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE ,
 				   				   FON_SP,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,FON_MI,FON_DP,NONE ,
 				   				   FON_0 ,FON_1 ,FON_2 ,FON_3 ,FON_4 ,FON_5 ,FON_6 ,FON_7 ,FON_8 ,FON_9 ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE ,
@@ -17,6 +17,7 @@ const unsigned char string[]	= {NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  
 				   				   FON_Q ,FON_R ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,FON_Y ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,FON__ ,NONE ,
 				   				   FON_A ,FON_B ,FON_C ,FON_D ,FON_E ,FON_F ,NONE  ,FON_H ,NONE  ,FON_J ,NONE  ,FON_L ,NONE  ,NONE  ,FON_O ,FON_P,
 				   				   FON_Q ,FON_R ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,NONE  ,FON_Y ,NONE  ,};
+const unsigned char number[]	= {FON_0 ,FON_1 ,FON_2 ,FON_3 ,FON_4 ,FON_5 ,FON_6 ,FON_7 ,FON_8 ,FON_9 };
 const unsigned long led_port_value_array[LED_NUM][LED_COLOR_NUM] = {{0x000001,0x000002,0x000004,0x000003,0x000006,0x000005,0x000007,0x000000},//LED1　赤　緑　青　黄　シアン　マゼンタ　白　黒
 															  		{0x000008,0x000017,0x000027,0x000018,0x000030,0x000028,0x000038,0x000000},//LED2　赤　緑　青　黄　シアン　マゼンタ　白　黒
 															  		{0x000040,0x000080,0x000100,0x0000c0,0x000180,0x000140,0x0001c0,0x000000},//LED3　赤　緑　青　黄　シアン　マゼンタ　白　黒
@@ -31,6 +32,8 @@ const unsigned long led_port_value_array[LED_NUM][LED_COLOR_NUM] = {{0x000001,0x
  ***********************************************************/
 void led_blink(void);
 void segled_flush(void);
+void segled_timer_update(void);
+void segled_display_update(unsigned char *ascii);
 /************************************************************/
 /* ワークエリア定義												*/
 /************************************************************/
@@ -41,7 +44,7 @@ long led_current_interval;
 unsigned char segled_state[SEG7_DIGIT_NUM];					//ポートAの点灯したときの状態
 unsigned char current_digit = 0;
 unsigned char segled_blink_state[SEG7_DIGIT_NUM];					//ポートAの消灯したときの状態
-
+unsigned short seg_timer_value;
 /***********************************************************************/
 /*7セグ以外のLEDの点灯、intervalを指定すれば点滅開始				   */
 /*void output_led(unsigned char led,unsigned char color,long interval) */
@@ -97,39 +100,38 @@ void led_blink(void)
 void out_put_segled_start(unsigned char *display)
 {
     current_digit			= 0;
-    seg_led_update(display);
+    segled_display_update(display);
     interval_function_set(1,segled_flush);
 }
 
 /******************************************************************/
-/*
+/*文字列を出力する値に変える
 /* void seg_led_update(unsigned char *display)
 /******************************************************************/
-void segled_update(unsigned char *display)
+void segled_display_update(unsigned char *ascii)
 {
 	unsigned char i;
 	for(i = 0;i < 3;i++){
-		if(display[i] > 0x7a)
+		if(DISPLAY[i] > 0x7a)
     		segled_state[i]	= NONE;
     	else
-    		segled_state[i]	= string[display[i]];
+    		segled_state[i]	= DISPLAY[ascii[i]];
     }
 }
+
 /**********************************************************************/
 /*7セグタイマスタート入力の判定、スタート値のセット、システムタイマへのセット				　　	  */
 /*void segled_timer_start(unsigned char *display)				  	  */
 /* 	引数：unsigned char *start									  	  */
 /* 	戻り値：unsigned char ERROR:入力した値が不正,タイマに空き無し　SUCCESS：タイマスタート*/
 /**********************************************************************/
-unsigned char segled_timer_start(unsigned char *start)
+unsigned char segled_timer_start(unsigned char *start_value)
 {
 	unsigned char i;
 	//引数の判定
-	for(i = 0;i < SEG7_DIGIT_NUM;i++){
-		if(start[i] < 0x30 || start[i] > 0x39)
-			return ERROR;
-	}
-	segled_update(start);
+	seg_timer_value			= atoi(start_value);
+	if(seg_timer_value > 999)
+		return ERROR;
 	if(ERROR == interval_function_set(1000,segled_timer_update))
 		return ERROR;
 	return interval_function_set(1,segled_flush);
@@ -152,14 +154,17 @@ void segled_timer_stop(void)
 /******************************************************************/
 void segled_timer_update(void)
 {
-	unsigned char i = 0;
-	display[i]--;
-	if(display[i])
-	segled_update();
-	if(display[0] == 0x30 && display[1] == 0x30 && display[3] == 0x30){
-		automatic_playing_start();
-		segled_timer_stop()//
+	unsigned char time_to_string[3];
+	seg_timer_value--;
+	if(seg_timer_value <= 0){
+		automatic_playing_start(CANON,SQUARE,0,0,0);
+		segled_timer_stop();//
+	}else{
+		time_to_string[0] = (seg_timer_value / 100) + 0x30;
+		time_to_string[1] = ((seg_timer_value / 10) % 10) + 0x30;
+		time_to_string[2] = (seg_timer_value % 10) + 0x30;
 	}
+	segled_display_update(time_to_string);
 }
 
 /******************************************************************/

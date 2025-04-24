@@ -40,7 +40,7 @@
 #define WRITTEN_STATE (1)
 #define NOT_FOUND (0)
 //選択できる項目数
-#define SELECT_MODE_NUM (4)					//選択するモード数
+#define SELECT_MODE_NUM (5)					//選択するモード数
 #define SELECT_PLAY_TITLE_NUM (8)			//自動演奏モードで演奏する曲数
 #define SELECT_WAVE_NUM (4)					//選択する波形の種類
 #define SELECT_SETTING_ITEM_NUM (3)
@@ -98,7 +98,7 @@ const unsigned char DEFAULT_BACKGROUND[]	= {"\x1b[49"};
 typedef unsigned char T_DISPLAY;
 typedef const unsigned char T_SCORE;
 typedef const unsigned short T_NOTE;
-enum menu{ORGAN = 1,AUTOPLAY,GAME,SETTING};//メインメニューの項目
+enum menu{ORGAN = 1,AUTOPLAY,GAME,TIMER,SETTING};//メインメニューの項目
 //曲名
 enum title{AVE_MARIA = 1,SAINT_MARCH,MENUETT,JESU_JOY_OF_MAN_S,AURA_LEE,SAKURA,ZYOUNETUTAIRIKU,LET_IT_BE,NHK_NODOZIMAN,DORAGON_QUEST,LEVEL_UP,
 			WINNING,BOUKENNNOSYO,YADOYA,ALLY_ATACK,BATTLE1,ZENNMETU,INITIAL_CHECK,CANON,};
