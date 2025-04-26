@@ -267,7 +267,7 @@ static void selected_mode_transition(unsigned char select)
 static void electronic_organ_mode(void)
 {
 	unsigned char ret				= OFF,i;
-	unsigned char output_num		= OFF;
+	unsigned char last_sw_state		= OFF;
 	send_serial(END_METHOD1,sizeof(END_METHOD1));
 	sci0_receive_start();//受信開始
 	while(1){
@@ -282,22 +282,22 @@ static void electronic_organ_mode(void)
 				sci0_receive_start();//受信開始
 		}
 		ret							= sw_check();
-		if(output_num != ret){
-			output_num				= ret;
+		if(ret != last_sw_state){
+			last_sw_state				= ret;
 			switch(electronic_organ_speaker){
 			case 1:
-				set_output_value(output_num,SPEAKER1);
+				set_output_value(last_sw_state,SPEAKER1);
 				output_speaker_start(1);
 				break;
 			case 2:
-				set_output_value(output_num,SPEAKER1);
-				set_output_value(output_num + 12,SPEAKER2);
+				set_output_value(last_sw_state,SPEAKER1);
+				set_output_value(last_sw_state + 12,SPEAKER2);
 				output_speaker_start(3);
 				break;
 			case 3:
-				set_output_value(output_num,SPEAKER1);
-				set_output_value(output_num + 12,SPEAKER2);
-				set_output_value(output_num + 24,SPEAKER3);
+				set_output_value(last_sw_state,SPEAKER1);
+				set_output_value(last_sw_state + 12,SPEAKER2);
+				set_output_value(last_sw_state + 24,SPEAKER3);
 				output_speaker_start(7);
 				break;
 			}
@@ -350,6 +350,8 @@ static void game_mode(void)
 /********************************************************************/
 static void timer_mode(void)
 {
+	unsigned short ret;
+	ret							= sw_check();
 	//時間入力待ち
 	//
 }
@@ -387,8 +389,9 @@ static void setting_mode(void)
 /*
  * エンターキーとスイッチ入力の判定
  *unsigned char input_check(void)
- *	戻り値：unsigned char ON:スイッチかエンターキーが入力されていた　OFF:入力なし
+ *	戻り値：unsigned char ON:スイッチが押してから離されたエンターキーが入力されていた　OFF:入力なし
  */
+ /*
 unsigned char input_check(void)
 {
 	unsigned char ret						= OFF;
@@ -403,6 +406,20 @@ unsigned char input_check(void)
 		ret				= last_sw_state;
 		last_sw_state	= OFF;
 	}
+	return ret;
+}
+*/
+//押されたらONを返す仕様
+//スイッチ番号またはENTER＿ONを返す仕様
+unsigned char input_check(void)
+{
+	unsigned char ret						= OFF;
+	unsigned char sw_state					= OFF;
+	sw_state								= sw_check();
+	if(sw_state != OFF){								//スイッチが押されていたら
+		ret									= sw_state;	//スイッチの状態記録
+	else if(sci0_enter_check() == ON)					//スイッチが押されている時はエンターは見ない
+		ret									= ENTER_ON;
 	return ret;
 }
 
