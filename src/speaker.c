@@ -111,36 +111,37 @@ void da_process_each_waveform(int wave_type,int sound_num);
 void mute(unsigned char speaker_num);
 
 /*
- * スピーカ初期化
+ * スピーカ関連の初期化
  * void speaker_initialize(void)
  */
 void speaker_initialize(void)
 {
 	//消費電力提言機能設定
-	SYSTEM.MSTPCRA.BIT.MSTPA8	= 0;//マルチファンクションタイマパルスユニットのユニット１モジュールストップ解除（PWM出力）
-	SYSTEM.MSTPCRA.BIT.MSTPA19	= 0;//DAコンバータ
+	SYSTEM.MSTPCRA.BIT.MSTPA8	= 0;	//マルチファンクションタイマパルスユニットのユニット１モジュールストップ解除（PWM出力）
+	SYSTEM.MSTPCRA.BIT.MSTPA19	= 0;	//DAコンバータモジュールストップ解除
 	//PWMスピーカー
 	PORTA.DDR.BIT.B0			= 0;
 	//マルチファンクションタイマパルスユニット1チャンネル６の設定（スピーカー１）
-	MTU6.TCR.BIT.TPSC			= 2;//16分周,3MHｚ
-	MTU6.TCR.BIT.CCLR			= 1;//TGRAのコンペアマッチでクリア、立ち上がりエッジでカウント、
-	MTU6.TMDR.BYTE				= 0x02;//通常動作、PWMモードに設定
-	MTU6.TIORH.BIT.IOA			= 0x1;//初期出力はLOW出力コンペアマッチでLOW出力
-	MTU6.TIORH.BIT.IOB			= 0x2;//初期出力はLOW出力コンペアマッチでHI出力
+	MTU6.TCR.BIT.TPSC			= 2;	//16分周,3MHｚ
+	MTU6.TCR.BIT.CCLR			= 1;	//TGRAのコンペアマッチでクリア、立ち上がりエッジでカウント、
+	MTU6.TMDR.BYTE				= 0x02;	//通常動作、PWMモードに設定
+	MTU6.TIORH.BIT.IOA			= 0x1;	//初期出力はLOW出力コンペアマッチでLOW出力
+	MTU6.TIORH.BIT.IOB			= 0x2;	//初期出力はLOW出力コンペアマッチでHI出力
 	//マルチファンクションタイマパルスユニット１チャンネル7の設定（スピーカー2）
-	MTU7.TCR.BIT.TPSC			= 2;//16分周,3MHｚ
-	MTU7.TCR.BIT.CCLR			= 1;//TGRAのコンペアマッチでクリア、立ち上がりエッジでカウント、
-	MTU7.TMDR.BYTE				= 0x02;//通常動作、PWMモードに設定
-	MTU7.TIOR.BIT.IOA			= 0x1;//初期出力はLOW出力コンペアマッチでLOW出力
-	MTU7.TIOR.BIT.IOB			= 0x2;//初期出力はLOW出力コンペアマッチでHI出力
+	MTU7.TCR.BIT.TPSC			= 2;	//16分周,3MHｚ
+	MTU7.TCR.BIT.CCLR			= 1;	//TGRAのコンペアマッチでクリア、立ち上がりエッジでカウント、
+	MTU7.TMDR.BYTE				= 0x02;	//通常動作、PWMモードに設定
+	MTU7.TIOR.BIT.IOA			= 0x1;	//初期出力はLOW出力コンペアマッチでLOW出力
+	MTU7.TIOR.BIT.IOB			= 0x2;	//初期出力はLOW出力コンペアマッチでHI出力
 	//マルチファンクションタイマパルスユニット１チャンネル8の設定（スピーカー3）
-	MTU8.TCR.BIT.TPSC			= 2;//16分周,3MHｚ
-	MTU8.TCR.BIT.CCLR			= 1;//TGRAのコンペアマッチでクリア、立ち上がりエッジでカウント、
-	MTU8.TMDR.BYTE				= 0x02;//通常動作、PWMモードに設定
-	MTU8.TIOR.BIT.IOA			= 0x1;//初期出力はLOW出力コンペアマッチでLOW出力
-	MTU8.TIOR.BIT.IOB			= 0x2;//初期出力はLOW出力コンペアマッチでHI出力
+	MTU8.TCR.BIT.TPSC			= 2;	//16分周,3MHｚ
+	MTU8.TCR.BIT.CCLR			= 1;	//TGRAのコンペアマッチでクリア、立ち上がりエッジでカウント、
+	MTU8.TMDR.BYTE				= 0x02;	//通常動作、PWMモードに設定
+	MTU8.TIOR.BIT.IOA			= 0x1;	//初期出力はLOW出力コンペアマッチでLOW出力
+	MTU8.TIOR.BIT.IOB			= 0x2;	//初期出力はLOW出力コンペアマッチでHI出力
 	//DAコンバーターの設定
-	DA.DACR.BYTE				= 0xff;//チャンネル１のアナログ出力許可
+	mtu1_initialize();					//MTU1の設定、DA出力用タイマ設定
+	DA.DACR.BYTE				= 0xff;	//チャンネル１のアナログ出力許可
 }
 /********************************************************************************************/
 /*スピーカとLEDの出力をセットする								  							*/
@@ -161,7 +162,7 @@ void set_output_value(unsigned char scale,unsigned char speaker_num)
 		DA.DACR.BIT.DAOE1					= 1;					//DA出力許可
 		MTU6.TGRA 							= pwm_timer_value[scale];
 		MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
-		da_process_each_waveform(speaker[0].wave_type,scale);	//DA出力に必要な処理、波形ごとの処理
+		da_process_each_waveform(speaker[0].wave_type,scale);		//DA出力に必要な処理、波形ごとの処理
 		output_led(SCALE_LED_NUM[scale],SCALE_COLOR_NUM[scale],0);
 		break;
 	case SPEAKER2:
@@ -179,7 +180,7 @@ void set_output_value(unsigned char scale,unsigned char speaker_num)
 
 void set_output_speaker_length(unsigned char set_pattern)
 {
-	unsigned char i;
+//	unsigned char i;
 	AUTOPLAYER *autoplayer						= get_autoplayer();
 	//スラーの時はforを通らないようにしたい
 //	for(i = 0;i < 200;i++){//音と音の間空ける

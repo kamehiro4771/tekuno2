@@ -7,7 +7,7 @@
 
 #ifndef __INITIALIZE_H__
 #define __INITIALIZE_H__
-void eneiro_init(void);
+void eneiro_initialize(void);
 
 
 #endif /* INITIALIZE_H_ */

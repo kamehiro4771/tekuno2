@@ -11,13 +11,12 @@
 /*
  * ワークエリア定義
  */
-unsigned long *area_array[MAX_AREA_NUM];//カウントエリア登録変数
-typedef void (*func_ptr)(void);//登録関数へのポインタ
+unsigned long *area_array[MAX_AREA_NUM];		//カウントエリア登録変数
 unsigned long func_interval_array[MAX_FUNC_NUM];//関数呼び出しの間隔配列
-func_ptr func_array[MAX_FUNC_NUM];//登録配列へのポインタ配列
-unsigned char function_cnt;//登録した関数の数
-unsigned char area_cnt;//登録したタイマエリアの数
-unsigned long timer_cnt_array[MAX_FUNC_NUM];//タイマーカウント
+T_FUNC_PTR func_array[MAX_FUNC_NUM];			//関数へのポインタ配列
+unsigned char function_cnt;						//登録した関数の数
+unsigned char area_cnt;							//登録したタイマエリアの数
+unsigned long timer_cnt_array[MAX_FUNC_NUM];	//タイマーカウント
 /*
  *
  */
@@ -33,51 +32,51 @@ void  mtu0_initialize(void)
 	MTU0.TIER.BIT.TGIEA			= 1;		//TGIA割り込み許可
 	MTU0.TGRA					= 12000;	//1msでコンペアマッチ
 	//割り込みコントローラの設定
+	IR(MTU0,TGIA0)				= 0;
 	IEN(MTU0,TGIA0)				= 1;
 	IPR(MTU0,TGIA0)				= 1;
-	IR(MTU0,TGIA0)				= 0;
 	MTUA.TSTR.BIT.CST0			= 1;		//MTU0.TCNTのカウントスタート
 }
 
 /********************************************************************/
-/*DA出力用タイマ設定								 	*/
+/*DA出力用タイマ設定								 				*/
 /*void  mtu1_initialize(void)										*/
 /********************************************************************/
 void mtu1_initialize(void)
 {
-	SYSTEM.MSTPCRA.BIT.MSTPA9	= 0;//?}???`?t?@???N?V?????p???X???j?b?g?i???j?b?g?O?j?X?g?b?v??????
+	SYSTEM.MSTPCRA.BIT.MSTPA9	= 0;//マルチファンクションタイマパルスユニット0モジュールストップ解除
 	//?}???`?t?@???N?V?????^?C?}?p???X???j?b?g?O?`?????l??1????
 	MTU1.TCR.BIT.TPSC			= 0;//48MHz
 	MTU1.TCR.BIT.CCLR			= 1;//?R???y?A?}?b?`A??N???A
-	MTU1.TIER.BIT.TGIEA			= 1;//TGIA?????????
+	MTU1.TIER.BIT.TGIEA			= 1;//TGIA割り込み許可
 	MTU1.TGRA					= 180;
 	//割り込みコントローラの設定
+	IR(MTU1,TGIA1)				= 0;
 	IEN(MTU1,TGIA1)				= 1;
 	IPR(MTU1,TGIA1)				= 1;
-	IR(MTU1,TGIA1)				= 0;
 }
 
 /****************************************************************************/
 /*一定時間待機																*/
 /*void cmt0_wait(unsigned short cnt)										*/
 /*	引数：unsigned short cnt 												*/
-/*		unsigned char cks 分周設定：00:8分周 01:32分周 10:128分周 11:512分周		*/
+/*		unsigned char cks 分周設定：00:8分周 01:32分周 10:128分周 11:512分周*/
 /****************************************************************************/
 void cmt2_wait(unsigned long cnt,unsigned char cks)
 {
-	MSTP(CMT2)			= 0;//モジュールストップ解除
-	CMT.CMSTR1.BIT.STR2 = 0;//タイマ停止
-	CMT2.CMCR.BIT.CMIE	= 1;//割り込み許可
-	CMT2.CMCR.BIT.CKS	= cks;//クロックの分周設定
+	MSTP(CMT2)			= 0;	//モジュールストップ解除
+	CMT.CMSTR1.BIT.STR2 = 0;	//タイマ停止
+	CMT2.CMCR.BIT.CMIE	= 1;	//割り込み許可
+	CMT2.CMCR.BIT.CKS	= cks;	//クロックの分周設定
 	CMT2.CMCNT			= 0;
 	CMT2.CMCOR			= cnt;
 	IR(CMT2,CMI2)		= 0;
 	IPR(CMT2,CMI2)		= 1;
-	CMT.CMSTR1.BIT.STR2 = 1;//カウントダウン動作開始
+	CMT.CMSTR1.BIT.STR2 = 1;	//カウントダウン動作開始
 	while(IR(CMT2,CMI2) == 0);
-	CMT.CMSTR1.BIT.STR2 = 0;//カウントダウン動作停止
+	CMT.CMSTR1.BIT.STR2 = 0;	//カウントダウン動作停止
 	IR(CMT2,CMI2) 		= 0;
-	MSTP(CMT2)			= 1;//モジュールストップ
+	MSTP(CMT2)			= 1;	//モジュールストップ
 }
 /********************************************************************/
 /*マルチファンクションタイマのコンペアマッチA割り込みで呼ばれる		*/
@@ -119,7 +118,7 @@ unsigned char interval_function_set(unsigned long interval,void func(void))
 	if(function_cnt < MAX_FUNC_NUM){
 		for(i = 0;i < MAX_FUNC_NUM;i++){
 			if(func_array[i] == func){
-				__setpsw_i();											//割り込み許可
+				__setpsw_i();								//割り込み許可
 				return SUCCESS;								//関数が既に登録されている
 			}
 		}

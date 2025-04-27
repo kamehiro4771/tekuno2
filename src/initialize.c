@@ -8,14 +8,15 @@
 
 /********************************************************************/
 /*システムの初期化													*/
-/*void eneiro_init(void)											*/
+/*void eneiro_initialize(void)										*/
 /********************************************************************/
-void eneiro_init(void)
+void eneiro_initialize(void)
 {
-	clock_init();//クロック初期化
-	io_port_initialize();
+	clock_initialize();				//クロック初期化
+	io_port_initialize();			//汎用入出力ポートの初期化
 	mtu0_initialize();				//MTU0の設定、システムタイマ
-	mtu1_initialize();				//MTU1の設定、DA出力用タイマ
 	cmt1_initiralize();				//乱数生成用タイマ
-	speaker_initialize();
+	speaker_initialize();			//スピーカ用PWM,DAコンバータ、DA出力用タイマ初期化
+	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
+	segled_initialize();			//システムタイマに７セグLEDのダイナミック点灯登録
 }

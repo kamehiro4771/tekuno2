@@ -35,6 +35,7 @@
 #define ERROR (1)
 #define SUCCESS (0)
 #define ON (0)
+#define ENTER_ON (0)
 #define SET (1)
 #define BLANK (0)
 #define WRITTEN_STATE (1)

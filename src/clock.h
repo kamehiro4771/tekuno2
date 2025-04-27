@@ -8,6 +8,6 @@
 #ifndef __CLOCK_H__
 #define __CLOCK_H__
 
-void clock_init(void);
+void clock_initialize(void);
 
 #endif /* CLOCK_H_ */

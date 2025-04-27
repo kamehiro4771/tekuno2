@@ -109,9 +109,11 @@ void end_flg_check(void)
 /********************************************************************/
 void auto_play_end_processing(void)
 {
+	if(playing_flg == OFF)						//演奏中出ない時に呼び出されたら何もしない
+		return;
 	g_use_speaker_num	= 0;
-	output_led(REST);				//LED消灯
-	mute(ALL_SPEAKER);//スピーカーi消音
+	output_led(REST,BLACK,0);					//LED消灯
+	mute(ALL_SPEAKER);							//スピーカーi消音
 	interrupt_data[0]			= autoplayer[0];//演奏中断データを保存
 	interrupt_data[1]			= autoplayer[1];
 	interrupt_data[2]			= autoplayer[2];
@@ -124,7 +126,7 @@ void auto_play_end_processing(void)
 	autoplayer[0].end_flg		= OFF;
 	autoplayer[1].end_flg		= OFF;
 	autoplayer[2].end_flg		= OFF;
-	playing_flg					= OFF;//演奏中フラグOFF
+	playing_flg					= OFF;			//演奏中フラグOFF
 }
 
 /********************************************************************************************/

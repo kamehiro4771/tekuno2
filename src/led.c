@@ -43,8 +43,8 @@ long led_blink_state;										//ポートDとポートEとポートBの消灯したときの状態（
 long led_current_interval;
 unsigned char segled_state[SEG7_DIGIT_NUM];					//ポートAの点灯したときの状態
 unsigned char current_digit = 0;
-unsigned char segled_blink_state[SEG7_DIGIT_NUM];					//ポートAの消灯したときの状態
-unsigned short seg_timer_value;
+unsigned char segled_blink_state[SEG7_DIGIT_NUM];			//ポートAの消灯したときの状態
+signed short seg_timer_value;
 /***********************************************************************/
 /*7セグ以外のLEDの点灯、intervalを指定すれば点滅開始				   */
 /*void output_led(unsigned char led,unsigned char color,long interval) */
@@ -92,15 +92,12 @@ void led_blink(void)
 }
 
 /******************************************************************/
-/*7セグLEDに表示開始する										  		　　*/
-/*void out_put_segled_start(unsigned char *display)				　　*/
-/*		unsigned char *value 文字列へのポインタ						  */
-/*		long interval:点滅間隔									  */
+/*7セグLEDに表示開始する										  */
+/*void segled_initialize(void)								　　  */
 /******************************************************************/
-void out_put_segled_start(unsigned char *display)
+void segled_initialize(void)
 {
     current_digit			= 0;
-    segled_display_update(display);
     interval_function_set(1,segled_flush);
 }
 
@@ -129,7 +126,7 @@ unsigned char segled_timer_start(unsigned char *start_value)
 {
 	unsigned char i;
 	//引数の判定
-	seg_timer_value			= atoi(start_value);
+	seg_timer_value			= atoi(start_value);					//カウントダウン用の数値
 	if(seg_timer_value > 999)
 		return ERROR;
 	if(ERROR == interval_function_set(1000,segled_timer_update))
@@ -149,8 +146,7 @@ void segled_timer_stop(void)
 
 /******************************************************************/
 /*1秒ごとに呼び出されて表示をダウンカウント０００になったら自動演奏開始
- *
- */
+ *void segled_timer_update(void)
 /******************************************************************/
 void segled_timer_update(void)
 {
@@ -159,6 +155,7 @@ void segled_timer_update(void)
 	if(seg_timer_value <= 0){
 		automatic_playing_start(CANON,SQUARE,0,0,0);
 		segled_timer_stop();//
+
 	}else{
 		time_to_string[0] = (seg_timer_value / 100) + 0x30;
 		time_to_string[1] = ((seg_timer_value / 10) % 10) + 0x30;
