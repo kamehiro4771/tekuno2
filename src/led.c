@@ -70,10 +70,10 @@ void output_led(unsigned char led,unsigned char color,long interval)
 		count_timer_dell(led_blink);
 	else
 		led_blink_state	= led_state;
-	led_state			|= led_port_value_array[led - 1][color - 1];
-	PORTD.DR.BYTE		|= led_state & 0xff;
-	PORTE.DR.BYTE		|= (led_state & 0xff00) >> 8;
-	PORTB.DR.BYTE		|= (led_state & 0xff0000) >> 16;
+	led_state			= led_port_value_array[led - 1][color - 1];
+	PORTD.DR.BYTE		= led_state & 0xff;
+	PORTE.DR.BYTE		= (led_state & 0xff00) >> 8;
+	PORTB.DR.BYTE		= (led_state & 0xff0000) >> 16;
 }
 
 /******************************************************************/
@@ -155,7 +155,7 @@ void segled_timer_update(void)
 	if(seg_timer_value <= 0){
 		automatic_playing_start(CANON,SQUARE,0,0,0);
 		segled_timer_stop();//
-
+		time_to_string[0] = time_to_string[1] = time_to_string[2] = 0x30;
 	}else{
 		time_to_string[0] = (seg_timer_value / 100) + 0x30;
 		time_to_string[1] = ((seg_timer_value / 10) % 10) + 0x30;

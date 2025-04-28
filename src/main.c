@@ -111,7 +111,7 @@ static void timer_mode(void)
 {
 	unsigned short ret,last_sw_state		= OFF;
 	T_DISPLAY timer_value[SEG7_DIGIT_NUM]	= {"000"};
-	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
+//	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
 		ret									= sw_check();
 		if(ret != OFF && last_sw_state 		!= ret){
@@ -145,12 +145,11 @@ static void timer_mode(void)
 			last_sw_state			= ret;
 	}
 	while(1){																//カウントダウン終了
-		ret = input_check();
+/*		ret = input_check();
 		if(ret != OFF){
 			auto_play_end_processing();
 			segled_timer_stop();
-			break;
-		}
+			break;*/
 	}
 }
 /****************************************************************************/
