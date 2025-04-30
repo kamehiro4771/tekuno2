@@ -72,6 +72,7 @@ SPEAKER speaker[3]													= {{50,SQUARE,1},{50,SQUARE,2},{50,SQUARE,3}};
 unsigned char electronic_organ_speaker								= 1;//電子オルガンモード時にいくつスピーカを鳴らすか//設定モードで変更して電子オルガンモードで参照する
 unsigned char seg_timer_song										= 0;
 unsigned char timer_value[3]										= {"100"};
+unsigned long timer_area											= 0;
 /****************************************************************************/
 /* プロトタイプ宣言															*/
 /****************************************************************************/
@@ -98,6 +99,7 @@ void abort(void);
 void main(void)
 {
 	eneiro_initialize();
+	timer_area_registration(timer_area);
 	while(1)
 	{
 		timer_mode();
@@ -110,6 +112,7 @@ void main(void)
 static void timer_mode(void)
 {
 	unsigned short ret,last_sw_state		= OFF;
+	unsigned short cnt						= 0;
 	T_DISPLAY timer_value[SEG7_DIGIT_NUM]	= {"000"};
 //	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
@@ -117,8 +120,8 @@ static void timer_mode(void)
 		if(ret != OFF && last_sw_state 		!= ret){
 			last_sw_state					= ret;
 			if(ret == SW2){
-				segled_timer_start(timer_value);						//タイマスタート
-				break;
+				segled_timer_start(timer_value);							//タイマスタート
+				break;														//ループを抜ける
 			}else{
 				switch(ret){
 				case SW1:
@@ -145,6 +148,13 @@ static void timer_mode(void)
 			last_sw_state			= ret;
 	}
 	while(1){																//カウントダウン終了
+		if(timer_area == 0){
+			timer_area				= 1000;
+			segled_display_update();
+		}
+//		if()//カウントダウン終了したら設定された曲を自動演奏開始タイマ終了を知る必要がある
+		LEDの点灯を変える
+//			automatic_playing_start(CANON,SQUARE,0,0,0);
 /*		ret = input_check();
 		if(ret != OFF){
 			auto_play_end_processing();

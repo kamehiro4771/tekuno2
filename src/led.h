@@ -60,5 +60,6 @@ void output_led(unsigned char led,unsigned char color,long interval);
 void segled_initialize(void);
 unsigned char segled_timer_start(unsigned char *start_value);
 void segled_timer_stop(void);
+void segled_lights_out(void);
 
 #endif /* OUTPUT_LED_H_ */

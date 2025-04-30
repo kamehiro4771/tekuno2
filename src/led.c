@@ -63,10 +63,10 @@ signed short seg_timer_value;
 void output_led(unsigned char led,unsigned char color,long interval)
 {
 	if(interval != 0){
-		if(led_current_interval != 0 && led_current_interval != interval)					//現在の点滅間隔と違う感覚が指定されたら変更
+		if(led_current_interval != 0 && led_current_interval != interval)	//現在の点滅間隔と違う感覚が指定されたら変更
 			count_timer_dell(led_blink);
 		interval_function_set(interval,led_blink);
-	}else if(led_current_interval != 0)							//点滅終了
+	}else if(led_current_interval != 0)										//点滅終了
 		count_timer_dell(led_blink);
 	else
 		led_blink_state	= led_state;
@@ -140,20 +140,18 @@ unsigned char segled_timer_start(unsigned char *start_value)
 /******************************************************************/
 void segled_timer_stop(void)
 {
-//	count_timer_dell();
 	count_timer_dell(segled_timer_update);
 }
 
-/******************************************************************/
-/*1秒ごとに呼び出されて表示をダウンカウント０００になったら自動演奏開始
- *void segled_timer_update(void)
-/******************************************************************/
+/*************************************************************************/
+/*1秒ごとに呼び出されて表示をダウンカウント０００になったらタイマストップ*/
+/*void segled_timer_update(void)										 */
+/*************************************************************************/
 void segled_timer_update(void)
 {
 	unsigned char time_to_string[3];
 	seg_timer_value--;
 	if(seg_timer_value <= 0){
-		automatic_playing_start(CANON,SQUARE,0,0,0);
 		segled_timer_stop();//
 		time_to_string[0] = time_to_string[1] = time_to_string[2] = 0x30;
 	}else{
@@ -165,8 +163,8 @@ void segled_timer_update(void)
 }
 
 /******************************************************************/
-/*
-/*
+/*7セグLEDのダイナミック点灯、1msで桁を切り替えて表示していく	  */
+/*void segled_flush(void)										  */
 /******************************************************************/
 void segled_flush(void)
 {
@@ -176,4 +174,14 @@ void segled_flush(void)
 	current_digit ++;
 	if(current_digit >= SEG7_DIGIT_NUM)
 		current_digit					= 0;
+}
+
+/******************************************************************/
+/*７セグLED消灯													  */
+/*void segled_lights_out(void)									  */
+/******************************************************************/
+void segled_lights_out(void)
+{
+	count_timer_dell(segled_flush);				//ダイナミック点灯停止
+	PORTA.DR.BYTE						= 0;//桁セレクトを0にして消灯
 }
