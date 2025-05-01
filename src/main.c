@@ -99,7 +99,7 @@ void abort(void);
 void main(void)
 {
 	eneiro_initialize();
-	timer_area_registration(timer_area);
+	timer_area_registration(&timer_area);
 	while(1)
 	{
 		timer_mode();
@@ -111,9 +111,11 @@ void main(void)
 /********************************************************************/
 static void timer_mode(void)
 {
-	unsigned short ret,last_sw_state		= OFF;
-	unsigned short cnt						= 0;
-	T_DISPLAY timer_value[SEG7_DIGIT_NUM]	= {"000"};
+	unsigned short ret,last_sw_state			= OFF;
+	unsigned short i							= 0;
+	unsigned short j							= 0;
+	T_DISPLAY timer_value[SEG7_DIGIT_NUM]		= {"000"};
+	T_DISPLAY led_color_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE,BLACK};
 //	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
 		ret									= sw_check();
@@ -147,20 +149,31 @@ static void timer_mode(void)
 		}else
 			last_sw_state			= ret;
 	}
-	while(1){																//カウントダウン終了
+	while(1){																//カウントダウン終了まで待機
+		if(timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0')
+			break;
+	}
+//	automatic_playing_start(CANON,SQUARE,0,0,0);
+	while(1){
 		if(timer_area == 0){
+			for(i = 1;i <= LED_NUM;i++){
+				output_led(i,led_color_array[j],200);
+			}
+			j++;
+			if(j == 8)
+				j					= 0;
 			timer_area				= 1000;
-			segled_display_update();
 		}
+	}
 //		if()//カウントダウン終了したら設定された曲を自動演奏開始タイマ終了を知る必要がある
-		LEDの点灯を変える
+//		LEDの点灯を変える
 //			automatic_playing_start(CANON,SQUARE,0,0,0);
 /*		ret = input_check();
 		if(ret != OFF){
 			auto_play_end_processing();
 			segled_timer_stop();
 			break;*/
-	}
+//	}
 }
 /****************************************************************************/
 /*メインシーケンス															*/

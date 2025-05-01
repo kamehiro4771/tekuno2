@@ -45,6 +45,7 @@ unsigned char segled_state[SEG7_DIGIT_NUM];					//ポートAの点灯したときの状態
 unsigned char current_digit = 0;
 unsigned char segled_blink_state[SEG7_DIGIT_NUM];			//ポートAの消灯したときの状態
 signed short seg_timer_value;
+unsigned char *time_to_string;
 /***********************************************************************/
 /*7セグ以外のLEDの点灯、intervalを指定すれば点滅開始				   */
 /*void output_led(unsigned char led,unsigned char color,long interval) */
@@ -62,18 +63,24 @@ signed short seg_timer_value;
 /***********************************************************************/
 void output_led(unsigned char led,unsigned char color,long interval)
 {
+	led_state						= led_port_value_array[led - 1][color - 1];
+	PORTD.DR.BYTE					= led_state & 0xff;
+	PORTE.DR.BYTE					= (led_state & 0xff00) >> 8;
+	PORTB.DR.BYTE					= (led_state & 0xff0000) >> 16;
 	if(interval != 0){
-		if(led_current_interval != 0 && led_current_interval != interval)	//現在の点滅間隔と違う感覚が指定されたら変更
+		led_blink_state				= led_state;
+		if(led_current_interval == interval){
+			//nop
+		}else if(led_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
+			led_current_interval	= interval;
 			count_timer_dell(led_blink);
-		interval_function_set(interval,led_blink);
+			interval_function_set(interval,led_blink);
+		}else{
+			led_current_interval	= interval;
+			interval_function_set(interval,led_blink);
+		}
 	}else if(led_current_interval != 0)										//点滅終了
 		count_timer_dell(led_blink);
-	else
-		led_blink_state	= led_state;
-	led_state			= led_port_value_array[led - 1][color - 1];
-	PORTD.DR.BYTE		= led_state & 0xff;
-	PORTE.DR.BYTE		= (led_state & 0xff00) >> 8;
-	PORTB.DR.BYTE		= (led_state & 0xff0000) >> 16;
 }
 
 /******************************************************************/
@@ -127,6 +134,7 @@ unsigned char segled_timer_start(unsigned char *start_value)
 	unsigned char i;
 	//引数の判定
 	seg_timer_value			= atoi(start_value);					//カウントダウン用の数値
+	time_to_string			= start_value;
 	if(seg_timer_value > 999)
 		return ERROR;
 	if(ERROR == interval_function_set(1000,segled_timer_update))
@@ -149,7 +157,6 @@ void segled_timer_stop(void)
 /*************************************************************************/
 void segled_timer_update(void)
 {
-	unsigned char time_to_string[3];
 	seg_timer_value--;
 	if(seg_timer_value <= 0){
 		segled_timer_stop();//
