@@ -151,19 +151,17 @@ void speaker_initialize(void)
 /********************************************************************************************/
 void set_output_value(unsigned char scale,unsigned char speaker_num)
 {
-	unsigned char i;
 	SPEAKER *speaker						= get_speaker();
 	switch(speaker_num){
 	case SPEAKER1:
-		for(i = 1;i < 9;i++)
-			output_led(i,BLACK,0);									//LED消灯
+//		led_lights_out();											//LED消灯
 		MTUB.TSTR.BIT.CST0					= 0;					//PWM出力タイマー停止
 		MTUA.TSTR.BIT.CST1					= 0;					//DA出力タイマ停止
 		DA.DACR.BIT.DAOE1					= 1;					//DA出力許可
 		MTU6.TGRA 							= pwm_timer_value[scale];
 		MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
 		da_process_each_waveform(speaker[0].wave_type,scale);		//DA出力に必要な処理、波形ごとの処理
-		output_led(SCALE_LED_NUM[scale],SCALE_COLOR_NUM[scale],0);
+//		output_led(SCALE_LED_NUM[scale],SCALE_COLOR_NUM[scale],0);
 		break;
 	case SPEAKER2:
 		MTUB.TSTR.BIT.CST1					= 0;

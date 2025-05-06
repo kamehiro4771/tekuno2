@@ -57,6 +57,7 @@
 #define WHITE (7)
 #define BLACK (8)
 void output_led(unsigned char led,unsigned char color,long interval);
+void led_lights_out(void);
 void segled_initialize(void);
 unsigned char segled_timer_start(unsigned char *start_value);
 void segled_timer_stop(void);

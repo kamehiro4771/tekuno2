@@ -96,6 +96,7 @@ void abort(void);
 /*							メイン関数										*/
 /*																			*/
 /****************************************************************************/
+//LED1を緑に点灯LED１を青に点灯
 void main(void)
 {
 	eneiro_initialize();
@@ -109,13 +110,18 @@ void main(void)
 /*7セグを利用したタイマ
 /*static void timer_mode(void)
 /********************************************************************/
+/*やりたいこと
+ *	７セグを点滅
+ *	１セグメントづつ点灯させる
+ *
+ */
 static void timer_mode(void)
 {
 	unsigned short ret,last_sw_state			= OFF;
 	unsigned short i							= 0;
 	unsigned short j							= 0;
 	T_DISPLAY timer_value[SEG7_DIGIT_NUM]		= {"000"};
-	T_DISPLAY led_color_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE,BLACK};
+	T_DISPLAY led_color_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE};
 //	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
 		ret									= sw_check();
@@ -150,30 +156,24 @@ static void timer_mode(void)
 			last_sw_state			= ret;
 	}
 	while(1){																//カウントダウン終了まで待機
-		if(timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0')
+		if(timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0'){
 			break;
-	}
-//	automatic_playing_start(CANON,SQUARE,0,0,0);
-	while(1){
-		if(timer_area == 0){
-			for(i = 1;i <= LED_NUM;i++){
-				output_led(i,led_color_array[j],200);
-			}
-			j++;
-			if(j == 8)
-				j					= 0;
-			timer_area				= 1000;
 		}
 	}
-//		if()//カウントダウン終了したら設定された曲を自動演奏開始タイマ終了を知る必要がある
-//		LEDの点灯を変える
-//			automatic_playing_start(CANON,SQUARE,0,0,0);
-/*		ret = input_check();
-		if(ret != OFF){
-			auto_play_end_processing();
-			segled_timer_stop();
-			break;*/
-//	}
+	automatic_playing_start(CANON,SQUARE,0,0,0);
+	while(playing_flg == ON){//演奏中
+		if(timer_area == 0){
+			led_lights_out();
+			for(i = 1;i <= LED_NUM;i++){
+				output_led(i,led_color_array[j],0);
+			}
+			j++;
+			if(j == 7)
+				j = 0;
+			timer_area = 1000;
+		}
+	}
+	led_lights_out();
 }
 /****************************************************************************/
 /*メインシーケンス															*/

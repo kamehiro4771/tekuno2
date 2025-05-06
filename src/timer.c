@@ -6,8 +6,8 @@
  */
 #include "iodefine.h"
 #include "main.h"
-#define MAX_FUNC_NUM (5)
-#define MAX_AREA_NUM (5)
+#define MAX_FUNC_NUM (8)
+#define MAX_AREA_NUM (8)
 /*
  * ワークエリア定義
  */
