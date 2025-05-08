@@ -71,7 +71,7 @@ const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] 	
 SPEAKER speaker[3]													= {{50,SQUARE,1},{50,SQUARE,2},{50,SQUARE,3}};
 unsigned char electronic_organ_speaker								= 1;//電子オルガンモード時にいくつスピーカを鳴らすか//設定モードで変更して電子オルガンモードで参照する
 unsigned char seg_timer_song										= 0;
-unsigned char timer_value[3]										= {"100"};
+unsigned char timer_value[3]										= {"321"};
 unsigned long timer_area											= 0;
 /****************************************************************************/
 /* プロトタイプ宣言															*/
@@ -96,14 +96,14 @@ void abort(void);
 /*							メイン関数										*/
 /*																			*/
 /****************************************************************************/
-//LED1を緑に点灯LED１を青に点灯
 void main(void)
 {
 	eneiro_initialize();
 	timer_area_registration(&timer_area);
+	segled_display_update(timer_value,0);
 	while(1)
 	{
-		timer_mode();
+//		timer_mode();
 	}
 }
 /********************************************************************/
@@ -121,7 +121,8 @@ static void timer_mode(void)
 	unsigned short i							= 0;
 	unsigned short j							= 0;
 	T_DISPLAY timer_value[SEG7_DIGIT_NUM]		= {"000"};
-	T_DISPLAY led_color_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE};
+	T_DISPLAY color_order_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE};
+	segled_display_update(timer_value);
 //	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
 		ret									= sw_check();
@@ -165,7 +166,7 @@ static void timer_mode(void)
 		if(timer_area == 0){
 			led_lights_out();
 			for(i = 1;i <= LED_NUM;i++){
-				output_led(i,led_color_array[j],0);
+				output_led(i,color_order_array[j],0);
 			}
 			j++;
 			if(j == 7)
@@ -175,6 +176,7 @@ static void timer_mode(void)
 	}
 	led_lights_out();
 }
+
 /****************************************************************************/
 /*メインシーケンス															*/
 /*void main_sequence_process(void)											*/

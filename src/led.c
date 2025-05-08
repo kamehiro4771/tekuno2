@@ -32,6 +32,7 @@ const unsigned long led_port_value_array[LED_NUM][LED_COLOR_NUM] = {{0x000001,0x
  ***********************************************************/
 void led_blink(void);
 void segled_flush(void);
+void segled_blink(void);
 void segled_timer_update(void);
 void segled_display_update(unsigned char *ascii);
 /************************************************************/
@@ -41,7 +42,10 @@ long *led_pointer;                                          //7セグ以外のLEDの状
 long led_state;												//7セグ以外のLEDの状態、ポートDとポートEとポートBの点灯したときの状態
 long led_blink_state;										//ポートDとポートEとポートBの消灯したときの状態（点滅指定されたLED以外はついている）
 long led_current_interval;
-unsigned char segled_state[SEG7_DIGIT_NUM];					//ポートAの点灯したときの状態
+unsigned char segled_state[SEG7_DIGIT_NUM];					//7セグLEDの点灯したときの状態
+unsigned char segled_blink_state[SEG7_DIGIT_NUM] = {FON_SP,FON_SP,FON_SP};			//7セグLEDの消灯したときの状態
+unsigned char *segled_pointer = &segled_state[0];			//
+long segled_current_interval;								//7セグの現在の点灯間隔
 unsigned char current_digit = 0;
 unsigned char segled_blink_state[SEG7_DIGIT_NUM];			//ポートAの消灯したときの状態
 signed short seg_timer_value;
@@ -61,9 +65,6 @@ unsigned char *time_to_string;
 /*									8:黒							   */
 /*		  long interval			点滅間隔(ms)						   */
 /***********************************************************************/
-//led_blink_stateとはLEDが消灯したときの状態
-//現在点灯している色を変えたいときができてない
-//LED1を緑に点灯LED１を青に点灯
 void output_led(unsigned char led,unsigned char color,long interval)
 {
 	led_state						|= led_port_value_array[led - 1][color - 1];//
@@ -128,20 +129,42 @@ void segled_initialize(void)
 }
 
 /******************************************************************/
-/*文字列を出力する値に変える
-/* void seg_led_update(unsigned char *display)
+/*現在の表示を更新する変える
+/* void segled_display_update(unsigned char *ascii,long interval)
+/* 	引数：unsigned char *display　表示する数字、文字
+/* 		long interval
 /******************************************************************/
-void segled_display_update(unsigned char *ascii)
+void segled_display_update(unsigned char *ascii,long interval)
 {
 	unsigned char i;
 	for(i = 0;i < 3;i++){
-		if(DISPLAY[i] > 0x7a)
+		if(ascii[i] > 0x7a)
     		segled_state[i]	= NONE;
     	else
     		segled_state[i]	= DISPLAY[ascii[i]];
-    }
+	}
+	if(segled_current_interval == interval){
+		//nop
+	}else if(segled_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
+		segled_current_interval	= interval;
+		count_timer_dell(led_blink);
+		interval_function_set(interval,segled_blink);
+	}else{
+		segled_current_interval	= interval;
+		interval_function_set(interval,segled_blink);
+	}
 }
 
+/******************************************************************/
+/*
+/******************************************************************/
+void segled_blink(void)
+{
+	if(segled_pointer == &segled_state[0])
+		segled_pointer = &segled_blink_state[0];
+	else
+		segled_pointer = &segled_state[0];
+}
 /**********************************************************************/
 /*7セグタイマスタート入力の判定、スタート値のセット、システムタイマへのセット				　　	  */
 /*void segled_timer_start(unsigned char *display)				  	  */
@@ -171,7 +194,7 @@ void segled_timer_stop(void)
 }
 
 /*************************************************************************/
-/*1秒ごとに呼び出されて表示をダウンカウント０００になったらタイマストップ*/
+/*表示をダウンカウント０００になったらタイマストップ										 */
 /*void segled_timer_update(void)										 */
 /*************************************************************************/
 void segled_timer_update(void)
@@ -185,7 +208,7 @@ void segled_timer_update(void)
 		time_to_string[1] = ((seg_timer_value / 10) % 10) + 0x30;
 		time_to_string[2] = (seg_timer_value % 10) + 0x30;
 	}
-	segled_display_update(time_to_string);
+	segled_display_update(time_to_string,0);
 }
 
 /******************************************************************/
@@ -195,7 +218,7 @@ void segled_timer_update(void)
 void segled_flush(void)
 {
 	unsigned char digit_direction[3]	= {0x02,0x04,0x08};
-	PORT4.DR.BYTE						= segled_state[current_digit];
+	PORT4.DR.BYTE						= segled_pointer[current_digit];
 	PORTA.DR.BYTE						= digit_direction[current_digit];
 	current_digit ++;
 	if(current_digit >= SEG7_DIGIT_NUM)
