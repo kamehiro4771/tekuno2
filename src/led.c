@@ -147,7 +147,7 @@ void segled_display_update(unsigned char *ascii,long interval)
 		//nop
 	}else if(segled_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
 		segled_current_interval	= interval;
-		count_timer_dell(led_blink);
+		count_timer_dell(segled_blink);
 		interval_function_set(interval,segled_blink);
 	}else{
 		segled_current_interval	= interval;
@@ -181,7 +181,7 @@ unsigned char segled_timer_start(unsigned char *start_value)
 		return ERROR;
 	if(ERROR == interval_function_set(1000,segled_timer_update))
 		return ERROR;
-	return interval_function_set(1,segled_flush);
+	return SUCCESS;
 }
 
 /******************************************************************/

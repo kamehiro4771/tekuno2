@@ -91,17 +91,17 @@ void count_time(void)
 			/*nop*/
 		}else{
 			timer_cnt_array[i]++;
-			if(func_interval_array[i] == timer_cnt_array[i]){//カウントが呼び出しカウントと一致した
-				func_array[i]();//登録された関数呼び出し
-				timer_cnt_array[i] = 0;//タイマーカウントクリア
+			if(func_interval_array[i] == timer_cnt_array[i]){	//カウントが呼び出し感覚と一致した
+				func_array[i]();								//登録された関数呼び出し
+				timer_cnt_array[i] = 0;							//タイマーカウントクリア
 			}
 		}
 	}
 	for(i = 0;i < area_cnt;i++){
 		if(*(area_array[i]) != 0)
-			(*(area_array[i]))--;//カウントエリアをダウンカウント
+			(*(area_array[i]))--;								//カウントエリアをダウンカウント
 	}
-	__setpsw_i();//割り込み許可
+	__setpsw_i();												//割り込み許可
 }
 
 /********************************************************************************/
@@ -114,20 +114,23 @@ void count_time(void)
 unsigned char interval_function_set(unsigned long interval,void func(void))
 {
 	unsigned char ret,i;
-	__clrpsw_i();											//割り込み禁止
+	__clrpsw_i();																	//割り込み禁止
 	if(function_cnt < MAX_FUNC_NUM){
 		for(i = 0;i < MAX_FUNC_NUM;i++){
 			if(func_array[i] == func){
-				__setpsw_i();								//割り込み許可
-				return SUCCESS;								//関数が既に登録されている
+				ret									= SUCCESS;						//関数が既に登録されている
+			}else if(func_array[i] == NULL){
+				func_interval_array[i]  			= interval;
+				timer_cnt_array[i] 					= 0;
+				func_array[i]						= func;
+				function_cnt++;
+				ret									= SUCCESS;
+				break;
 			}
 		}
-		func_interval_array[function_cnt]  	= interval;
-		func_array[function_cnt++]			= func;
-		ret									= SUCCESS;
 	}else
-		ret									= ERROR;		//登録数オーバー
-	__setpsw_i();											//割り込み許可
+		ret											= ERROR;						//登録数オーバー
+	__setpsw_i();																	//割り込み許可
 	return ret;
 }
 

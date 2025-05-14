@@ -100,10 +100,9 @@ void main(void)
 {
 	eneiro_initialize();
 	timer_area_registration(&timer_area);
-	segled_display_update(timer_value,0);
 	while(1)
 	{
-//		timer_mode();
+		timer_mode();
 	}
 }
 /********************************************************************/
@@ -122,7 +121,7 @@ static void timer_mode(void)
 	unsigned short j							= 0;
 	T_DISPLAY timer_value[SEG7_DIGIT_NUM]		= {"000"};
 	T_DISPLAY color_order_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE};
-	segled_display_update(timer_value);
+	segled_display_update(timer_value,0);
 //	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
 		ret									= sw_check();
@@ -137,19 +136,19 @@ static void timer_mode(void)
 					timer_value[0]		= timer_value[0] + 1;
 					if(timer_value[0] == 0x3a)
 						timer_value[0]	= 0x30;
-					segled_display_update(&timer_value[0]);					//7セグ表示を更新
+					segled_display_update(&timer_value[0],0);					//7セグ表示を更新
 					break;
 				case SW3:
 					timer_value[1]		= timer_value[1] + 1;
 					if(timer_value[1] == 0x3a)
 						timer_value[1]	= 0x30;
-					segled_display_update(&timer_value[0]);					//7セグ表示を更新
+					segled_display_update(&timer_value[0],0);					//7セグ表示を更新
 					break;
 				case SW5:
 					timer_value[2]		= timer_value[2] + 1;
 					if(timer_value[2] == 0x3a)
 						timer_value[2]	= 0x30;
-					segled_display_update(&timer_value[0]);					//7セグ表示を更新
+					segled_display_update(&timer_value[0],0);					//7セグ表示を更新
 					break;
 				}
 			}
@@ -161,6 +160,11 @@ static void timer_mode(void)
 			break;
 		}
 	}
+	//システムタイマの関数をデリートする関数が機能してない
+	//曲を止めると点滅しない点滅止めると音が鳴りっぱなし
+	//segled_flush関数が二つシステムタイマに登録されるなぜ
+	//７セグが部リンクしないなぜ
+	segled_display_update(&timer_value[0],500);
 	automatic_playing_start(CANON,SQUARE,0,0,0);
 	while(playing_flg == ON){//演奏中
 		if(timer_area == 0){
