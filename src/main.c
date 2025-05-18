@@ -34,7 +34,7 @@ const T_DISPLAY SETTING_SPEAKER_SELECT[]										= {"設定するスピーカを選択して
 const T_DISPLAY OUTPUT_SPEAKER_SELECT[]											= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
 
 /*項目名*/
-const T_DISPLAY MODE_NAME[MODE_NUM][64]											= {"電子オルガンモード","自動演奏モード","ゲームモード","設定",};//モード名
+const T_DISPLAY MODE_NAME[MODE_NUM][64]											= {"電子オルガンモード","自動演奏モード","ゲームモード","タイマモード","設定",};//モード名
 const T_DISPLAY TITLE_NAME[SONG_NUM][64]										= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
 																	   	   	   	   "Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","勝利",
 																	   	   	   	   "宿屋","攻撃音","冒険の書","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
@@ -73,6 +73,7 @@ unsigned char electronic_organ_speaker								= 1;//電子オルガンモード時にいくつ
 unsigned char seg_timer_song										= 0;
 unsigned char timer_value[3]										= {"321"};
 unsigned long timer_area											= 0;
+unsigned char mode;
 /****************************************************************************/
 /* プロトタイプ宣言															*/
 /****************************************************************************/
@@ -99,21 +100,17 @@ void abort(void);
 void main(void)
 {
 	eneiro_initialize();
+	automatic_playing_start(INITIAL_CHECK,SQUARE,0,0,0);
 	timer_area_registration(&timer_area);
 	while(1)
 	{
-		timer_mode();
+		main_sequence_process();
 	}
 }
 /********************************************************************/
 /*7セグを利用したタイマ
 /*static void timer_mode(void)
 /********************************************************************/
-/*やりたいこと
- *	７セグを点滅
- *	１セグメントづつ点灯させる
- *
- */
 static void timer_mode(void)
 {
 	unsigned short ret,last_sw_state			= OFF;
@@ -121,8 +118,9 @@ static void timer_mode(void)
 	unsigned short j							= 0;
 	T_DISPLAY timer_value[SEG7_DIGIT_NUM]		= {"000"};
 	T_DISPLAY color_order_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE};
+	segled_initialize();			//システムタイマに７セグLEDのダイナミック点灯登録
 	segled_display_update(timer_value,0);
-//	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
+	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
 	while(1){
 		ret									= sw_check();
 		if(ret != OFF && last_sw_state 		!= ret){
@@ -155,18 +153,18 @@ static void timer_mode(void)
 		}else
 			last_sw_state			= ret;
 	}
+	sci0_receive_start();
 	while(1){																//カウントダウン終了まで待機
-		if(timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0'){
+		if(timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0')
+			break;
+	}
+	segled_display_update(&timer_value[0],500);
+	automatic_playing_start(CANON,TRIANGLE,0,0,0);
+	while(playing_flg == ON){//演奏中
+		if(input_check() != OFF){
+			auto_play_end_processing();
 			break;
 		}
-	}
-	//システムタイマの関数をデリートする関数が機能してない
-	//曲を止めると点滅しない点滅止めると音が鳴りっぱなし
-	//segled_flush関数が二つシステムタイマに登録されるなぜ
-	//７セグが部リンクしないなぜ
-	segled_display_update(&timer_value[0],500);
-	automatic_playing_start(CANON,SQUARE,0,0,0);
-	while(playing_flg == ON){//演奏中
 		if(timer_area == 0){
 			led_lights_out();
 			for(i = 1;i <= LED_NUM;i++){
@@ -178,6 +176,7 @@ static void timer_mode(void)
 			timer_area = 1000;
 		}
 	}
+	segled_lights_out();
 	led_lights_out();
 }
 
@@ -317,24 +316,30 @@ static void selected_mode_transition(unsigned char select)
 {
 	switch(select){
 	case ORGAN:
+		mode	= ORGAN;
 		electronic_organ_mode();
 		break;
 	case AUTOPLAY:
+		mode	= AUTOPLAY;
 		autplay_mode();
 		break;
 	case GAME:
+		mode	= GAME;
 		game_mode();
 		break;
 	case TIMER:
-		timer_mode:
+		mode	= TIMER;
+		timer_mode();
 		break;
 	case SETTING:
+		mode	= SETTING;
 		setting_mode();
 		break;
 	default:
 		send_serial(ERROR_MESSAGE,sizeof(ERROR_MESSAGE));
 		break;
 	}
+	mode		= 0;
 }
 
 /********************************************************************/
@@ -345,13 +350,16 @@ static void electronic_organ_mode(void)
 {
 	unsigned char ret				= OFF,i;
 	unsigned char last_sw_state		= OFF;
+	unsigned char pattern[]			= {1,3,7};
+	unsigned char add[]				= {11,23,35};
 	send_serial(END_METHOD,sizeof(END_METHOD));
 	sci0_receive_start();//受信開始
 	while(1){
 		ret							= sci0_enter_check();
 		if(ret == ON){
 			if(sci0_find_received_data('e') != NOT_FOUND){
-				mute(SPEAKER1);
+				for(i = 1;i <= SELECT_SPEAKER_NUM;i++)
+					mute(i);
 				for(i = 1;i < 9;i++)
 					output_led(i,BLACK,0);
 				break;
@@ -361,27 +369,19 @@ static void electronic_organ_mode(void)
 		ret							= sw_check();
 		if(ret != last_sw_state){
 			last_sw_state				= ret;
-			switch(electronic_organ_speaker){
-			case 1:
-				set_output_value(last_sw_state,SPEAKER1);
-				output_speaker_start(1);
-				break;
-			case 2:
-				set_output_value(last_sw_state,SPEAKER1);
-				set_output_value(last_sw_state + 12,SPEAKER2);
-				output_speaker_start(3);
-				break;
-			case 3:
-				set_output_value(last_sw_state,SPEAKER1);
-				set_output_value(last_sw_state + 12,SPEAKER2);
-				set_output_value(last_sw_state + 24,SPEAKER3);
-				output_speaker_start(7);
-				break;
+			if(last_sw_state == OFF){
+				for(i = 1;i <= electronic_organ_speaker;i++){
+					set_output_value(last_sw_state,i);
+				}
+			}else{
+				for(i = 1;i <= electronic_organ_speaker;i++){
+					set_output_value(last_sw_state + add[i - 1],i);
+				}
 			}
+			output_speaker_start(pattern[electronic_organ_speaker - 1]);
 		}
 	}
 }
-
 /********************************************************************/
 /*自動演奏モード関数												*/
 /*void autplay_mode(void)											*/
@@ -452,12 +452,12 @@ static void setting_mode(void)
 		break;
 	}
 }
-/*
- * エンターキーとスイッチ入力の判定
+
+ /* エンターキーとスイッチ入力の判定
  *unsigned char input_check(void)
  *	戻り値：unsigned char ON:スイッチが押してから離されたエンターキーが入力されていた　OFF:入力なし
  */
- /*
+
 unsigned char input_check(void)
 {
 	unsigned char ret						= OFF;
@@ -474,9 +474,10 @@ unsigned char input_check(void)
 	}
 	return ret;
 }
-*/
+
 //押されたらONを返す仕様
 //スイッチ番号またはENTER＿ONを返す仕様
+/*
 unsigned char input_check(void)
 {
 	unsigned char ret						= OFF;
@@ -485,10 +486,10 @@ unsigned char input_check(void)
 	if(sw_state != OFF)								//スイッチが押されていたら
 		ret									= sw_state;	//スイッチの状態記録
 	else if(sci0_enter_check() == ON)					//スイッチが押されている時はエンターは見ない
-		ret									= ENTER_ON;
+		ret									= ON;
 	return ret;
 }
-
+*/
 struct SPEAKER *get_speaker(void)
 {
 	return speaker;

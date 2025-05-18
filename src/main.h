@@ -48,7 +48,7 @@
 #define SELECT_SPEAKER_NUM (3)
 #define SELECT_OUTPUT_SPEAKER_NUM (3)
 //全項目数
-#define MODE_NUM (4)							//全モード数
+#define MODE_NUM (5)							//全モード数
 #define SONG_NUM (19)							//全部の曲数
 #define WAVE_NUM (4)							//全波形の種類
 #define SETTING_ITEM_NUM (3)					//設定項目数
@@ -146,6 +146,7 @@ typedef struct SPEAKER{
 }SPEAKER;
 
 extern unsigned char playing_flg;
+extern unsigned char mode;
 /****************************************************************************/
 /*プロトタイプ宣言																*/
 /****************************************************************************/

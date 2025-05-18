@@ -125,6 +125,7 @@ void led_lights_out(void)
 void segled_initialize(void)
 {
     current_digit			= 0;
+    segled_current_interval	= 0;
     interval_function_set(1,segled_flush);
 }
 
@@ -232,5 +233,7 @@ void segled_flush(void)
 void segled_lights_out(void)
 {
 	count_timer_dell(segled_flush);				//ダイナミック点灯停止
+	count_timer_dell(segled_blink);
+	segled_pointer 						= &segled_state[0];
 	PORTA.DR.BYTE						= 0;//桁セレクトを0にして消灯
 }

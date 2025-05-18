@@ -55,7 +55,7 @@ void sci0_received(void)
 {
 	sci0.receive_data[sci0.receive_count]		= SCI0.RDR;
 	if(sci0.receive_data[sci0.receive_count] == '\n'){//エンターが押されたら
-		sci0.enter_flg							= ON;//エンターフラグON
+		sci0.enter_flg							= ENTER_ON;//エンターフラグON
 		SCI0.SCR.BIT.RE							= 0;//受信動作禁止
 	}
 	sci0.receive_count							= (sci0.receive_count + 1) % 128;//バッファが0～127の128文字以内にする
