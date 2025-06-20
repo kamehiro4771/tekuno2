@@ -58,7 +58,7 @@ const T_DISPLAY TIMER_SETTING_METHOD[]											= {"SW1:ŽOŒ…–ÚÝ’è@SW3:“ñŒ…–Ú
 																				   "SW2:ƒ^ƒCƒ}ƒXƒ^[ƒg\r\n"};
 const T_DISPLAY ERROR_MESSAGE[]													= {"“ü—Í‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ\n"};
 /*‘I‘ðo—ˆ‚é€–Ú‚ð•Ï‚¦‚½‚¢Žž‚ÍˆÈ‰º‚Ì”z—ñ‚ð•ÏX‚µ‚ÄA‘Œ¸‚ª‚ ‚Á‚½‚ç#define‚ÌSELECT_NUM‚ð•Ï‚¦‚é*/
-const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,SETTING};//‘I‘ð‚Å‚«‚éƒ‚[ƒh
+const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,EDITOR,SETTING};//‘I‘ð‚Å‚«‚éƒ‚[ƒh
 const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]				= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING};//‚±‚Ì”z—ñ‚É“ü‚Á‚Ä‚¢‚é‹È‚ªƒƒjƒ…[‚É•\Ž¦‚³‚ê‘I‘ð‚Å‚«‚é
 const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//‘I‘ð‚Å‚«‚é”gŒ`
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
@@ -475,6 +475,14 @@ unsigned char input_check(void)
 	return ret;
 }
 
+/*********************************************************/
+/**/
+/**/
+/*********************************************************/
+void editor_mode()
+{
+
+}
 //‰Ÿ‚³‚ê‚½‚çON‚ð•Ô‚·Žd—l
 //ƒXƒCƒbƒ`”Ô†‚Ü‚½‚ÍENTERQON‚ð•Ô‚·Žd—l
 /*

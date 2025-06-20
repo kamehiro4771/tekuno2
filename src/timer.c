@@ -73,7 +73,7 @@ void cmt2_wait(unsigned long cnt,unsigned char cks)
 	IR(CMT2,CMI2)		= 0;
 	IPR(CMT2,CMI2)		= 1;
 	CMT.CMSTR1.BIT.STR2 = 1;	//カウントダウン動作開始
-	while(IR(CMT2,CMI2) == 0);
+	while(IR(CMT2,CMI2) == 0);//割り込みが入るまで待機
 	CMT.CMSTR1.BIT.STR2 = 0;	//カウントダウン動作停止
 	IR(CMT2,CMI2) 		= 0;
 	MSTP(CMT2)			= 1;	//モジュールストップ
