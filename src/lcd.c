@@ -30,7 +30,13 @@
 #define RS (PORTA.DDR.BIT.B2)
 #define RW (PORTA.DDR.BIT.B1)
 #define E (PORTA.DDR.BIT.B3)
-
+#define FIRST_ROW (0x00)
+#define SECOND_ROW (0x40)
+ /****************************************************************************/
+ /* ワークエリア定義															*/
+ /****************************************************************************/
+unsigned char display_data[256];//表示データ(1行16文字なので16行分)
+unsigned char address;//現在の表示位置
  /*********************************************************/
  /*インストラクションコードを送る	　　　				  */
  /*void instruction_sending(unsigned short instruction) 　*/
@@ -52,16 +58,16 @@ void instruction_sending(unsigned short instruction)
 /*********************************************************/
 void lcd_init(void)
 {
-	PORT4.DDR.BYTE	= 0xff;//ポート4を出力ポートに設定
-	PORTA.DDR.BYTE	= 0x0d;//PA1,PA2，PA3を出力ポートに設定
-	instruction_sending(FUNCTION_SET);//ファンクションセット1回目
-	cmt2_wait(60000,CKS32);//40ms待機
-	instruction_sending(FUNCTION_SET);//ファンクションセット2回目
-	cmt2_wait(150, CKS32);//100μs待機
-	instruction_sending(FUNCTION_SET);//ファンクションセット3回目
+	PORT4.DDR.BYTE	= 0xff;				//ポート4を出力ポートに設定
+	PORTA.DDR.BYTE	= 0x0d;				//PA1,PA2，PA3を出力ポートに設定
+	instruction_sending(FUNCTION_SET);	//ファンクションセット1回目
+	cmt2_wait(60000,CKS32);				//40ms待機
+	instruction_sending(FUNCTION_SET);	//ファンクションセット2回目
+	cmt2_wait(150, CKS32);				//100μs待機
+	instruction_sending(FUNCTION_SET);	//ファンクションセット3回目
 	while (BUSY_FLAG == 0) {
 	}
-	instruction_sending(FUNCTION_SET);//ファンクションセット4回目
+	instruction_sending(FUNCTION_SET);	//ファンクションセット4回目
 	while (BUSY_FLAG == 0) {
 	}
 	instruction_sending(DISPLAY_OFF);
@@ -89,8 +95,23 @@ void lcd_display(unsigned char *data,unsigned short length)
 	unsigned short instruction;
 	unsigned short i = 0;
 	while (length) {
+		switch (data[i]) {
+		case 0x0d://CR(行頭復帰)
+			instruction_sending();
+			break;
+		case 0x0a://LF(改行)
+			if(((address / 16) % 2))
+				instruction_sending();
+			else
+				instruction_sending();
+			break;
+		case 0x08://バックスペース
+			break;
+		case ://デリート
+		}
 		instruction = WRITE_DATA + data[i++];
 		instruction_sending(instruction);
 		length--;
+		address++;
 	}
 }
