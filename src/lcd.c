@@ -22,27 +22,31 @@
 #define CURSOL_SHIFT_RIGHT (0x018)		//カーソルを右に移動
 #define CURSOL_SHIFT_LEFT (0x010)		//カーソルを左に移動
 #define SET_DDRAM_ADDRESS (0X080)		//ディスプレイのアドレスを指定する
-#define BUSYFLAG_LEADOUT (0x100)		//内部操作中かどうか確認する
+#define READ_OUT (0X100)	//インストラクションレジスタの値を読む
 #define WRITE_DATA (0x200)				//DDRAMに書き込む
-#define READ_DATA (0x300)				//DDRAMを読む
+#define READ_DATA (0x300)				//DDRAMのデータを読む
+
 #define BUSY_FLAG (PORT4.PORT.BIT.B7)
 #define DB (PORT4.DDR.BYTE)
 #define RS (PORTA.DDR.BIT.B2)
 #define RW (PORTA.DDR.BIT.B1)
 #define E (PORTA.DDR.BIT.B3)
-#define FIRST_ROW (0x00)
-#define SECOND_ROW (0x40)
+#define FIRST_ROW (0x00)				//1行目の1番左のアドレス
+#define SECOND_ROW (0x40)				//2行目の1番左のアドレス
+#define LINE_UP (0)
+#define LINE_DOWN (1)
  /****************************************************************************/
  /* ワークエリア定義															*/
  /****************************************************************************/
-unsigned char display_data[256];//表示データ(1行16文字なので16行分)
-unsigned char address;//現在の表示位置
+unsigned char display_data[16][16];//表示データ(1行16文字なので16行分)
+unsigned char digit;//現在表示している桁位置
+unsigned char line;//現在表示している行番号
  /*********************************************************/
  /*インストラクションコードを送る	　　　				  */
- /*void instruction_sending(unsigned short instruction) 　*/
+ /*void instruction_set(unsigned short instruction) 　*/
  /*引数：unsigned short instruction						  */
  /*********************************************************/
-void instruction_sending(unsigned short instruction)
+unsigned char instruction_set(unsigned short instruction)
 {
 	DB = (instruction & 0x00ff);
 	RW = (instruction >> 8) & 1
@@ -50,6 +54,23 @@ void instruction_sending(unsigned short instruction)
 	E = 1;
 	cmt2_wait(2, CKS8);//約300ns待機
 	E = 0;
+	return DB;
+}
+
+/***************************************************************/
+/*ビジーフラグを読んで、インストラクションを送る			 　*/
+/*unsigned char lcd_control(unsigned short instrucion)		   */
+/*	引数：unsigned short instruction　転送するインストラクション*/
+/*	戻り値：unsigned char DB0～7							　 */
+/***************************************************************/
+unsigned char lcd_control(unsigned short instruction)
+{
+	instruction_set(READ_OUT);
+	while (BUSY_FLAG == 0) {
+	}
+	if (instruction == READ_OUT)
+		return DB;
+	return instruction_set(instruction);	
 }
 
 /*********************************************************/
@@ -60,30 +81,40 @@ void lcd_init(void)
 {
 	PORT4.DDR.BYTE	= 0xff;				//ポート4を出力ポートに設定
 	PORTA.DDR.BYTE	= 0x0d;				//PA1,PA2，PA3を出力ポートに設定
-	instruction_sending(FUNCTION_SET);	//ファンクションセット1回目
+	instruction_set(FUNCTION_SET);		//ファンクションセット1回目
 	cmt2_wait(60000,CKS32);				//40ms待機
-	instruction_sending(FUNCTION_SET);	//ファンクションセット2回目
+	instruction_set(FUNCTION_SET);		//ファンクションセット2回目
 	cmt2_wait(150, CKS32);				//100μs待機
-	instruction_sending(FUNCTION_SET);	//ファンクションセット3回目
-	while (BUSY_FLAG == 0) {
-	}
-	instruction_sending(FUNCTION_SET);	//ファンクションセット4回目
-	while (BUSY_FLAG == 0) {
-	}
-	instruction_sending(DISPLAY_OFF);
-	while (BUSY_FLAG == 0) {
-	}
-	instruction_sending(CLEAR_DISPLAY);
-	while (BUSY_FLAG == 0) {
-	}
-	instruction_sending(ENTRY_MODE_RIGHT);
-	while (BUSY_FLAG == 0) {
-	}
-	instruction_sending(DISPLAY_ON);
-	while (BUSY_FLAG == 0) {
-	}
+	lcd_control(FUNCTION_SET);			//ファンクションセット3回目
+	lcd_control(FUNCTION_SET);			//ファンクションセット4回目
+	lcd_control(DISPLAY_OFF);
+	lcd_control(CLEAR_DISPLAY);
+	lcd_control(ENTRY_MODE_RIGHT);
+	lcd_control(DISPLAY_ON);
 }
 
+/*************************************************************/
+/*改行処理													 */
+/*void lcd_line_feed(unsigned char up_or_down)*/
+/*************************************************************/
+//上に改行するか下に改行する
+//スクロールする場合は、現在の表示データを更新する
+//display_dataを見てカーソルの位置を移動させる
+//digit変数の変更
+//line変数の変更
+void lcd_line_feed()
+{
+
+}
+
+/*************************************************************/
+/*LCDの表示クリア*/
+/*void lcd_clear(void)*/
+/*************************************************************/
+void lcd_clear(void)
+{
+
+}
 /*************************************************************/
 /*LCDにデータを表示する										 */
 /*void lcd_display(unsigned char *data,unsigned short length)*/
@@ -94,24 +125,36 @@ void lcd_display(unsigned char *data,unsigned short length)
 {
 	unsigned short instruction;
 	unsigned short i = 0;
+	unsigned char cursol = lcd_control(READ_OUT);
 	while (length) {
 		switch (data[i]) {
 		case 0x0d://CR(行頭復帰)
-			instruction_sending();
+			if (cursol == <= 0x0f)
+				lcd_control(SET_DDRAM_ADDRESS);
+			else
+				lcd_control(SET_DDRAM_ADDRESS | 0x40);
 			break;
 		case 0x0a://LF(改行)
-			if(((address / 16) % 2))
-				instruction_sending();
+			if(line % 2) == 0)
+				lcd_line_feed(LINE_DOWN);
 			else
-				instruction_sending();
+				lcd_line_feed(LINE_UP);
 			break;
 		case 0x08://バックスペース
+			if (digit == 0)
+				lcd_line_feed(LINE_UP);
+			else
+				digit--;
+			lcd_control(CURSOL_SHIFT_LEFT);
 			break;
-		case ://デリート
+		default:
+			instruction = WRITE_DATA + data[i++];
+			lcd_control(instruction);
+			digit++;
+			if (digit == 15)
+				lcd_line_feed();
+			break;
 		}
-		instruction = WRITE_DATA + data[i++];
-		instruction_sending(instruction);
 		length--;
-		address++;
 	}
 }
