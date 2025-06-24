@@ -18,4 +18,5 @@ void eneiro_initialize(void)
 	cmt1_initiralize();				//乱数生成用タイマ
 	speaker_initialize();			//スピーカ用PWM,DAコンバータ、DA出力用タイマ初期化
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
+	lcd_init();
 }

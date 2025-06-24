@@ -41,6 +41,7 @@
 unsigned char display_data[16][16];//表示データ(1行16文字なので16行分)
 unsigned char digit;//現在表示している桁位置
 unsigned char line;//現在表示している行番号
+unsigned char esc_flag = OFF;
  /*********************************************************/
  /*インストラクションコードを送る	　　　				  */
  /*void instruction_set(unsigned short instruction) 　*/
@@ -49,7 +50,7 @@ unsigned char line;//現在表示している行番号
 unsigned char instruction_set(unsigned short instruction)
 {
 	DB = (instruction & 0x00ff);
-	RW = (instruction >> 8) & 1
+	RW = (instruction >> 8) & 1;
 	RS |= (instruction >> 8) & 2;
 	E = 1;
 	cmt2_wait(2, CKS8);//約300ns待機
@@ -102,18 +103,32 @@ void lcd_init(void)
 //display_dataを見てカーソルの位置を移動させる
 //digit変数の変更
 //line変数の変更
-void lcd_line_feed()
+void lcd_line_feed(unsigned char up_or_down)
 {
+	digit = 15;
+	if (up_or_down == LINE_UP) {
+		line--;
 
+	}
+	else {
+		line++;
+	}
+	while (display_data[line][digit] == ' ') {
+		digit--;
+	}
 }
 
+void lcd_page_ud()
+{
+	
+}
 /*************************************************************/
 /*LCDの表示クリア*/
 /*void lcd_clear(void)*/
 /*************************************************************/
 void lcd_clear(void)
 {
-
+	
 }
 /*************************************************************/
 /*LCDにデータを表示する										 */
@@ -121,13 +136,24 @@ void lcd_clear(void)
 /*引数：*/
 /**/
 /*************************************************************/
+//改行する条件
+/*	エンターキー入力
+*	↓キー入力
+*	↑キー入力
+*	一番左で←キー入力
+*	一番右で→キー入力
+*	一番右で文字入力
+*	一番左でバックスペースキー入力
+* 
+*/
+/*
 void lcd_display(unsigned char *data,unsigned short length)
 {
 	unsigned short instruction;
 	unsigned short i = 0;
-	unsigned char cursol = lcd_control(READ_OUT);
+	unsigned char cursol = lcd_control(READ_OUT);//現在のカーソル位置を取得
 	while (length) {
-		switch (data[i]) {
+		switch (data[i]) {//改行のあるなしを判定
 		case 0x0d://CR(行頭復帰)
 			if (cursol == <= 0x0f)
 				lcd_control(SET_DDRAM_ADDRESS);
@@ -147,6 +173,15 @@ void lcd_display(unsigned char *data,unsigned short length)
 				digit--;
 			lcd_control(CURSOL_SHIFT_LEFT);
 			break;
+		case 0x1b://エスケープシーケンス開始
+
+			break;
+		case '':
+			break;
+		case '':
+			break;
+		case '':
+			break;
 		default:
 			instruction = WRITE_DATA + data[i++];
 			lcd_control(instruction);
@@ -158,3 +193,4 @@ void lcd_display(unsigned char *data,unsigned short length)
 		length--;
 	}
 }
+*/
