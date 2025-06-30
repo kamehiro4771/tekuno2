@@ -18,9 +18,11 @@ void io_port_initialize(void)
 	//7SEGLEDa~DPのポートの設定
 	PORT4.DDR.BYTE				= 0xff;//出力ポートに設定
 	//7SEGLEDのコモン端子の設定
+#ifndef LCD
 	PORTA.DDR.BIT.B1			= 1;
 	PORTA.DDR.BIT.B2			= 1;
 	PORTA.DDR.BIT.B3			= 1;
+#endif
 	//スイッチの設定
 	PORTC.DDR.BIT.B0			= 0;
 	PORTC.DDR.BIT.B1			= 0;

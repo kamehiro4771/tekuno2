@@ -22,15 +22,15 @@
 #define CURSOL_SHIFT_RIGHT (0x018)		//カーソルを右に移動
 #define CURSOL_SHIFT_LEFT (0x010)		//カーソルを左に移動
 #define SET_DDRAM_ADDRESS (0X080)		//ディスプレイのアドレスを指定する
-#define READ_OUT (0X100)	//インストラクションレジスタの値を読む
+#define READ_OUT (0X100)				//インストラクションレジスタの値を読む
 #define WRITE_DATA (0x200)				//DDRAMに書き込む
 #define READ_DATA (0x300)				//DDRAMのデータを読む
 
 #define BUSY_FLAG (PORT4.PORT.BIT.B7)
-#define DB (PORT4.DDR.BYTE)
-#define RS (PORTA.DDR.BIT.B2)
-#define RW (PORTA.DDR.BIT.B1)
-#define E (PORTA.DDR.BIT.B3)
+#define DB (PORT4.DR.BYTE)
+#define RS (PORTA.DR.BIT.B2)
+#define RW (PORTA.DR.BIT.B1)
+#define E (PORTA.DR.BIT.B3)
 #define FIRST_ROW (0x00)				//1行目の1番左のアドレス
 #define SECOND_ROW (0x40)				//2行目の1番左のアドレス
 #define LINE_UP (0)
@@ -51,7 +51,7 @@ unsigned char instruction_set(unsigned short instruction)
 {
 	DB = (instruction & 0x00ff);
 	RW = (instruction >> 8) & 1;
-	RS |= (instruction >> 8) & 2;
+	RS = (instruction >> 8) & 2;
 	E = 1;
 	cmt2_wait(2, CKS8);//約300ns待機
 	E = 0;
@@ -66,8 +66,8 @@ unsigned char instruction_set(unsigned short instruction)
 /***************************************************************/
 unsigned char lcd_control(unsigned short instruction)
 {
-	instruction_set(READ_OUT);
-	while (BUSY_FLAG == 0) {
+	while (BUSY_FLAG == 1) {
+		instruction_set(READ_OUT);
 	}
 	if (instruction == READ_OUT)
 		return DB;
@@ -81,7 +81,7 @@ unsigned char lcd_control(unsigned short instruction)
 void lcd_init(void)
 {
 	PORT4.DDR.BYTE	= 0xff;				//ポート4を出力ポートに設定
-	PORTA.DDR.BYTE	= 0x0d;				//PA1,PA2，PA3を出力ポートに設定
+	PORTA.DDR.BYTE	|= 0x0e;				//PA1,PA2，PA3を出力ポートに設定
 	instruction_set(FUNCTION_SET);		//ファンクションセット1回目
 	cmt2_wait(60000,CKS32);				//40ms待機
 	instruction_set(FUNCTION_SET);		//ファンクションセット2回目
