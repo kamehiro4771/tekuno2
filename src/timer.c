@@ -78,6 +78,7 @@ void cmt2_wait(unsigned long cnt,unsigned char cks)
 	IR(CMT2,CMI2) 		= 0;
 	MSTP(CMT2)			= 1;	//モジュールストップ
 }
+
 /********************************************************************/
 /*マルチファンクションタイマのコンペアマッチA割り込みで呼ばれる		*/
 /*void count_time(void)												*/

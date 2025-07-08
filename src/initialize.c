@@ -19,4 +19,5 @@ void eneiro_initialize(void)
 	speaker_initialize();			//スピーカ用PWM,DAコンバータ、DA出力用タイマ初期化
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
 	lcd_init();
+	automatic_playing_start(INITIAL_CHECK, SQUARE, 0, 0, 0);
 }

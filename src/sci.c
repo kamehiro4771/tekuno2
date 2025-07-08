@@ -197,7 +197,7 @@ signed long a_to_i(void)
 	if(sci0.receive_count > 7)//5Œ…{CR+LF‚æ‚è‚à‘½‚­“ü—Í‚³‚ê‚Ä‚¢‚½‚ç[‚P‚ð•Ô‚·
 		return -1;
 	for(i = 0;sci0.receive_data[i] >= '0' && sci0.receive_data[i] <= '9';i++){
-		num[i]		= sci0.receive_data[i] - 0x30;
+		num[i]		= sci0.receive_data[i] - '0';
 	}
 	if(i != sci0.receive_count - 2 || i == 0)
 		return -1;//“r’†‚Å•¶Žš‚ª“ü—Í‚³‚ê‚Ä‚¢‚½ŽžAƒGƒ“ƒ^[‚¾‚¯‰Ÿ‚³‚ê‚½‚Æ‚«

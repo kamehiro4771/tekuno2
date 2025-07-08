@@ -77,16 +77,12 @@ unsigned char mode;
 /****************************************************************************/
 /* プロトタイプ宣言															*/
 /****************************************************************************/
-void main(void);
 static void main_sequence_process(void);
-static signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],const unsigned char *select_num,unsigned char item_num,const unsigned char *end_method);
-static void selected_mode_transition(unsigned char select);
 static void electronic_organ_mode(void);
 static void autplay_mode(void);
 static void setting_mode(void);
 static void game_mode(void);
 static void timer_mode(void);
-//unsigned short item_select(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num);
 #ifdef __cplusplus
 extern "C" {
 void abort(void);
@@ -100,84 +96,108 @@ void abort(void);
 void main(void)
 {
 	eneiro_initialize();
-	automatic_playing_start(INITIAL_CHECK,SQUARE,0,0,0);
 	timer_area_registration(&timer_area);
 	while(1)
 	{
 		main_sequence_process();
 	}
 }
-/********************************************************************/
-/*7セグを利用したタイマ
-/*static void timer_mode(void)
-/********************************************************************/
-static void timer_mode(void)
+/* エンターキーとスイッチ入力の判定
+*unsigned char input_check(void)
+*	戻り値：unsigned char ON:スイッチが押してから離されたエンターキーが入力されていた　OFF:入力なし
+*/
+
+unsigned char input_check(void)
 {
-	unsigned short ret,last_sw_state			= OFF;
-	unsigned short i							= 0;
-	unsigned short j							= 0;
-	T_DISPLAY timer_value[SEG7_DIGIT_NUM]		= {"000"};
-	T_DISPLAY color_order_array[LED_COLOR_NUM]	= {RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE};
-	segled_initialize();			//システムタイマに７セグLEDのダイナミック点灯登録
-	segled_display_update(timer_value,0);
-	send_serial(TIMER_SETTING_METHOD,sizeof(TIMER_SETTING_METHOD));		//操作方法表示
-	while(1){
-		ret									= sw_check();
-		if(ret != OFF && last_sw_state 		!= ret){
-			last_sw_state					= ret;
-			if(ret == SW2){
-				segled_timer_start(timer_value);							//タイマスタート
-				break;														//ループを抜ける
-			}else{
-				switch(ret){
-				case SW1:
-					timer_value[0]		= timer_value[0] + 1;
-					if(timer_value[0] == 0x3a)
-						timer_value[0]	= 0x30;
-					segled_display_update(&timer_value[0],0);					//7セグ表示を更新
-					break;
-				case SW3:
-					timer_value[1]		= timer_value[1] + 1;
-					if(timer_value[1] == 0x3a)
-						timer_value[1]	= 0x30;
-					segled_display_update(&timer_value[0],0);					//7セグ表示を更新
-					break;
-				case SW5:
-					timer_value[2]		= timer_value[2] + 1;
-					if(timer_value[2] == 0x3a)
-						timer_value[2]	= 0x30;
-					segled_display_update(&timer_value[0],0);					//7セグ表示を更新
-					break;
-				}
-			}
-		}else
-			last_sw_state			= ret;
+	unsigned char ret = OFF;
+	static unsigned char sw_state = OFF;
+	static unsigned char last_sw_state = OFF;
+	sw_state = sw_check();
+	if (sw_state != OFF) {//スイッチが押されていたら
+		last_sw_state = sw_state;//スイッチの状態記録
 	}
-	sci0_receive_start();
-	while(1){																//カウントダウン終了まで待機
-		if(timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0')
-			break;
+	else if (sci0_enter_check() == ON) {//スイッチが押されている時はエンターは見ない
+		ret = ON;
 	}
-	segled_display_update(&timer_value[0],500);
-	automatic_playing_start(CANON,TRIANGLE,0,0,0);
-	while(playing_flg == ON){//演奏中
-		if(input_check() != OFF){
-			auto_play_end_processing();
-			break;
+	else if (last_sw_state != OFF) {//スイッチが離された
+		ret = last_sw_state;
+		last_sw_state = OFF;
+	}
+	return ret;
+}
+
+/*********************************************************************************************************************************/
+/*アイテムセレクトシーケンス																									 */
+/*signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)*/
+/*		引数：const unsigned char *item_select
+/*			const unsigned char (*item_name)[64]
+ * 			const unsigned char *select_num
+ * 			const unsigned char *end_method
+/*			unsigned char item_num
+/*********************************************************************************************************************************/
+static signed short item_select_sequence(const T_DISPLAY* item_select, const T_DISPLAY(*item_name)[64], const T_DISPLAY* select_num, unsigned char item_num, const T_DISPLAY* end_method)
+{
+	static unsigned char item_select_sequence_num = 0;
+	static signed char ret;
+	switch (item_select_sequence_num) {
+	case 0://画面表示
+		sci0_receive_start();//受信開始
+		selection_screen_display(item_select, item_name, select_num, item_num, end_method);//選択画面が表示される
+		item_select_sequence_num++;
+		break;
+	case 1://入力待ち
+		ret = input_check();
+		if (ret == ON) {//キーボードで入力があった時
+			ret = a_to_i();//受信データを数値にして受け取る
+			item_select_sequence_num++;
 		}
-		if(timer_area == 0){
-			led_lights_out();
-			for(i = 1;i <= LED_NUM;i++){
-				output_led(i,color_order_array[j],0);
-			}
-			j++;
-			if(j == 7)
-				j = 0;
-			timer_area = 1000;
-		}
+		else if (ret != OFF)//スイッチで入力があった時
+			item_select_sequence_num++;
+		break;
+	case 2://入力値の判定
+		item_select_sequence_num = 0;
+		if (ret <= item_num && ret > 0)
+			return select_num[ret - 1];
+		if (sci0_find_received_data('e'))
+			return 'e';
+		break;
 	}
-	segled_lights_out();
-	led_lights_out();
+	return -1;
+}
+
+/********************************************************************/
+/*選択したモードに遷移する											*/
+/*void selected_mode_transition(int *select)						*/
+/*
+/********************************************************************/
+static void selected_mode_transition(unsigned char select)
+{
+	switch (select) {
+	case ORGAN:
+		mode = ORGAN;
+		electronic_organ_mode();
+		break;
+	case AUTOPLAY:
+		mode = AUTOPLAY;
+		autplay_mode();
+		break;
+	case GAME:
+		mode = GAME;
+		game_mode();
+		break;
+	case TIMER:
+		mode = TIMER;
+		timer_mode();
+		break;
+	case SETTING:
+		mode = SETTING;
+		setting_mode();
+		break;
+	default:
+		send_serial(ERROR_MESSAGE, sizeof(ERROR_MESSAGE));
+		break;
+	}
+	mode = 0;
 }
 
 /****************************************************************************/
@@ -228,43 +248,7 @@ static void selection_screen_display(const T_DISPLAY *select_item,const T_DISPLA
 		send_serial(end_method,strlen((const char*)end_method));
 }
 
-/*********************************************************************************************************************************/
-/*アイテムセレクトシーケンス																									 */
-/*signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)*/
-/*		引数：const unsigned char *item_select
-/*			const unsigned char (*item_name)[64]
- * 			const unsigned char *select_num
- * 			const unsigned char *end_method
-/*			unsigned char item_num
-/*********************************************************************************************************************************/
-static signed short item_select_sequence(const T_DISPLAY *item_select,const T_DISPLAY (*item_name)[64],const T_DISPLAY *select_num,unsigned char item_num,const T_DISPLAY *end_method)
-{
-	static unsigned char item_select_sequence_num = 0;
-	static signed char ret;
-	switch(item_select_sequence_num){
-	case 0://画面表示
-		sci0_receive_start();//受信開始
-		selection_screen_display(item_select,item_name,select_num,item_num,end_method);//選択画面が表示される
-		item_select_sequence_num++;
-		break;
-	case 1://入力待ち
-		ret = input_check();
-		if(ret == ON){
-			ret			= a_to_i();//受信データを数値にして受け取る
-			item_select_sequence_num++;
-		}else if(ret != OFF)
-			item_select_sequence_num++;
-		break;
-	case 2://入力値の判定
-		item_select_sequence_num		= 0;
-		if(ret <= item_num && ret > 0)
-			return select_num[ret - 1];
-		if(sci0_find_received_data('e'))
-			return 'e';
-		break;
-	}
-	return -1;
-}
+
 /*********************************************************************************************************/
 /*デューティ比の設定																					 */
 /*void duty_setting(unsigned char speaker_num)															 */
@@ -307,40 +291,7 @@ static void duty_setting(void)
 	}
 	speaker[speaker_num - 1].duty_value		= ret;
 }
-/********************************************************************/
-/*選択したモードに遷移する											*/
-/*void selected_mode_transition(int *select)						*/
-/*	
-/********************************************************************/
-static void selected_mode_transition(unsigned char select)
-{
-	switch(select){
-	case ORGAN:
-		mode	= ORGAN;
-		electronic_organ_mode();
-		break;
-	case AUTOPLAY:
-		mode	= AUTOPLAY;
-		autplay_mode();
-		break;
-	case GAME:
-		mode	= GAME;
-		game_mode();
-		break;
-	case TIMER:
-		mode	= TIMER;
-		timer_mode();
-		break;
-	case SETTING:
-		mode	= SETTING;
-		setting_mode();
-		break;
-	default:
-		send_serial(ERROR_MESSAGE,sizeof(ERROR_MESSAGE));
-		break;
-	}
-	mode		= 0;
-}
+
 
 /********************************************************************/
 /*電子オルガンモード関数											*/
@@ -453,28 +404,81 @@ static void setting_mode(void)
 	}
 }
 
- /* エンターキーとスイッチ入力の判定
- *unsigned char input_check(void)
- *	戻り値：unsigned char ON:スイッチが押してから離されたエンターキーが入力されていた　OFF:入力なし
- */
 
-unsigned char input_check(void)
+/********************************************************************/
+/*7セグを利用したタイマ
+/*static void timer_mode(void)
+/********************************************************************/
+static void timer_mode(void)
 {
-	unsigned char ret						= OFF;
-	static unsigned char sw_state			= OFF;
-	static unsigned char last_sw_state		= OFF;
-	sw_state				= sw_check();
-	if(sw_state != OFF){//スイッチが押されていたら
-		last_sw_state		= sw_state;//スイッチの状態記録
-	}else if(sci0_enter_check() == ON){//スイッチが押されている時はエンターは見ない
-		ret				= ON;
-	}else if(last_sw_state != OFF){//スイッチが離された
-		ret				= last_sw_state;
-		last_sw_state	= OFF;
+	unsigned short ret, last_sw_state = OFF;
+	unsigned short i = 0;
+	unsigned short j = 0;
+	T_DISPLAY timer_value[SEG7_DIGIT_NUM] = { "000" };
+	T_DISPLAY color_order_array[LED_COLOR_NUM] = { RED,GREEN,BLUE,YELLOW,CYAN,MAGENTA,WHITE };
+	segled_initialize();			//システムタイマに７セグLEDのダイナミック点灯登録
+	segled_display_update(timer_value, 0);
+	send_serial(TIMER_SETTING_METHOD, sizeof(TIMER_SETTING_METHOD));		//操作方法表示
+	while (1) {
+		ret = sw_check();
+		if (ret != OFF && last_sw_state != ret) {
+			last_sw_state = ret;
+			if (ret == SW2) {
+				segled_timer_start(timer_value);							//タイマスタート
+				break;														//ループを抜ける
+			}
+			else {
+				switch (ret) {
+				case SW1:
+					timer_value[0] = timer_value[0] + 1;
+					if (timer_value[0] == 0x3a)
+						timer_value[0] = 0x30;
+					segled_display_update(&timer_value[0], 0);					//7セグ表示を更新
+					break;
+				case SW3:
+					timer_value[1] = timer_value[1] + 1;
+					if (timer_value[1] == 0x3a)
+						timer_value[1] = 0x30;
+					segled_display_update(&timer_value[0], 0);					//7セグ表示を更新
+					break;
+				case SW5:
+					timer_value[2] = timer_value[2] + 1;
+					if (timer_value[2] == 0x3a)
+						timer_value[2] = 0x30;
+					segled_display_update(&timer_value[0], 0);					//7セグ表示を更新
+					break;
+				}
+			}
+		}
+		else
+			last_sw_state = ret;
 	}
-	return ret;
+	sci0_receive_start();
+	while (1) {																//カウントダウン終了まで待機
+		if (timer_value[0] == '0' && timer_value[1] == '0' && timer_value[2] == '0')
+			break;
+	}
+	segled_display_update(&timer_value[0], 500);
+	automatic_playing_start(CANON, TRIANGLE, 0, 0, 0);
+	while (playing_flg == ON) {//演奏中
+		if (input_check() != OFF) {
+			auto_play_end_processing();
+			break;
+		}
+		if (timer_area == 0) {
+			led_lights_out();
+			for (i = 1; i <= LED_NUM; i++) {
+				output_led(i, color_order_array[j], 0);
+			}
+			j++;
+			if (j == 7)
+				j = 0;
+			timer_area = 1000;
+		}
+	}
+	segled_lights_out();
+	led_lights_out();
 }
-
 /*********************************************************/
 /**/
 /**/
