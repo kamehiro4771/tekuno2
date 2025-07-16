@@ -125,7 +125,32 @@ unsigned char input_check(void)
 	}
 	return ret;
 }
-
+/************************************************************************************/
+/*選択項目表示																		*/
+/*void selection_screen_display(char *item,char *item_name,unsigned char item_num)	*/
+/*			const unsigned char *item:選択する内容									*/
+/*			const unsigned char *item_name:選択する項目名配列へのポインタ			*/
+/*			const unsigned char *select_num選択できる項目の配列番号の配列へのポインタ			*/
+/*			char item_num:項目の数													*/
+/************************************************************************************/
+static void selection_screen_display(const T_DISPLAY* select_item, const T_DISPLAY(*item_name)[64], T_DISPLAY* select_num, unsigned char item_num, T_DISPLAY* end_method)
+{
+	unsigned char i;
+	unsigned char index_num[8];
+	send_serial(RESET, 10);//画面をリセット
+	send_serial(select_item, strlen((const char*)select_item));
+	for (i = 1; i <= item_num; i++) {
+		sprintf((char*)index_num, "%d:", i);
+		send_serial(index_num, 2);
+		send_serial(item_name[select_num[i - 1] - 1], strlen((const char*)item_name[select_num[i - 1] - 1]));
+		send_serial("\n", 1);
+		while (sci0_get_reg_0_flg() != ON) {
+			//index_numが書き換えられるとおかしくなるので全ての送信が完了するまで待つ
+		}
+	}
+	if (end_method != NULL)//終了操作ひょうじするか
+		send_serial(end_method, strlen((const char*)end_method));
+}
 /*********************************************************************************************************************************/
 /*アイテムセレクトシーケンス																									 */
 /*signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)*/
@@ -220,33 +245,7 @@ static void main_sequence_process(void)
 			break;
 	}
 }
-/************************************************************************************/
-/*選択項目表示																		*/
-/*void selection_screen_display(char *item,char *item_name,unsigned char item_num)	*/
-/*			const unsigned char *item:選択する内容									*/
-/*			const unsigned char *item_name:選択する項目名配列へのポインタ			*/
-/*			const unsigned char *select_num選択できる項目の配列番号の配列へのポインタ			*/
-/*			char item_num:項目の数													*/
-/************************************************************************************/
-//こんなにたくさんsend_serialしないといけないか
-static void selection_screen_display(const T_DISPLAY *select_item,const T_DISPLAY (*item_name)[64],T_DISPLAY *select_num,unsigned char item_num,T_DISPLAY *end_method)
-{
-	unsigned char i;
-	unsigned char index_num[8];
-	send_serial(RESET,10);//画面をリセット
-	send_serial(select_item,strlen((const char*)select_item));
-	for(i = 1;i <= item_num;i++){
-		sprintf((char *)index_num,"%d:",i);
-		send_serial(index_num,2);
-		send_serial(item_name[select_num[i - 1] - 1],strlen((const char *)item_name[select_num[i - 1] - 1]));
-		send_serial("\n",1);
-		while(sci0_get_reg_0_flg() != ON){
-			//index_numが書き換えられるとおかしくなるので送信完了するまで待つ
-		}
-	}
-	if(end_method != NULL)//終了操作ひょうじするか
-		send_serial(end_method,strlen((const char*)end_method));
-}
+
 
 
 /*********************************************************************************************************/

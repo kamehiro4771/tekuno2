@@ -15,10 +15,11 @@ void io_port_initialize(void)
 	PORTD.DDR.BYTE				= 0xff;
 	PORTE.DDR.BYTE				= 0xff;
 	PORTB.DDR.BYTE				= 0xff;
+#ifndef LCD
 	//7SEGLEDa~DPのポートの設定
 	PORT4.DDR.BYTE				= 0xff;//出力ポートに設定
 	//7SEGLEDのコモン端子の設定
-#ifndef LCD
+
 	PORTA.DDR.BIT.B1			= 1;
 	PORTA.DDR.BIT.B2			= 1;
 	PORTA.DDR.BIT.B3			= 1;

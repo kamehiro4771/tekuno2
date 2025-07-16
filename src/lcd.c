@@ -42,6 +42,26 @@ unsigned char display_data[16][16];//表示データ(1行16文字なので16行分)
 unsigned char digit;//現在表示している桁位置
 unsigned char line;//現在表示している行番号
 unsigned char esc_flag = OFF;
+
+
+unsigned char read_busy_flag(void)
+{
+	unsigned char busy;
+    RS = 0;         // コマンドモード
+    RW = 1;         // 読み取りモード
+    PORT4.DDR.BIT.B7 = 0; // DB7を入力に
+
+    __nop(); __nop();     // タイミング調整
+
+    E = 1;
+    __nop(); __nop();     // LCDがデータを出力するまで待つ
+    busy = PORT4.DDR.BIT.B7; // BUSYフラグ読み取り
+    E = 0;
+
+    return busy;
+}
+
+
  /*********************************************************/
  /*インストラクションコードを送る	　　　				  */
  /*void instruction_set(unsigned short instruction) 　*/
@@ -50,8 +70,10 @@ unsigned char esc_flag = OFF;
 void instruction_set(unsigned short instruction)
 {
 	unsigned char i;
-	RS = instruction & 0x200;
-	RW = instruction & 0x100;
+	RS = (instruction & 0x200) ? 1 : 0;
+	RW = (instruction & 0x100) ? 1 : 0;
+	for (i = 0; i < 10; i++)
+		__nop();
 	DB = instruction & 0x00ff;
 	for(i = 0;i < 10;i++)
 		__nop();
@@ -69,15 +91,16 @@ void instruction_set(unsigned short instruction)
 /***************************************************************/
 unsigned char lcd_control(unsigned short instruction)
 {
-	unsigned char i;
-	do{
-		PORT4.DDR.BYTE	= 0xff;				//ポート４を出力ポートに設定
-		instruction_set(READ_OUT);
-		PORT4.DDR.BYTE	= 0;				//ポート４を入力ポートに設定
-	}while (BUSY_FLAG == 1);				//ビジーフラグが立っている間待機
+	unsigned short i;
+	PORT4.DDR.BYTE	= 0xff;				//ポート４を出力ポートに設定
+	instruction_set(READ_OUT);
+	PORT4.DDR.BIT.B7	= 0;				//ポート４を入力ポートに設定
+	while (read_busy_flag == 1){
+		__nop(); // 軽いウェイトでポーリングを安定化
+	}				//ビジーフラグが立っている間待機
 	if (instruction == READ_OUT)
 		return DB;
-	PORT4.DDR.BYTE	= 0xff;				//ポート４を出力ポートに設定
+	PORT4.DDR.BIT.B7	= 0xff;				//ポート４を出力ポートに設定
 	instruction_set(instruction);
 	return 0;
 }
@@ -101,7 +124,7 @@ void lcd_init(void)
 	lcd_control(CLEAR_DISPLAY);
 	lcd_control(ENTRY_MODE_RIGHT);
 	lcd_control(DISPLAY_ON);
-	lcd_control(SET_DDRAM_ADDRESS | 0x00);
+	lcd_control(WRITE_DATA | 'A'); // 左上に「A」表示
 }
 
 /*************************************************************/
