@@ -38,11 +38,11 @@
  /****************************************************************************/
  /* ワークエリア定義															*/
  /****************************************************************************/
-unsigned char display_data[16][16];//表示データ(1行16文字なので16行分)
+unsigned char display_data[16][16];//表示データ(1行16文字×16行分)
 unsigned char digit;//現在表示している桁位置
 unsigned char line;//現在表示している行番号
 unsigned char esc_flag = OFF;
-
+unsigned char address_counter;
 
 unsigned char read_busy_flag(void)
 {
@@ -55,7 +55,7 @@ unsigned char read_busy_flag(void)
 
     E = 1;
     __nop(); __nop();     // LCDがデータを出力するまで待つ
-    busy = PORT4.DDR.BIT.B7; // BUSYフラグ読み取り
+    busy = BUSY_FLAG; // BUSYフラグ読み取り
     E = 0;
 
     return busy;
@@ -91,20 +91,26 @@ void instruction_set(unsigned short instruction)
 /***************************************************************/
 unsigned char lcd_control(unsigned short instruction)
 {
-	unsigned short i;
-	PORT4.DDR.BYTE	= 0xff;				//ポート４を出力ポートに設定
-	instruction_set(READ_OUT);
-	PORT4.DDR.BIT.B7	= 0;				//ポート４を入力ポートに設定
-	while (read_busy_flag == 1){
-		__nop(); // 軽いウェイトでポーリングを安定化
-	}				//ビジーフラグが立っている間待機
-	if (instruction == READ_OUT)
-		return DB;
-	PORT4.DDR.BIT.B7	= 0xff;				//ポート４を出力ポートに設定
-	instruction_set(instruction);
+	while (read_busy_flag() == 1){
+		__nop(); 							// 軽いウェイトでポーリングを安定化
+	}										//ビジーフラグが立っている間待機
+	if(instruction == READ_OUT){
+		PORT4.DDR.BYTE = 0;					//ポート4を入力ポートに設定
+		address_counter = DB | 0x7f;
+	}else{
+		PORT4.DDR.BIT.B7	= 0xff;			//ポート４を出力ポートに設定
+		instruction_set(instruction);
+	}
 	return 0;
 }
 
+void lcd_print(const unsigned char* str,unsigned short length)
+{
+	unsigned short i;
+	for(i = 0;i < length;i++){
+		lcd_control(WRITE_DATA | str[i]);
+	}
+}
 /*********************************************************/
 /*LCDディスプレイ初期化関数								 */
 /*void lcd_init(void)									 */
@@ -124,7 +130,8 @@ void lcd_init(void)
 	lcd_control(CLEAR_DISPLAY);
 	lcd_control(ENTRY_MODE_RIGHT);
 	lcd_control(DISPLAY_ON);
-	lcd_control(WRITE_DATA | 'A'); // 左上に「A」表示
+//	lcd_control(WRITE_DATA | 'A'); // 左上に「A」表示
+	lcd_print("Hello world!",sizeof("Hello world!"));
 }
 
 /*************************************************************/
