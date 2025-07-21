@@ -33,8 +33,13 @@
 #define E (PORTA.DR.BIT.B3)
 #define FIRST_ROW (0x00)				//1行目の1番左のアドレス
 #define SECOND_ROW (0x40)				//2行目の1番左のアドレス
-#define LINE_UP (0)
-#define LINE_DOWN (1)
+#define LINE_UP_ADDR ()
+
+#define BS (0x08)
+#define TAB (0x09)
+#define CR (0x0b)
+#define LF (0x0a)
+
  /****************************************************************************/
  /* ワークエリア定義															*/
  /****************************************************************************/
@@ -44,20 +49,25 @@ unsigned char line;//現在表示している行番号
 unsigned char esc_flag = OFF;
 unsigned char address_counter;
 
-unsigned char read_busy_flag(void)
+
+
+/*********************************************************/
+/*ビジーフラグ読み出し									 */
+/*unsigned char read_busy_flag(void)					 */
+ /********************************************************/
+unsigned char read_bf_ac(void)
 {
 	unsigned char busy;
-    RS = 0;         // コマンドモード
-    RW = 1;         // 読み取りモード
-    PORT4.DDR.BIT.B7 = 0; // DB7を入力に
-
-    __nop(); __nop();     // タイミング調整
-
-    E = 1;
-    __nop(); __nop();     // LCDがデータを出力するまで待つ
-    busy = BUSY_FLAG; // BUSYフラグ読み取り
-    E = 0;
-
+    RS				= 0;		//コマンドモード
+    RW				= 1;		//読み取りモード
+    PORT4.DDR.BYTE	= 0;		//DBを入力に
+    __nop();					//タイミング調整
+    E				= 1;
+    __nop();					//LCDがデータを出力するまで待つ
+    busy			= BUSY_FLAG;//BUSYフラグ読み取り
+	address_counter = DB & 0x7f;
+    E				= 0;
+	PORT4.DDR.BYTE	= 0xff;		//ポート4を出力ポートに設定
     return busy;
 }
 
@@ -78,38 +88,117 @@ void instruction_set(unsigned short instruction)
 	for(i = 0;i < 10;i++)
 		__nop();
 	E = 1;
-	for(i = 0;i < 80;i++)
+	for(i = 0;i < 10;i++)
 		__nop();
 	E = 0;
 }
 
-/***************************************************************/
-/*ビジーフラグを読んで、インストラクションを送る			 　*/
-/*unsigned char lcd_control(unsigned short instrucion)		   */
+/******************************************************************/
+/*ビジーフラグを読んで、インストラクションを送る				  */
+/*void lcd_send_instruction(unsigned short instruction)			  */
 /*	引数：unsigned short instruction　セットするインストラクション*/
-/*	戻り値：unsigned char DB0～7							　 */
-/***************************************************************/
-unsigned char lcd_control(unsigned short instruction)
+/******************************************************************/
+void lcd_send_instruction(unsigned short instruction)
 {
-	while (read_busy_flag() == 1){
+	while (read_bf_ac() == 1){
 		__nop(); 							// 軽いウェイトでポーリングを安定化
 	}										//ビジーフラグが立っている間待機
-	if(instruction == READ_OUT){
-		PORT4.DDR.BYTE = 0;					//ポート4を入力ポートに設定
-		address_counter = DB | 0x7f;
-	}else{
-		PORT4.DDR.BIT.B7	= 0xff;			//ポート４を出力ポートに設定
-		instruction_set(instruction);
-	}
-	return 0;
+	instruction_set(instruction);
+	return;
 }
 
+/*************************************************************/
+/*改行処理													 */
+/*void lcd_line_feed(unsigned char up_or_down)*/
+/*************************************************************/
+//上に改行するか下に改行する
+//スクロールする場合は、現在の表示データを更新する
+//display_dataを見てカーソルの位置を移動させる
+//digit変数の変更
+//line変数の変更
+void lcd_line_feed(unsigned char ch)
+{
+	digit = 15;
+	lcd_send_instruction(READ_OUT);//現在のアドレスを取得
+	if (up_or_down == LINE_UP) {
+		line--;
+
+	}
+	else {
+		line++;
+	}
+	while (display_data[line][digit] == ' ') {
+		digit--;
+	}
+}
+
+/***************************************************************/
+/**/
+/*void lcd_buck_space(void)									   */
+/***************************************************************/
+void lcd_buck_space(void)
+{
+	if(address_counter == )
+
+	else if(address_counter == )
+
+	else {
+		lcd_send_instruction(CURSOL_SHIFT_LEFT);
+		lcd_send_instruction(WRITE_DATA | ' ');
+		lcd_send_instruction(CURSOL_SHIFT_LEFT);
+	}
+
+}
+
+/***************************************************************/
+/*一文字だけ出力する										   */
+/*void lcd_putchar(unsigned char ch)						   */
+/*引数：unsigned char ch 出力する文字						   */
+/***************************************************************/
+void lcd_putchar(unsigned char ch)
+{
+	switch (ch) {
+	case BS:
+		lcd_buck_space();
+		break;
+	case TAB:
+
+		break;
+	case CR:
+		if (address_counter <= 0x0f)
+			lcd_send_instruction(SET_DDRAM_ADDRESS);
+		else
+			lcd_send_instruction(SET_DDRAM_ADDRESS | 0x40);
+		break;
+	case LF:
+		lcd_line_feed(ch);
+		break;
+	default:
+		lcd_send_instruction(WRITE_DATA | ch);
+		if (address_counter == 0x0f || address_counter == 0x4f)
+			lcd_line_feed(ch);
+		break;
+	}
+}
+/****************************************************************/
+/*LCDに文字列を出力する											*/
+/*void lcd_print(const unsigned char* str,unsigned short length)*/
+/**/
+/**/
+/***************************************************************/
 void lcd_print(const unsigned char* str,unsigned short length)
 {
 	unsigned short i;
-	for(i = 0;i < length;i++){
-		lcd_control(WRITE_DATA | str[i]);
-	}
+	lcd_send_instruction(CLEAR_DISPLAY);
+	lcd_send_instruction(RETURN_HOME);
+	do{
+		lcd_putchar(str[i]);
+	} while (address_counter != 0x00);
+}
+
+void lcd_news_ticker(void)
+{
+
 }
 /*********************************************************/
 /*LCDディスプレイ初期化関数								 */
@@ -124,51 +213,19 @@ void lcd_init(void)
 	cmt2_wait(60000,CKS32);				//40ms待機
 	instruction_set(FUNCTION_SET);		//ファンクションセット2回目
 	cmt2_wait(150, CKS32);				//100μs待機
-	lcd_control(FUNCTION_SET);			//ファンクションセット3回目
-	lcd_control(FUNCTION_SET);			//ファンクションセット4回目
-	lcd_control(DISPLAY_OFF);
-	lcd_control(CLEAR_DISPLAY);
-	lcd_control(ENTRY_MODE_RIGHT);
-	lcd_control(DISPLAY_ON);
-//	lcd_control(WRITE_DATA | 'A'); // 左上に「A」表示
-	lcd_print("Hello world!",sizeof("Hello world!"));
+	lcd_send_instruction(FUNCTION_SET);			//ファンクションセット3回目
+	lcd_send_instruction(FUNCTION_SET);			//ファンクションセット4回目
+	lcd_send_instruction(DISPLAY_OFF);
+	lcd_send_instruction(CLEAR_DISPLAY);
+	lcd_send_instruction(ENTRY_MODE_RIGHT);
+	lcd_send_instruction(DISPLAY_ON);
 }
 
-/*************************************************************/
-/*改行処理													 */
-/*void lcd_line_feed(unsigned char up_or_down)*/
-/*************************************************************/
-//上に改行するか下に改行する
-//スクロールする場合は、現在の表示データを更新する
-//display_dataを見てカーソルの位置を移動させる
-//digit変数の変更
-//line変数の変更
-void lcd_line_feed(unsigned char up_or_down)
-{
-	digit = 15;
-	if (up_or_down == LINE_UP) {
-		line--;
 
-	}
-	else {
-		line++;
-	}
-	while (display_data[line][digit] == ' ') {
-		digit--;
-	}
-}
 
 void lcd_page_ud()
 {
-	
-}
-/*************************************************************/
-/*LCDの表示クリア*/
-/*void lcd_clear(void)*/
-/*************************************************************/
-void lcd_clear(void)
-{
-	
+
 }
 /*************************************************************/
 /*LCDにデータを表示する										 */
@@ -191,14 +248,14 @@ void lcd_display(unsigned char *data,unsigned short length)
 {
 	unsigned short instruction;
 	unsigned short i = 0;
-	unsigned char cursol = lcd_control(READ_OUT);//現在のカーソル位置を取得
+	unsigned char cursol = lcd_send_instruction(READ_OUT);//現在のカーソル位置を取得
 	while (length) {
 		switch (data[i]) {//改行のあるなしを判定
 		case 0x0d://CR(行頭復帰)
 			if (cursol == <= 0x0f)
-				lcd_control(SET_DDRAM_ADDRESS);
+				lcd_send_instruction(SET_DDRAM_ADDRESS);
 			else
-				lcd_control(SET_DDRAM_ADDRESS | 0x40);
+				lcd_send_instruction(SET_DDRAM_ADDRESS | 0x40);
 			break;
 		case 0x0a://LF(改行)
 			if(line % 2) == 0)
@@ -211,7 +268,7 @@ void lcd_display(unsigned char *data,unsigned short length)
 				lcd_line_feed(LINE_UP);
 			else
 				digit--;
-			lcd_control(CURSOL_SHIFT_LEFT);
+			lcd_send_instruction(CURSOL_SHIFT_LEFT);
 			break;
 		case 0x1b://エスケープシーケンス開始
 
@@ -224,7 +281,7 @@ void lcd_display(unsigned char *data,unsigned short length)
 			break;
 		default:
 			instruction = WRITE_DATA + data[i++];
-			lcd_control(instruction);
+			lcd_send_instruction(instruction);
 			digit++;
 			if (digit == 15)
 				lcd_line_feed();
