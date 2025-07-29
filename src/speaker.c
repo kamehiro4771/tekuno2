@@ -251,6 +251,12 @@ void output_speaker_start(unsigned char pattern)
 	}
 }
 
+
+void output_speaker(unsigned char pattern)
+{
+	set_output_speaker_length(pattern);
+	output_speaker_start(pattern);//出力開始
+}
 /********************************************************************************************/
 /*指示されたスピーカーの出力停止															*/
 /*void mute(unsigned char speaker_num)														*/

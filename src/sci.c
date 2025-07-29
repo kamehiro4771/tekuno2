@@ -54,11 +54,11 @@ void sci0_init(int baudrate)
 void sci0_received(void)
 {
 	sci0.receive_data[sci0.receive_count]		= SCI0.RDR;
+	sci0.receive_count							= (sci0.receive_count + 1) % 128;//バッファが0～127の128文字以内にする
 	if(sci0.receive_data[sci0.receive_count] == '\n'){//エンターが押されたら
 		sci0.enter_flg							= ENTER_ON;//エンターフラグON
 		SCI0.SCR.BIT.RE							= 0;//受信動作禁止
 	}
-	sci0.receive_count							= (sci0.receive_count + 1) % 128;//バッファが0～127の128文字以内にする
 }
 /****************************************************/
 /*送信データエンプティ割り込み（TXI）				*/
@@ -68,7 +68,7 @@ void sci0_send_next_data(void)
 {
 	sci0.send_length[sci0.send_counter]--;
 	SCI0.TDR				= *(sci0.send_data[sci0.send_counter]++);
-	if(sci0.send_length[sci0.send_counter] == 0){//ヌル文字になったら送信終了
+	if(sci0.send_length[sci0.send_counter] == '\0'){//ヌル文字になったら送信終了
 		SCI0.SCR.BIT.TIE	= 0;//送信終了割り込み禁止
 		SCI0.SCR.BIT.TEIE	= 1;//送信終了割り込み許可
 	}
@@ -255,4 +255,16 @@ void send_data_is_exists_confirm(void)
 		sci0_send_start();
 	}
 	sci0.elapsed_time	= 1;
+}
+
+/*******************************************/
+/*受信開始して入力あるまで待機*/
+/**/
+/*******************************************/
+void sci0_scanf(void)
+{
+	sci0_receive_start();
+	while (sci0.enter_flg == OFF) {
+
+	}
 }

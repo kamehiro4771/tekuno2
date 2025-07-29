@@ -9,5 +9,6 @@
 #define LCD_H_
 
 void lcd_init(void);
+void lcd_print(const unsigned char* str, unsigned short length);
 
 #endif /* LCD_H_ */

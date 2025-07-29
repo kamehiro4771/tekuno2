@@ -9,6 +9,7 @@
  */
 
 #include "main.h"
+#include "game.h"
 #define GAME_END (11)
 /********************************************************************************************/
 /*プロトタイプ宣言																				*/
@@ -42,11 +43,11 @@ const char map3[][]		= {""}*/
 /********************************************************************************************/
 /*ワークエリア定義																				*/
 /********************************************************************************************/
-T_ENEMY enemy[ENEMY_NUM] = {{"~スライム~",100,100,WATER,10,5},{"#ゴブリン#",200,200,SOIL,20,15},
-						{"@オオコウモリ@",300,300,WIND,30,25},{"@ウェアウルフ@",400,400,WIND,40,30},
-						{"$ドラゴン$",800,800,FIRE,50,40},};
+T_MONSTER enemy[5] = {{"~スライム~",100,WATER,10,5},{"#ゴブリン#",200,SOIL,20,15},
+						{"@オオコウモリ@",300,WIND,30,25},{"@ウェアウルフ@",400,WIND,40,30},
+						{"$ドラゴン$",800,FIRE,50,40},};
 
-T_ALLY ally[ALLY_NUM] = {{"$朱雀$",150,FIRE,25,10},
+T_MONSTER ally[ALLY_NUM] = {{"$朱雀$",150,FIRE,25,10},
 						{"~玄武~",150,WATER,20,15},
 						{"@青龍@",150,WIND,15,10},
 						{"#白虎#",150,SOIL,20,5},};
@@ -63,7 +64,7 @@ signed short party_hp;//パーティー全体のHP
 /********************************************************************************************/
 void game_main(void)
 {
-	AUTOPLAYER *pautoplayer = get_autoplayer();
+	AUTOPLAYER *pautoplayer;
 	while(g_sequence != GAME_END){
 		game_sequence(pautoplayer);
 	}
@@ -71,41 +72,56 @@ void game_main(void)
 	g_sequence = 0;
 }
 
+/********************************************************************************************/
+/*ゲームに使われるパラメータの初期化														*/
+/*void game_param_init(void)																*/
+/********************************************************************************************/
+void game_param_init(void)
+{
+	unsigned char i;
+	unsigned short temp;
+	for (i = 0; i < ALLY_NUM; i++) {
+		player.mhp = player.hp += ally[i].hp;	//味方モンスターのHPの合計をプレイヤーHPの合計に設定
+		temp += ally[i].gp;		//味方モンスターの防御力を合計する
+	}
+	player.gp = temp / ALLY_NUM;			//平均値を防御力に設定
+	pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
+}
+
+/********************************************************************************************/
+/*ゲーム開始処理																			*/
+/*void game_atart(void)																		*/
+/********************************************************************************************/
+void game_atart(void)
+{
+	game_param_init();//プレイヤーのパラメータ初期化
+	send_serial(GAME_TITLE, sizeof(GAME_TITLE));//タイトル表示
+	automatic_playing_start(DORAGON_QUEST, SQUARE, 0, 0, 0);//オープニング曲を自動演奏開始
+}
+
 /****************************************************************************/
-/*ゲームシーケンス																*/
+/*ゲームシーケンス															*/
 /*void game_sequence(void)													*/
 /****************************************************************************/
 void game_sequence(AUTOPLAYER *pautoplayer)
 {
 	unsigned char i,ret;
 	switch(g_sequence){
-	case 0://タイトル表示、プレイヤーのパラメータ初期化
-		for(i = 0;i < ALLY_NUM;i++){
-			player.mhp = player.hp += ally[i].hp;//味方モンスターのHPの合計がプレイヤーHP
-			player.gp = player.gp + ally[i].gp;
-		}
-//		player.hp = 1;
-		player.gp = player.gp / ALLY_NUM;//味方防御力の平均を防御力に設定
-		send_serial(GAME_TITLE,sizeof(GAME_TITLE));//タイトル表示
-		g_sequence++;//シーケンス番号＋１
-		pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
-		break;
-	case 1:
-		automatic_playing_start(DORAGON_QUEST,SQUARE,pautoplayer[0].score_count,pautoplayer[1].score_count,pautoplayer[2].score_count);//オープニング曲を自動演奏
+	case 0:
+		game_start();
 		g_sequence++;
-	case 2:
-		ret	= input_check();
-		if(ret != OFF){
+		break;
+	case 1://入力待ち
+		ret = input_check();
+		if (ret != OFF) {
 			pautoplayer[0].end_flg = pautoplayer[1].end_flg = pautoplayer[2].end_flg = ON;
 			g_sequence++;//スイッチ又はエンターが押された
-		}else if(playing_flg == OFF){//最後まで演奏された時は途中から演奏
-			pautoplayer[0]	= REPEATING_FROM_INTERMEDIATE[0];
-			pautoplayer[1]	= REPEATING_FROM_INTERMEDIATE[1];
-			pautoplayer[2]	= REPEATING_FROM_INTERMEDIATE[2];
-			g_sequence					= 1;
+		}
+		else if (playing_flg == OFF) {//最後まで演奏された時は途中から演奏
+			automatic_playing_start(DORAGON_QUEST, REPEATING_FROM_INTERMEDIATE[0].score_count, REPEATING_FROM_INTERMEDIATE[1].score_count, REPEATING_FROM_INTERMEDIATE[2].score_count);
 		}
 		break;
-	case 3://画面表示切り替え
+	case 2://画面表示切り替え
 #if 0
 		if(blank_check())//セーブデータがあれば「ぼうけんをする」「ぼうけんのしょをつくる」両方表示
 #endif
@@ -116,12 +132,12 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 			send_serial(SAVE_DATA_CREATION);*/
 		g_sequence++;
 		break;
-	case 4://冒険の書自動演奏開始
+	case 3://冒険の書自動演奏開始
 		ret = automatic_playing_start(BOUKENNNOSYO,SQUARE,0,0,0);
 		if(ret == ON)
 			g_sequence++;
 		break;
-	case 5:
+	case 4:
 		ret = input_check();
 		switch(ret){
 		case ON:
@@ -147,13 +163,13 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 			break;
 		}
 		break;
-	case 6://名前の入力促す表示
+	case 5://名前の入力促す表示
 		sci0_receive_start();//受信開始
 		send_serial(RESET,10);
 		send_serial(INPUT_NAME,sizeof(INPUT_NAME));
 		g_sequence++;
 		break;
-	case 7:
+	case 6:
 		ret = input_check();
 		if(ret == ON){
 			ret = sci0_str_cpy(player.name);//入力をプレイヤーの名前に設定
@@ -164,26 +180,17 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 		}else if(playing_flg == OFF)
 			automatic_playing_start(BOUKENNNOSYO,SQUARE,0,0,0);
 		break;
-	case 8:
+	case 7:
 		auto_play_end_processing();
 		send_serial(player.name,strlen((const char*)player.name));
 		send_serial(ARRIVAL,sizeof(ARRIVAL));
 		g_sequence++;
 		break;
-	case 9:
-		for(i = 0;i < ENEMY_NUM;i++){
-			ret = battle_main(&player,&ally,&enemy[i]);
-
-			cmt2_wait(65535,11);//バトルが終わったら間隔をあけるようにする
-	//		戦闘の曲、曲調早くする。
-			if(ret == LOSE){
-				g_sequence =11;
-				break;
-			}
-		}
+	case 8://モンスターと戦闘
+		battle_main();
 		g_sequence++;
 		break;
-	case 10:
+	case 9:
 		send_serial(player.name,sizeof(player.name));
 		send_serial(GAME_CLEAR,sizeof(GAME_CLEAR));
 		g_sequence	= GAME_END;

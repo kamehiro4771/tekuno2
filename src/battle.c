@@ -52,15 +52,22 @@ void motion_after_input(void);
 /*	戻り値：unsigned char ret 1勝利									*/
 /*							  0敗北									*/
 /********************************************************************/
+for (i = 0; i < ENEMY_NUM; i++) {
+	ret = battle_main(&player, &ally, &enemy[i]);
+	if (ret == LOSE) {
+		g_sequence = 11;
+		break;
+	}
+}
 unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 {
-	//モンスターを倒した時おかしくなる
-	first_turn_flg 					= ON;
+	unsigned char kill_cnt = 0;
+	first_turn_flg 			= ON;
 	penemy					= enemy;
 	pplayer					= player;
 	pally					= ally;
 	battle_display(APPEARANCE,NULL);
-	while(1){
+	while(kill_cnt < ENEMY_NUM){
 		player_turn();
 		if(penemy->hp == 0){
 			battle_display(KILLED_ENEMY,NULL);
@@ -69,7 +76,7 @@ unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 			while(playing_flg == ON){
 				/*nop*/
 			}
-			return 1;
+			kill_cnt++;
 		}
 		enemy_turn();
 		if(pplayer->hp <= 0)

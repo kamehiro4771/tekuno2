@@ -17,7 +17,7 @@
 #define RETURN_HOME (0x002)
 #define ENTRY_MODE_RIGHT (0x006)		//表示を右にシフトに設定する。表示全体はシフトしない
 #define ENTRY_MODE_LEFT (0x004)			//表示を左シフトに設定する。表示全体はシフトしない
-#define DISPLAY_ON (0x000f)				//ディスプレイONカーソルON
+#define DISPLAY_ON (0x000c)				//ディスプレイONカーソルON
 #define DISPLAY_OFF (0x0008)			//ディスプレイOFFカーソルOFF
 #define CURSOL_SHIFT_RIGHT (0x018)		//カーソルを右に移動
 #define CURSOL_SHIFT_LEFT (0x010)		//カーソルを左に移動
@@ -25,6 +25,8 @@
 #define READ_OUT (0X100)				//インストラクションレジスタの値を読む
 #define WRITE_DATA (0x200)				//DDRAMに書き込む
 #define READ_DATA (0x300)				//DDRAMのデータを読む
+#define CURSOL (0x02)
+#define BLINK (0x01)
 
 #define BUSY_FLAG (PORT4.PORT.BIT.B7)
 #define DB (PORT4.DR.BYTE)
@@ -112,24 +114,19 @@ void lcd_send_instruction(unsigned short instruction)
 /*void lcd_line_feed(unsigned char up_or_down)*/
 /*************************************************************/
 //上に改行するか下に改行する
-//スクロールする場合は、現在の表示データを更新する
 //display_dataを見てカーソルの位置を移動させる
 //digit変数の変更
 //line変数の変更
-void lcd_line_feed(unsigned char ch)
+void lcd_line_feed(void)
 {
 	digit = 15;
-	lcd_send_instruction(READ_OUT);//現在のアドレスを取得
-	if (up_or_down == LINE_UP) {
-		line--;
-
-	}
-	else {
-		line++;
-	}
-	while (display_data[line][digit] == ' ') {
+	while (display_data[line][digit] == 0 && digit != 0) {
 		digit--;
 	}
+	if(address_counter == 0x00)
+		lcd_send_instruction(SET_DDRAM_ADDRESS | (0x40 + digit));
+	else
+		lcd_send_instruction(SET_DDRAM_ADDRESS | (0x00 + digit));
 }
 
 /***************************************************************/
@@ -138,16 +135,36 @@ void lcd_line_feed(unsigned char ch)
 /***************************************************************/
 void lcd_buck_space(void)
 {
-	if(address_counter == )
-
-	else if(address_counter == )
-
+	if (address_counter == 0x00 || address_counter == 0x40)
+		lcd_line_feed();
 	else {
 		lcd_send_instruction(CURSOL_SHIFT_LEFT);
 		lcd_send_instruction(WRITE_DATA | ' ');
 		lcd_send_instruction(CURSOL_SHIFT_LEFT);
 	}
+}
 
+/***************************************************************/
+/**/
+/**/
+/***************************************************************/
+void carriage_return(void)
+{
+	read_bf_ac();//現在のアドレスカウンタを読む
+	if (address_counter <= 0x0f)
+		lcd_send_instruction(SET_DDRAM_ADDRESS);
+	else
+		lcd_send_instruction(SET_DDRAM_ADDRESS | 0x40);
+}
+
+/***************************************************************/
+/**/
+/**/
+/***************************************************************/
+void write_data(unsigned char ch)
+{
+	lcd_send_instruction(WRITE_DATA | ch);
+	read_bf_ac();
 }
 
 /***************************************************************/
@@ -165,38 +182,42 @@ void lcd_putchar(unsigned char ch)
 
 		break;
 	case CR:
-		if (address_counter <= 0x0f)
-			lcd_send_instruction(SET_DDRAM_ADDRESS);
-		else
-			lcd_send_instruction(SET_DDRAM_ADDRESS | 0x40);
+		carriage_return();
 		break;
 	case LF:
-		lcd_line_feed(ch);
+		lcd_line_feed();
 		break;
 	default:
-		lcd_send_instruction(WRITE_DATA | ch);
-		if (address_counter == 0x0f || address_counter == 0x4f)
-			lcd_line_feed(ch);
+		write_data(ch);
 		break;
 	}
 }
+
 /****************************************************************/
 /*LCDに文字列を出力する											*/
 /*void lcd_print(const unsigned char* str,unsigned short length)*/
 /**/
 /**/
 /***************************************************************/
+//現在の表示はクリア
+//左上端から表示
+//画面に収まるだけしか表示しない
+//カーソルは出さない
+//改行は1行だけ
 void lcd_print(const unsigned char* str,unsigned short length)
 {
-	unsigned short i;
+	unsigned short i = 0;
 	lcd_send_instruction(CLEAR_DISPLAY);
 	lcd_send_instruction(RETURN_HOME);
+	lcd_send_instruction(DISPLAY_ON);
 	do{
-		lcd_putchar(str[i]);
-	} while (address_counter != 0x00);
+		lcd_putchar(str[i++]);
+		if (address_counter == 0x0f)
+			lcd_line_feed();
+	} while (i != length || address_counter >= 0x4f);
 }
 
-void lcd_news_ticker(void)
+void lcd_news_ticker(const unsigned char* str, unsigned short length)
 {
 
 }
@@ -219,6 +240,7 @@ void lcd_init(void)
 	lcd_send_instruction(CLEAR_DISPLAY);
 	lcd_send_instruction(ENTRY_MODE_RIGHT);
 	lcd_send_instruction(DISPLAY_ON);
+	lcd_print("Hello! World!",sizeof("Hello! World!"));
 }
 
 
@@ -228,66 +250,12 @@ void lcd_page_ud()
 
 }
 /*************************************************************/
-/*LCDにデータを表示する										 */
-/*void lcd_display(unsigned char *data,unsigned short length)*/
-/*引数：*/
-/**/
+/*LCDにキーボード入力を表示する								 */
+/*void lcd_editor(void)										 */
 /*************************************************************/
-//改行する条件
-/*	エンターキー入力
-*	↓キー入力
-*	↑キー入力
-*	一番左で←キー入力
-*	一番右で→キー入力
-*	一番右で文字入力
-*	一番左でバックスペースキー入力
-* 
-*/
-/*
-void lcd_display(unsigned char *data,unsigned short length)
+void lcd_editor(void)
 {
-	unsigned short instruction;
-	unsigned short i = 0;
-	unsigned char cursol = lcd_send_instruction(READ_OUT);//現在のカーソル位置を取得
-	while (length) {
-		switch (data[i]) {//改行のあるなしを判定
-		case 0x0d://CR(行頭復帰)
-			if (cursol == <= 0x0f)
-				lcd_send_instruction(SET_DDRAM_ADDRESS);
-			else
-				lcd_send_instruction(SET_DDRAM_ADDRESS | 0x40);
-			break;
-		case 0x0a://LF(改行)
-			if(line % 2) == 0)
-				lcd_line_feed(LINE_DOWN);
-			else
-				lcd_line_feed(LINE_UP);
-			break;
-		case 0x08://バックスペース
-			if (digit == 0)
-				lcd_line_feed(LINE_UP);
-			else
-				digit--;
-			lcd_send_instruction(CURSOL_SHIFT_LEFT);
-			break;
-		case 0x1b://エスケープシーケンス開始
-
-			break;
-		case '':
-			break;
-		case '':
-			break;
-		case '':
-			break;
-		default:
-			instruction = WRITE_DATA + data[i++];
-			lcd_send_instruction(instruction);
-			digit++;
-			if (digit == 15)
-				lcd_line_feed();
-			break;
-		}
-		length--;
-	}
+	lcd_send_instruction(CLEAR_DISPLAY);
+	lcd_send_instruction(RETURN_HOME);
+	lcd_send_instruction(DISPLAY_ON | CURSOL | BLINK);
 }
-*/

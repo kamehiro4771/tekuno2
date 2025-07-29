@@ -7,7 +7,7 @@
 
 #ifndef SCI_H_
 #define SCI_H_
-
+#include "main.h"
 void sci0_init(int baudrate);
 void sci0_received(void);
 void sci0_receive_start(void);
@@ -20,4 +20,5 @@ unsigned char sci0_enter_check(void);
 unsigned char sci0_find_received_data(unsigned char find_char);
 signed long a_to_i(void);
 unsigned char sci0_get_reg_0_flg(void);
+void sci0_scanf(void);
 #endif /* SCI_H_ */

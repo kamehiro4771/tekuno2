@@ -102,7 +102,7 @@ void main(void)
 		main_sequence_process();
 	}
 }
-/* エンターキーとスイッチ入力の判定
+/* エンターキー又はスイッチ入力待ち
 *unsigned char input_check(void)
 *	戻り値：unsigned char ON:スイッチが押してから離されたエンターキーが入力されていた　OFF:入力なし
 */
@@ -112,6 +112,7 @@ unsigned char input_check(void)
 	unsigned char ret = OFF;
 	static unsigned char sw_state = OFF;
 	static unsigned char last_sw_state = OFF;
+	while(1){
 	sw_state = sw_check();
 	if (sw_state != OFF) {//スイッチが押されていたら
 		last_sw_state = sw_state;//スイッチの状態記録

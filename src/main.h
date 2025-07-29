@@ -9,6 +9,7 @@
 #define MAIN_H_
 
 //ヘッダーファイル
+
 #include "iodefine.h"
 #include <math.h>
 #include <stdio.h>
@@ -16,6 +17,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+
+
 #include "auto_play.h"
 #include "clock.h"
 #include "initialize.h"
@@ -23,6 +26,7 @@
 #include "led.h"
 #include "speaker.h"
 #include "sci.h"
+
 #include "sw.h"
 #include "timer.h"
 #include "port.h"
@@ -31,6 +35,7 @@
 #include "ad.h"
 #include "battle.h"
 #include "flash.h"
+
 #pragma address e2_FLASH = 0x00100000
 #define LCD
 #define ERROR (1)
@@ -78,15 +83,6 @@
 #define CURSOR_MOVING_LEFT_MOST "\x1b[0`"		//カーソルを左端に移動
 #define CURSOL_MOVING_SENTER "\x1b[40G"			//カーソルを画面の中央に移動
 //#define CURSOR__BACK_ORIGIN "\x1b[0;0H"
-/*
-const unsigned char SCREEN_ERACE[]			= {"\x1b[2J"};
-const unsigned char RED_CHAR[]				= {"\x1b[31"};
-const unsigned char YELLOW_CHAR[]			= {"\x1b[33"};
-const unsigned char BLUE_CHAR[]				= {"\x1b[36"};
-const unsigned char GREEN_CHAR[]			= {"\x1b[32"};
-const unsigned char DEFAULT_CHAR[]			= {"\x1b[39"};
-const unsigned char DEFAULT_BACKGROUND[]	= {"\x1b[49"};
-*/
 #define PCLK (48000000)
 #define BAUD_RATE (115200)
 #define CKS8 (0)								//コンペアマッチタイマのPCLKの分周/8

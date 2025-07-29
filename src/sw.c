@@ -12,8 +12,8 @@
 #define MAX_CNT (100)
 
 /*********************************************************/
-//スイッチの状態を確認する。チャタリング対策のループ処理
-/*int sw_check(void)
+/*スイッチの状態を確認する。チャタリング対策のループ処理					 */
+/*iunsigned char sw_check(void)							　*/
 /*	戻り値：スイッチ番号1～13又はOFF
 /*********************************************************/
 unsigned char sw_check(void)
@@ -56,7 +56,6 @@ unsigned char sw_check(void)
 			case 0xffff:
 				return OFF;
 			}
-
 		}
 	}
 	else {

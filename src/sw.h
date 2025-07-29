@@ -6,9 +6,9 @@
  *      Author: kameyamahiroki
  */
 
-#ifndef __SW_H
-#define __SW_H
+#ifndef __SW_H__
+#define __SW_H__
 
 unsigned char sw_check(void);
 
-#endif /* SW_H_ */
+#endif

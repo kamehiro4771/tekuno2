@@ -5,8 +5,8 @@
  *      Author: kameyamahiroki
  */
 
-#ifndef GAME_H_
-#define GAME_H_
+#ifndef __GAME_H__
+#define __GAME_H__
 
 #define FIELD_NUM (13)//バトルフィールドの数
 #define ONE_JEWEL (6)//一つの宝石のバイト数
@@ -31,22 +31,14 @@ void game_main(void);
 /********************************************************************************************/
 /*構造体宣言																				*/
 /********************************************************************************************/
-typedef struct Enemy{
+typedef struct monster{
 	unsigned char name[64];
 	unsigned short hp;
-	unsigned short mhp;
 	unsigned short el;
 	unsigned short ap;
 	unsigned short gp;
-}T_ENEMY;
+}T_MONSTER;
 
-typedef struct Ally{
-	unsigned char name[64];
-	unsigned short hp;
-	unsigned short el;
-	unsigned short ap;
-	unsigned short gp;
-}T_ALLY;
 
 typedef struct Player{
 	unsigned char name[64];
