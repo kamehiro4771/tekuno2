@@ -34,6 +34,7 @@ void game_main(void);
 typedef struct monster{
 	unsigned char name[64];
 	unsigned short hp;
+	unsigned short max_hp;
 	unsigned short el;
 	unsigned short ap;
 	unsigned short gp;
@@ -43,11 +44,11 @@ typedef struct monster{
 typedef struct Player{
 	unsigned char name[64];
 	unsigned short hp;
-	unsigned short mhp;
+	unsigned short max_hp;
 	unsigned short gp;
 }T_PLAYER;
 
-T_ALLY get_ally_data(unsigned char type);
+T_MONSTER get_ally_data(unsigned char type);
 
 
 #endif /* GAME_H_ */

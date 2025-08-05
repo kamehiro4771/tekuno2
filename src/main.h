@@ -149,5 +149,5 @@ extern unsigned char mode;
 /****************************************************************************/
 struct SPEAKER *get_speaker(void);
 unsigned char input_check(void);
-
+unsigned char input_wait(void);
 #endif /* MAIN_H_ */

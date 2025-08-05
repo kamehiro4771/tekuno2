@@ -112,7 +112,6 @@ unsigned char input_check(void)
 	unsigned char ret = OFF;
 	static unsigned char sw_state = OFF;
 	static unsigned char last_sw_state = OFF;
-	while(1){
 	sw_state = sw_check();
 	if (sw_state != OFF) {//スイッチが押されていたら
 		last_sw_state = sw_state;//スイッチの状態記録
@@ -123,6 +122,30 @@ unsigned char input_check(void)
 	else if (last_sw_state != OFF) {//スイッチが離された
 		ret = last_sw_state;
 		last_sw_state = OFF;
+	}
+	return ret;
+}
+
+unsigned char input_wait(void)
+{
+	unsigned char ret = OFF;
+	static unsigned char sw_state = OFF;
+	static unsigned char last_sw_state = OFF;
+	sci0_receive_start();//受信開始
+	while (1) {
+		sw_state = sw_check();
+		if (sw_state != OFF) {//スイッチが押されていたら
+			last_sw_state = sw_state;//スイッチの状態記録
+		}
+		else if (sci0_enter_check() == ON) {//スイッチが押されている時はエンターは見ない
+			ret = ON;
+			break;
+		}
+		else if (last_sw_state != OFF) {//スイッチが離された
+			ret = last_sw_state;
+			last_sw_state = OFF;
+			break;
+		}
 	}
 	return ret;
 }
@@ -354,7 +377,7 @@ static void autplay_mode(void)
 		return;//波形選択でeが入力されたらメニューへ戻る
 	send_serial(TITLE_NAME[title - 1],sizeof(TITLE_NAME[title - 1]));
 	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
-	automatic_playing_start((unsigned short)title,wave_type,0,0,0);
+	autoplay_start((unsigned short)title,wave_type);
 	while(playing_flg == ON){
 		ret = input_check();
 		if(ret != OFF)
@@ -459,7 +482,7 @@ static void timer_mode(void)
 			break;
 	}
 	segled_display_update(&timer_value[0], 500);
-	automatic_playing_start(CANON, TRIANGLE, 0, 0, 0);
+	autoplay_start(CANON, TRIANGLE, 0, 0, 0);
 	while (playing_flg == ON) {//演奏中
 		if (input_check() != OFF) {
 			auto_play_end_processing();

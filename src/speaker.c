@@ -143,13 +143,13 @@ void speaker_initialize(void)
 	mtu1_initialize();					//MTU1の設定、DA出力用タイマ設定
 	DA.DACR.BYTE				= 0xff;	//チャンネル１のアナログ出力許可
 }
+
 /********************************************************************************************/
 /*スピーカとLEDの出力をセットする								  							*/
 /*void set_output_value(unsigned char scale,unsigned char speaker_num)		  				*/
 /*			引数：const char scale 出力する音の番号、pwm_timer_valueの添え字番号			*/
-/*				  unsigned char speaker_num スピーカー番号									*/
+/*				  unsigned char speaker_num スピーカー番号1~3								*/
 /********************************************************************************************/
-//タイマモードの時はLEDの操作はなし
 void set_output_value(unsigned char scale,unsigned char speaker_num)
 {
 	SPEAKER *speaker						= get_speaker();
@@ -177,43 +177,13 @@ void set_output_value(unsigned char scale,unsigned char speaker_num)
 		MTU8.TGRB							= MTU8.TGRA * (speaker[2].duty_value / 100);
 		break;
 	}
+	set_output_speaker_length(speaker_num - 1);
 }
 
-void set_output_speaker_length(unsigned char set_pattern)
+void set_output_speaker_length(unsigned char player_num)
 {
-//	unsigned char i;
-	AUTOPLAYER *autoplayer						= get_autoplayer();
-	//スラーの時はforを通らないようにしたい
-//	for(i = 0;i < 200;i++){//音と音の間空ける
-//	}
-	switch(set_pattern){//セットパターンを見て経過時間カウントに音の長さをセットする
-	case 1://1のみ
-		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
-		break;
-	case 2://2のみ
-		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
-		break;
-	case 3://1と2
-		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
-		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
-		break;
-	case 4://3のみ
-		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
-		break;
-	case 5://1と3
-		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
-		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
-		break;
-	case 6://2と3
-		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
-		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
-		break;
-	case 7://1と2と3
-		autoplayer[0].elapsed_time = autoplayer[0].pnote_value[autoplayer[0].score_count];
-		autoplayer[1].elapsed_time = autoplayer[1].pnote_value[autoplayer[1].score_count];
-		autoplayer[2].elapsed_time = autoplayer[2].pnote_value[autoplayer[2].score_count];
-		break;
-	}
+	AUTOPLAYER *autoplayer						= get_autoplayer(player_num);
+	autoplayer->elapsed_time = autoplayer->pnote_value[autoplayer->score_count];
 }
 /********************************************************************************************/
 /*指示されたスピーカーの数出力開始															*/
@@ -248,15 +218,11 @@ void output_speaker_start(unsigned char pattern)
 		MTUB.TSTR.BYTE					|= 7;
 		MTUA.TSTR.BIT.CST1				= 1;//DA出力のタイマースタート
 		break;
+	default:
+		break;
 	}
 }
 
-
-void output_speaker(unsigned char pattern)
-{
-	set_output_speaker_length(pattern);
-	output_speaker_start(pattern);//出力開始
-}
 /********************************************************************************************/
 /*指示されたスピーカーの出力停止															*/
 /*void mute(unsigned char speaker_num)														*/

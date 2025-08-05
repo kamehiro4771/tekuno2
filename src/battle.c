@@ -29,10 +29,10 @@ enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS,COM
 /*ワークエリア定義													 */
 /*********************************************************************/
 AUTOPLAYER *resume_data;
-T_ENEMY *penemy;//戦闘中のモンスターへのポインタ
+T_MONSTER *penemy;//戦闘中のモンスターへのポインタ
 T_PLAYER *pplayer;//プレイヤーへのポインタ
-T_ALLY *pally;//味方モンスター達へのポインタ
-T_ALLY attack_ally;//攻撃したモンスター
+T_MONSTER *pally;//味方モンスター達へのポインタ
+T_MONSTER attack_ally;//攻撃したモンスター
 char output_display[9][512];//戦闘中の画面表示
 unsigned char first_turn_flg;//敵が現れて最初のターンなら新しいバトルフィールドを作成する
 unsigned char operation[2];//プレーヤーの入力したアルファベットが入る
@@ -47,19 +47,12 @@ unsigned char puzzle_operation_check(void);
 void motion_after_input(void);
 /********************************************************************/
 /*バトルメイン関数													*/
-/*unsigned char battle_main(struct T_ENEMY* enemy)					*/
-/*  引数：struct T_ENEMY* enemy 対戦している敵情報					*/
+/*unsigned char battle_main(struct T_MONSTER* enemy)					*/
+/*  引数：struct T_MONSTER* enemy 対戦している敵情報					*/
 /*	戻り値：unsigned char ret 1勝利									*/
 /*							  0敗北									*/
 /********************************************************************/
-for (i = 0; i < ENEMY_NUM; i++) {
-	ret = battle_main(&player, &ally, &enemy[i]);
-	if (ret == LOSE) {
-		g_sequence = 11;
-		break;
-	}
-}
-unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
+unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 {
 	unsigned char kill_cnt = 0;
 	first_turn_flg 			= ON;
@@ -72,7 +65,7 @@ unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 		if(penemy->hp == 0){
 			battle_display(KILLED_ENEMY,NULL);
 			auto_play_end_processing();
-			automatic_playing_start(WINNING,SQUARE,0,0,0);
+			autoplay_start(WINNING,SQUARE,0,0,0);
 			while(playing_flg == ON){
 				/*nop*/
 			}
@@ -88,8 +81,8 @@ unsigned char battle_main(T_PLAYER *player,T_ALLY *ally, T_ENEMY *enemy)
 
 /********************************************************************/
 /*プレーヤーのターン関数											*/
-/*void player_turn(T_PLAYER *player,T_ENEMY* enemy)							*/
-/*	引数：struct T_ENEMY* enemy 戦闘中の敵のデータ					*/
+/*void player_turn(T_PLAYER *player,T_MONSTER* enemy)							*/
+/*	引数：struct T_MONSTER* enemy 戦闘中の敵のデータ					*/
 /********************************************************************/
 void player_turn(void)
 {
@@ -97,7 +90,7 @@ void player_turn(void)
 	battle_display(PLAYER_TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
-		automatic_playing_start(BATTLE1,SQUARE,0,0,0);//戦闘テーマ演奏開始
+		autoplay_start(BATTLE1,SQUARE,0,0,0);//戦闘テーマ演奏開始
 		output_battle_field(NEW_FIELD);
 	}else{
 		output_battle_field(CURRENT_FIELD);
@@ -110,7 +103,7 @@ void player_turn(void)
 			break;
 		}
 		if(playing_flg == OFF)//戦闘の曲が終了したとき
-			automatic_playing_start(BATTLE1,SQUARE,0,0,0);
+			autoplay_start(BATTLE1,SQUARE,0,0,0);
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
@@ -177,7 +170,7 @@ void motion_after_input(void)
 				}
 			}else
 				pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
-			automatic_playing_start(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
+			autoplay_start(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
 			while(playing_flg == ON){
 				//nop
 			}
@@ -190,7 +183,7 @@ void motion_after_input(void)
 			for(i = 0;i < 3;i++){
 				pautoplayer[i] 		= resume_data[i];
 			}
-			automatic_playing_start(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
+			autoplay_start(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
 			free_padding(dladder);//空いた宝石配列を詰める
 		}else{//自分のターン終了
 			sci0_receive_start();//受信が終わっているので開始
@@ -261,20 +254,20 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		damage_value			= damage_or_recovery_value_calculate(penemy,combo_value,LIFE,deleted_number);//ダメージ計算
 		sprintf(output_display[RECOVERY],"%s%s%d%s",pplayer->name,LIFE_JEWEL_DISPLAY,damage_value,RECOVERY_DISPLAY);
 		pplayer->hp = pplayer->hp + damage_value;//自分のHPにダメージを足す最大値を超えないように
-		if(pplayer->hp > pplayer->mhp)
-			pplayer->hp = pplayer->mhp;
+		if(pplayer->hp > pplayer->max_hp)
+			pplayer->hp = pplayer->max_hp;
 		break;
 	case STATUS:
 		//味方のステータスも表示する
 		sprintf(output_display[STATUS],"%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s %s%s %s%s %s%s%s%s%s%s%d/%d%s%s%s%s%s",
 																LINE_DISPLAY,CRLF,CRLF,
 																CURSOL_MOVING_SENTER,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,CRLF,
-																CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->mhp,CRLF,CRLF,CRLF,
+																CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->max_hp,CRLF,CRLF,CRLF,
 																COLOR_CHAR_ARRAY[pally[FIRE].el],pally[FIRE].name,
 																COLOR_CHAR_ARRAY[pally[WATER].el],pally[WATER].name,
 																COLOR_CHAR_ARRAY[pally[WIND].el],pally[WIND].name,
 																COLOR_CHAR_ARRAY[pally[SOIL].el],pally[SOIL].name,DEFAULT_CHAR,CRLF,
-																CURSOL_MOVING_SENTER,HP_DISPLAY,pplayer->hp,pplayer->mhp,CRLF,
+																CURSOL_MOVING_SENTER,HP_DISPLAY,pplayer->hp,pplayer->max_hp,CRLF,
 																CRLF,CRLF,LINE_DISPLAY,CRLF);
 		combo_value 			= 0;
 		break;
