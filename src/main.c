@@ -58,7 +58,7 @@ const T_DISPLAY TIMER_SETTING_METHOD[]											= {"SW1:OŒ…–Úİ’è@SW3:“ñŒ…–Ú
 																				   "SW2:ƒ^ƒCƒ}ƒXƒ^[ƒg\r\n"};
 const T_DISPLAY ERROR_MESSAGE[]													= {"“ü—Í‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ\n"};
 /*‘I‘ğo—ˆ‚é€–Ú‚ğ•Ï‚¦‚½‚¢‚ÍˆÈ‰º‚Ì”z—ñ‚ğ•ÏX‚µ‚ÄA‘Œ¸‚ª‚ ‚Á‚½‚ç#define‚ÌSELECT_NUM‚ğ•Ï‚¦‚é*/
-const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,EDITOR,SETTING};//‘I‘ğ‚Å‚«‚éƒ‚[ƒh
+const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,SETTING};//‘I‘ğ‚Å‚«‚éƒ‚[ƒh
 const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]				= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING};//‚±‚Ì”z—ñ‚É“ü‚Á‚Ä‚¢‚é‹È‚ªƒƒjƒ…[‚É•\¦‚³‚ê‘I‘ğ‚Å‚«‚é
 const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//‘I‘ğ‚Å‚«‚é”gŒ`
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
@@ -77,17 +77,36 @@ unsigned char mode;
 /****************************************************************************/
 /* ƒvƒƒgƒ^ƒCƒvéŒ¾															*/
 /****************************************************************************/
-static void main_sequence_process(void);
+static void main_process(void);
 static void electronic_organ_mode(void);
 static void autplay_mode(void);
 static void setting_mode(void);
 static void game_mode(void);
 static void timer_mode(void);
+static void main_process(void);
 #ifdef __cplusplus
 extern "C" {
 void abort(void);
 }
 #endif
+/********************************************************************/
+/*ƒVƒXƒeƒ€‚Ì‰Šú‰»													*/
+/*void eneiro_initialize(void)										*/
+/********************************************************************/
+void eneiro_initialize(void)
+{
+	clock_initialize();				//ƒNƒƒbƒN‰Šú‰»
+	io_port_initialize();			//”Ä—p“üo—Íƒ|[ƒg‚Ì‰Šú‰»
+	mtu0_initialize();				//MTU0‚Ìİ’èAƒVƒXƒeƒ€ƒ^ƒCƒ}
+	cmt1_initiralize();				//—”¶¬—pƒ^ƒCƒ}
+	speaker_initialize();			//ƒXƒs[ƒJ—pPWM,DAƒRƒ“ƒo[ƒ^ADAo—Í—pƒ^ƒCƒ}‰Šú‰»
+	sci0_init(BAUD_RATE);			//ƒVƒŠƒAƒ‹’ÊMƒ‚[ƒWƒ…[ƒ‹‚Ì‰Šú‰»
+#ifndef LCD
+	lcd_init();
+#endif
+	autoplay_start(INITIAL_CHECK, SQUARE);
+}
+
 /****************************************************************************/
 /*																			*/
 /*							ƒƒCƒ“ŠÖ”										*/
@@ -96,13 +115,16 @@ void abort(void);
 void main(void)
 {
 	eneiro_initialize();
-	timer_area_registration(&timer_area);
+//	autoplay_start(AVE_MARIA,SAWTHOOTH);
+//	timer_area_registration(&timer_area);
 	while(1)
 	{
-		main_sequence_process();
+		main_process();
 	}
 }
-/* ƒGƒ“ƒ^[ƒL[–”‚ÍƒXƒCƒbƒ`“ü—Í‘Ò‚¿
+
+
+/* ƒGƒ“ƒ^[ƒL[–”‚ÍƒXƒCƒbƒ`“ü—ÍŠm”F
 *unsigned char input_check(void)
 *	–ß‚è’lFunsigned char ON:ƒXƒCƒbƒ`‚ª‰Ÿ‚µ‚Ä‚©‚ç—£‚³‚ê‚½ƒGƒ“ƒ^[ƒL[‚ª“ü—Í‚³‚ê‚Ä‚¢‚½@OFF:“ü—Í‚È‚µ
 */
@@ -126,24 +148,27 @@ unsigned char input_check(void)
 	return ret;
 }
 
+/* ƒGƒ“ƒ^[ƒL[–”‚ÍƒXƒCƒbƒ`“ü—Í‘Ò‚¿
+*unsigned char input_check(void)
+*	–ß‚è’lFunsigned char ON:ƒXƒCƒbƒ`‚ª‰Ÿ‚µ‚Ä‚©‚ç—£‚³‚ê‚½ƒGƒ“ƒ^[ƒL[‚ª“ü—Í‚³‚ê‚Ä‚¢‚½@OFF:“ü—Í‚È‚µ
+*/
 unsigned char input_wait(void)
 {
 	unsigned char ret = OFF;
-	static unsigned char sw_state = OFF;
-	static unsigned char last_sw_state = OFF;
+	unsigned char sw_state = OFF;
+	unsigned char last_sw_state = OFF;
 	sci0_receive_start();//óMŠJn
 	while (1) {
 		sw_state = sw_check();
-		if (sw_state != OFF) {//ƒXƒCƒbƒ`‚ª‰Ÿ‚³‚ê‚Ä‚¢‚½‚ç
-			last_sw_state = sw_state;//ƒXƒCƒbƒ`‚Ìó‘Ô‹L˜^
+		if (sw_state != OFF) {				//ƒXƒCƒbƒ`‚ª‰Ÿ‚³‚ê‚Ä‚¢‚½‚ç
+			last_sw_state = sw_state;		//ƒXƒCƒbƒ`‚Ìó‘Ô‹L˜^
 		}
-		else if (sci0_enter_check() == ON) {//ƒXƒCƒbƒ`‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚ÍƒGƒ“ƒ^[‚ÍŒ©‚È‚¢
+		else if (sci0_enter_check() == ON) {//ƒGƒ“ƒ^[‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©Šm”F‚·‚éiƒXƒCƒbƒ`‰Ÿ‚µ‚È‚ª‚ç‚ÌƒGƒ“ƒ^[‚Í–³Œøj
 			ret = ON;
 			break;
 		}
-		else if (last_sw_state != OFF) {//ƒXƒCƒbƒ`‚ª—£‚³‚ê‚½
+		else if (last_sw_state != OFF) {	//ƒXƒCƒbƒ`ON‚©‚çƒXƒCƒbƒ`OFF‚É‚È‚Á‚½
 			ret = last_sw_state;
-			last_sw_state = OFF;
 			break;
 		}
 	}
@@ -153,11 +178,11 @@ unsigned char input_wait(void)
 /*‘I‘ğ€–Ú•\¦																		*/
 /*void selection_screen_display(char *item,char *item_name,unsigned char item_num)	*/
 /*			const unsigned char *item:‘I‘ğ‚·‚é“à—e									*/
-/*			const unsigned char *item_name:‘I‘ğ‚·‚é€–Ú–¼”z—ñ‚Ö‚Ìƒ|ƒCƒ“ƒ^			*/
+/*			const unsigned char *item_name:‘I‘ğ‚·‚é€–Ú–¼							*/
 /*			const unsigned char *select_num‘I‘ğ‚Å‚«‚é€–Ú‚Ì”z—ñ”Ô†‚Ì”z—ñ‚Ö‚Ìƒ|ƒCƒ“ƒ^			*/
 /*			char item_num:€–Ú‚Ì”													*/
 /************************************************************************************/
-static void selection_screen_display(const T_DISPLAY* select_item, const T_DISPLAY(*item_name)[64], T_DISPLAY* select_num, unsigned char item_num, T_DISPLAY* end_method)
+static void selection_screen_display(const T_DISPLAY* select_item, const T_DISPLAY item_name[][64], T_DISPLAY* select_num, unsigned char item_num, T_DISPLAY* end_method)
 {
 	unsigned char i;
 	unsigned char index_num[8];
@@ -167,7 +192,7 @@ static void selection_screen_display(const T_DISPLAY* select_item, const T_DISPL
 		sprintf((char*)index_num, "%d:", i);
 		send_serial(index_num, 2);
 		send_serial(item_name[select_num[i - 1] - 1], strlen((const char*)item_name[select_num[i - 1] - 1]));
-		send_serial("\n", 1);
+		send_serial(CRLF, 2);
 		while (sci0_get_reg_0_flg() != ON) {
 			//index_num‚ª‘‚«Š·‚¦‚ç‚ê‚é‚Æ‚¨‚©‚µ‚­‚È‚é‚Ì‚Å‘S‚Ä‚Ì‘—M‚ªŠ®—¹‚·‚é‚Ü‚Å‘Ò‚Â
 		}
@@ -175,43 +200,50 @@ static void selection_screen_display(const T_DISPLAY* select_item, const T_DISPL
 	if (end_method != NULL)//I—¹‘€ì‚Ğ‚å‚¤‚¶‚·‚é‚©
 		send_serial(end_method, strlen((const char*)end_method));
 }
+
 /*********************************************************************************************************************************/
 /*ƒAƒCƒeƒ€ƒZƒŒƒNƒgƒV[ƒPƒ“ƒX																									 */
-/*signed short item_select_sequence(const unsigned char *item_select,const unsigned char (*item_name)[64],unsigned char item_num)*/
+/*static signed short item_select(const T_DISPLAY* item_select, const T_DISPLAY(*item_name)[64], const T_DISPLAY* select_num, unsigned char item_num, const T_DISPLAY* end_method)*/
 /*		ˆø”Fconst unsigned char *item_select
 /*			const unsigned char (*item_name)[64]
  * 			const unsigned char *select_num
  * 			const unsigned char *end_method
 /*			unsigned char item_num
 /*********************************************************************************************************************************/
-static signed short item_select_sequence(const T_DISPLAY* item_select, const T_DISPLAY(*item_name)[64], const T_DISPLAY* select_num, unsigned char item_num, const T_DISPLAY* end_method)
+unsigned short item_select(const T_DISPLAY* item_select, const T_DISPLAY item_name[][64], const T_DISPLAY* select_num, unsigned char item_num, const T_DISPLAY* end_method)
 {
-	static unsigned char item_select_sequence_num = 0;
-	static signed char ret;
-	switch (item_select_sequence_num) {
-	case 0://‰æ–Ê•\¦
-		sci0_receive_start();//óMŠJn
-		selection_screen_display(item_select, item_name, select_num, item_num, end_method);//‘I‘ğ‰æ–Ê‚ª•\¦‚³‚ê‚é
-		item_select_sequence_num++;
-		break;
-	case 1://“ü—Í‘Ò‚¿
-		ret = input_check();
-		if (ret == ON) {//ƒL[ƒ{[ƒh‚Å“ü—Í‚ª‚ ‚Á‚½
-			ret = a_to_i();//óMƒf[ƒ^‚ğ”’l‚É‚µ‚Äó‚¯æ‚é
-			item_select_sequence_num++;
+	unsigned char sequence = 0;
+	signed char ret;
+	while(sequence != 3){
+		switch (sequence) {
+		case 0://‰æ–Ê•\¦
+			selection_screen_display(item_select, item_name, select_num, item_num, end_method);//‘I‘ğ‰æ–Ê‚ª•\¦‚³‚ê‚é
+			sequence++;
+			break;
+		case 1://“ü—Í‘Ò‚¿
+			ret = input_wait();
+			if (ret == ON) {//ƒL[ƒ{[ƒh‚Å“ü—Í‚ª‚ ‚Á‚½
+				ret = a_to_i();//óMƒf[ƒ^‚ğ”’l‚É‚µ‚Äó‚¯æ‚é
+				sequence++;
+			}
+			else if (ret != OFF)//ƒXƒCƒbƒ`‚Å“ü—Í‚ª‚ ‚Á‚½
+				sequence++;
+			break;
+		case 2://“ü—Í’l‚Ì”»’è
+			sequence = 0;
+			if (ret <= item_num && ret > 0)
+				sequence	= 3;
+			else if (sci0_find_received_data('e')) {
+				ret = 'e';
+				sequence	= 3;
+			}
+			else {
+				sequence = 0;
+			}
+			break;
 		}
-		else if (ret != OFF)//ƒXƒCƒbƒ`‚Å“ü—Í‚ª‚ ‚Á‚½
-			item_select_sequence_num++;
-		break;
-	case 2://“ü—Í’l‚Ì”»’è
-		item_select_sequence_num = 0;
-		if (ret <= item_num && ret > 0)
-			return select_num[ret - 1];
-		if (sci0_find_received_data('e'))
-			return 'e';
-		break;
 	}
-	return -1;
+	return ret;
 }
 
 /********************************************************************/
@@ -221,25 +253,21 @@ static signed short item_select_sequence(const T_DISPLAY* item_select, const T_D
 /********************************************************************/
 static void selected_mode_transition(unsigned char select)
 {
+	mode = select;
 	switch (select) {
 	case ORGAN:
-		mode = ORGAN;
 		electronic_organ_mode();
 		break;
 	case AUTOPLAY:
-		mode = AUTOPLAY;
 		autplay_mode();
 		break;
 	case GAME:
-		mode = GAME;
 		game_mode();
 		break;
 	case TIMER:
-		mode = TIMER;
 		timer_mode();
 		break;
 	case SETTING:
-		mode = SETTING;
 		setting_mode();
 		break;
 	default:
@@ -251,41 +279,32 @@ static void selected_mode_transition(unsigned char select)
 
 /****************************************************************************/
 /*ƒƒCƒ“ƒV[ƒPƒ“ƒX															*/
-/*void main_sequence_process(void)											*/
+/*static void main_process(void)											*/
 /****************************************************************************/
-static void main_sequence_process(void)
+static void main_process(void)
 {
-	static unsigned char main_sequence_num = 0;
-	signed char ret;
-	switch(main_sequence_num){
-		case 0://ƒ‚[ƒh‘I‘ğ
-			ret = item_select_sequence(E_NEIRO,MODE_NAME,SELECTABLE_MODE_ARREY,SELECT_MODE_NUM,NULL);
-			if(ret != -1 && ret != 'e')
-				main_sequence_num++;
-			break;
-		case 1://Šeƒ‚[ƒh‚ÉˆÚs
-			selected_mode_transition(ret);
-			main_sequence_num = 0;
-			break;
+	unsigned char ret;
+	while(1){
+		ret = item_select(E_NEIRO,MODE_NAME,SELECTABLE_MODE_ARREY,SELECT_MODE_NUM,NULL);
+		selected_mode_transition(ret);
 	}
 }
 
 
 
-/*********************************************************************************************************/
-/*ƒfƒ…[ƒeƒB”ä‚Ìİ’è																					 */
-/*void duty_setting(unsigned char speaker_num)															 */
-/*	unsigned char speaker_num ƒXƒs[ƒJ”Ô†																 */
-/*********************************************************************************************************/
+/*************************************************************************************/
+/*ƒfƒ…[ƒeƒB”ä‚Ìİ’è																 */
+/*void duty_setting(void)															 */
+/*************************************************************************************/
 static void duty_setting(void)
 {
 	signed long ret						= OFF;
-	signed short speaker_num			= -1;
+	unsigned short speaker_num			= 0;
 	unsigned char duty_one_digits		= NO_SELECT;
 	unsigned char duty_two_digits		= NO_SELECT;
-	while(speaker_num == -1){
-		speaker_num = item_select_sequence(SETTING_SPEAKER_SELECT,SETTING_SPEAKER_NAME,SELECTABLE_SPEAKER_ARREY,SELECT_SPEAKER_NUM,END_METHOD);
-	}
+	speaker_num = item_select(SETTING_SPEAKER_SELECT,SETTING_SPEAKER_NAME,SELECTABLE_SPEAKER_ARREY,SELECT_SPEAKER_NUM,END_METHOD);
+	if (speaker_num == 'e')
+		return;
 	sci0_receive_start();
 	send_serial(DUTY_SETTING_METHOD,sizeof(DUTY_SETTING_METHOD));
 	while(1){
@@ -298,7 +317,6 @@ static void duty_setting(void)
 			}else
 				break;
 		}else if(ret != OFF){
-			//ƒXƒCƒbƒ`“ü—Í‚Ì
 			if(duty_one_digits == NO_SELECT){
 				if(ret < SW11)
 					duty_one_digits = ret;
@@ -332,10 +350,8 @@ static void electronic_organ_mode(void)
 		ret							= sci0_enter_check();
 		if(ret == ON){
 			if(sci0_find_received_data('e') != NOT_FOUND){
-				for(i = 1;i <= SELECT_SPEAKER_NUM;i++)
-					mute(i);
-				for(i = 1;i < 9;i++)
-					output_led(i,BLACK,0);
+				mute(ALL_SPEAKER);
+				led_lights_out();
 				break;
 			}else
 				sci0_receive_start();//óMŠJn
@@ -362,25 +378,20 @@ static void electronic_organ_mode(void)
 /********************************************************************/
 static void autplay_mode(void)
 {
-	unsigned char ret			= 0;
-	signed short title			= -1;
-	signed short wave_type		= -1;
-	while(title == -1){
-		title = item_select_sequence(PLAYLIST_SELECT,TITLE_NAME,SELECTABLE_TITLE_ARREY,SELECT_PLAY_TITLE_NUM,END_METHOD);
-	}
+	unsigned short title		= 0;
+	unsigned short wave_type		= 0;
+	title = item_select(PLAYLIST_SELECT,TITLE_NAME,SELECTABLE_TITLE_ARREY,SELECT_PLAY_TITLE_NUM,END_METHOD);
 	if(title == 'e')
 		return;//ƒ^ƒCƒgƒ‹‘I‘ğ‚Åe‚ª“ü—Í‚³‚ê‚½‚çƒƒjƒ…[‚Ö–ß‚é
-	while(wave_type == -1){
-		wave_type = item_select_sequence(WAVETYPE_SELECT,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD);
-	}
+	wave_type = item_select(WAVETYPE_SELECT,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD);
 	if(wave_type == 'e')
 		return;//”gŒ`‘I‘ğ‚Åe‚ª“ü—Í‚³‚ê‚½‚çƒƒjƒ…[‚Ö–ß‚é
-	send_serial(TITLE_NAME[title - 1],sizeof(TITLE_NAME[title - 1]));
+	send_serial(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1],sizeof(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1]));
 	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
-	autoplay_start((unsigned short)title,wave_type);
+	autoplay_start(SELECTABLE_TITLE_ARREY[title - 1],wave_type);
+	sci0_receive_start();
 	while(playing_flg == ON){
-		ret = input_check();
-		if(ret != OFF)
+		if(input_check() != OFF)
 			auto_play_end_processing();
 	}
 }
@@ -401,25 +412,18 @@ static void game_mode(void)
 /********************************************************************/
 static void setting_mode(void)
 {
-	signed short setting_num			= -1;
-	while(setting_num == -1){
-		setting_num = item_select_sequence(SETTING_ITEM_SELECT,SETTING_ITME_NAME,SELECTABLE_SETTING_ARREY,SETTING_ITEM_NUM,END_METHOD);
-	}
+	unsigned short setting_num			= 0;
+	setting_num = item_select(SETTING_ITEM_SELECT,SETTING_ITME_NAME,SELECTABLE_SETTING_ARREY,SETTING_ITEM_NUM,END_METHOD);
 	switch(setting_num){
 	case DUTY:
-//		ƒfƒ…[ƒeƒB”ä‚ÌƒXƒs[ƒJ‚²‚Æ‚Ìİ’è‚ª‚Å‚«‚È‚¢
 		duty_setting();
 		break;
 	case WAVE:
-		do{
-			setting_num = item_select_sequence(WAVETYPE_SELECT,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD);
-		}while(setting_num == -1);
+		setting_num = item_select(WAVETYPE_SELECT,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD);
 		speaker[0].wave_type= setting_num;
 		break;
 	case SPEAKER_NUM://“dqƒIƒ‹ƒKƒ“ƒ‚[ƒh‚É–Â‚ç‚·ƒXƒs[ƒJ‚Ì”Ô†w’è
-		do{
-			setting_num = item_select_sequence(OUTPUT_SPEAKER_SELECT,OUTPUT_SPEAKER_SELECT_NAME,SELECTABLE_OUTPUT_SPEAKER_ARREY,SELECT_OUTPUT_SPEAKER_NUM,END_METHOD);
-		}while(setting_num == -1);
+		setting_num = item_select(OUTPUT_SPEAKER_SELECT,OUTPUT_SPEAKER_SELECT_NAME,SELECTABLE_OUTPUT_SPEAKER_ARREY,SELECT_OUTPUT_SPEAKER_NUM,END_METHOD);
 		electronic_organ_speaker = setting_num;
 		break;
 	case 'e':

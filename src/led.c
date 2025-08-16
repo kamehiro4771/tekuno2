@@ -62,14 +62,14 @@ unsigned char *time_to_string;
 /*									5:シアン						   */
 /*									6:マゼンタ						   */
 /*									7:白							   */
-/*									8:黒							   */
+/*									8:黒(消灯)						   */
 /*		  long interval			点滅間隔(ms)						   */
 /***********************************************************************/
 void output_led(unsigned char led,unsigned char color,long interval)
 {
 	led_state						|= led_port_value_array[led - 1][color - 1];//
 	if(interval == 0)//点滅しないLEDは覚えておく
-		led_blink_state					= led_port_value_array[led - 1][color - 1];
+		led_blink_state				= led_port_value_array[led - 1][color - 1];
 	PORTD.DR.BYTE					= led_state & 0xff;
 	PORTE.DR.BYTE					= (led_state & 0xff00) >> 8;
 	PORTB.DR.BYTE					= (led_state & 0xff0000) >> 16;
@@ -79,9 +79,6 @@ void output_led(unsigned char led,unsigned char color,long interval)
 		}else if(led_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
 			led_current_interval	= interval;
 			count_timer_dell(led_blink);
-			interval_function_set(interval,led_blink);
-		}else{
-			led_current_interval	= interval;
 			interval_function_set(interval,led_blink);
 		}
 	}else if(led_current_interval != 0)										//点滅終了
@@ -149,9 +146,6 @@ void segled_display_update(unsigned char *ascii,long interval)
 	}else if(segled_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
 		segled_current_interval	= interval;
 		count_timer_dell(segled_blink);
-		interval_function_set(interval,segled_blink);
-	}else{
-		segled_current_interval	= interval;
 		interval_function_set(interval,segled_blink);
 	}
 }

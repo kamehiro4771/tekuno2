@@ -21,7 +21,7 @@ void end_flg_check(void);
 /*
  * ワークエリア定義
  */
-AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,OFF},{SQUARE,NULL,NULL,0,0,0,OFF,OFF},{SQUARE,NULL,NULL,0,0,0,OFF,OFF},};
+AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},};
 AUTOPLAYER interrupt_data[3];//エンターやスイッチで演奏終了したときのスピーカの情報を保存しておく
 unsigned char g_use_speaker_num;		//使用するスピーカーの個数
 unsigned char playing_flg = OFF;
@@ -62,14 +62,15 @@ void score_set_speaker(int title, unsigned char wave_type)
 	switch (g_use_speaker_num) {
 	case 1:
 		autoplayer[0].set_flg = ON;
-		autoplayer[1].end_flg = autoplayer[2].end_flg = ON;
+		autoplayer[0].end_flg = OFF;
 		break;
 	case 2:
 		autoplayer[0].set_flg = autoplayer[1].set_flg = ON;
-		autoplayer[2].end_flg = ON;
+		autoplayer[0].end_flg = autoplayer[1].end_flg	= OFF;
 		break;
 	case 3:
 		autoplayer[0].set_flg = autoplayer[1].set_flg = autoplayer[2].set_flg = ON;
+		autoplayer[0].end_flg = autoplayer[1].end_flg = autoplayer[2].end_flg	= OFF;
 		break;
 	}
 	autoplay_function_set();
@@ -109,7 +110,6 @@ void autoplay_start(unsigned short title,unsigned char wave_type)
 /*********************************************/
 void autoplay_start_from_intermediate(void)
 {
-	unsigned char i;
 	output_speaker_start(7);//出力開始
 	autoplay_function_set();
 }
@@ -183,7 +183,9 @@ AUTOPLAYER *get_autoplayer(unsigned char player_num)
  *
  *
  */
+
 AUTOPLAYER get_interrupt_data(unsigned char player_num)
 {
 	return interrupt_data[player_num];
 }
+

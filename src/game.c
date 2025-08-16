@@ -14,7 +14,7 @@
 /********************************************************************************************/
 /*プロトタイプ宣言																				*/
 /********************************************************************************************/
-void game_sequence(AUTOPLAYER *pautoplayer);
+void game_sequence(void);
 /*
  * 定数定義
  */
@@ -64,9 +64,8 @@ signed short party_hp;//パーティー全体のHP
 /********************************************************************************************/
 void game_main(void)
 {
-	AUTOPLAYER *pautoplayer;
 	while(g_sequence != GAME_END){
-		game_sequence(pautoplayer);
+		game_sequence();
 	}
 	send_serial(RESET,4);
 	g_sequence = 0;
@@ -85,7 +84,6 @@ void game_param_init(void)
 		temp += ally[i].gp;		//味方モンスターの防御力を合計する
 	}
 	player.gp = temp / ALLY_NUM;			//平均値を防御力に設定
-//	pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
 }
 
 /********************************************************************************************/
@@ -96,13 +94,13 @@ void game_start(void)
 {
 	game_param_init();										//プレイヤーのパラメータ初期化
 	send_serial(GAME_TITLE, sizeof(GAME_TITLE));			//タイトル表示
-	autoplay_start(DORAGON_QUEST, SQUARE, 0, 0, 0);//オープニング曲を自動演奏開始
+	autoplay_start(DORAGON_QUEST, SQUARE);//オープニング曲を自動演奏開始
 	sci0_receive_start();									//受信開始
 }
 
 void boukennnosyo_check(void)
 {
-	autoplay_start(BOUKENNNOSYO, SQUARE, 0, 0, 0);
+	autoplay_start(BOUKENNNOSYO, SQUARE);
 #if 0
 	if (blank_check())//セーブデータがあれば「ぼうけんをする」「ぼうけんのしょをつくる」両方表示
 #endif
@@ -116,9 +114,10 @@ void boukennnosyo_check(void)
 /*ゲームシーケンス															*/
 /*void game_sequence(void)													*/
 /****************************************************************************/
-void game_sequence(AUTOPLAYER *pautoplayer)
+void game_sequence(void)
 {
 	unsigned char i,ret;
+	AUTOPLAYER* pautoplayer[3];
 	switch(g_sequence){
 	case 0:
 		game_start();
@@ -127,11 +126,15 @@ void game_sequence(AUTOPLAYER *pautoplayer)
 	case 1://入力待ち
 		ret = input_check();
 		if (ret != OFF) {
-			pautoplayer[0].end_flg = pautoplayer[1].end_flg = pautoplayer[2].end_flg = ON;
+			auto_play_end_processing();
 			g_sequence++;//スイッチ又はエンターが押された
 		}
 		else if (playing_flg == OFF) {//最後まで演奏された時は途中から演奏
-			autoplay_start(DORAGON_QUEST, REPEATING_FROM_INTERMEDIATE[0].score_count, REPEATING_FROM_INTERMEDIATE[1].score_count, REPEATING_FROM_INTERMEDIATE[2].score_count);
+			for (i = 0; i < SPEAKER_NUM; i++) {
+				pautoplayer[i] = get_autoplayer(i);
+				*pautoplayer[i] = REPEATING_FROM_INTERMEDIATE[i];
+			}
+			autoplay_start_from_intermediate();
 		}
 		break;
 	case 2://セーブデータを確認する
