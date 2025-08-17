@@ -19,7 +19,6 @@
 #include <stdlib.h>
 
 
-#include "auto_play.h"
 #include "clock.h"
 #include "lcd.h"
 #include "led.h"
@@ -122,18 +121,6 @@ typedef struct SCI{
 	unsigned long elapsed_time;			//タイマカウントエリア
 }SCI;
 
-//スピーカと自動演奏で使う変数を分ける
-typedef struct AUTOPLAYER{
-	unsigned char wave_type;			//出力波形（スピーカー１の）
-	T_SCORE *pscore;		//楽譜配列へのポインタ
-	T_NOTE *pnote_value;	//音の長さ配列へのポインタ
-	unsigned short score_count;			//スコアカウント
-	unsigned long elapsed_time;			//経過時間監視エリア
-	unsigned short note_size;			//音符の数
-	unsigned char set_flg;				//スコアカウントが進んだのでセットが必要であることを知らせる
-	unsigned char end_flg;
-}AUTOPLAYER;
-
 
 typedef struct SPEAKER{
 	float duty_value;					//デューティ比
@@ -141,12 +128,13 @@ typedef struct SPEAKER{
 	unsigned char speaker_num;			//スピーカー番号
 }SPEAKER;
 
+#include "auto_play.h"
 extern unsigned char playing_flg;
 extern unsigned char mode;
 /****************************************************************************/
 /*プロトタイプ宣言																*/
 /****************************************************************************/
-struct SPEAKER *get_speaker(void);
+struct SPEAKER *get_speaker(unsigned char speaker_num);
 unsigned char input_check(void);
 unsigned char input_wait(void);
 #endif /* MAIN_H_ */

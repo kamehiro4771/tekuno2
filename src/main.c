@@ -109,7 +109,7 @@ void eneiro_initialize(void)
 
 /****************************************************************************/
 /*																			*/
-/*							ƒƒCƒ“ŠÖ”										*/
+/*							ƒƒCƒ“ŠÖ”											*/
 /*																			*/
 /****************************************************************************/
 void main(void)
@@ -529,9 +529,9 @@ unsigned char input_check(void)
 	return ret;
 }
 */
-struct SPEAKER *get_speaker(void)
+struct SPEAKER *get_speaker(unsigned char speaker_num)
 {
-	return speaker;
+	return &speaker[speaker_num];
 }
 
 

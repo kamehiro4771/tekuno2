@@ -94,10 +94,14 @@ void game_start(void)
 {
 	game_param_init();										//プレイヤーのパラメータ初期化
 	send_serial(GAME_TITLE, sizeof(GAME_TITLE));			//タイトル表示
-	autoplay_start(DORAGON_QUEST, SQUARE);//オープニング曲を自動演奏開始
+	autoplay_start(DORAGON_QUEST, SQUARE);					//オープニング曲を自動演奏開始
 	sci0_receive_start();									//受信開始
 }
 
+/********************************************************************************************/
+/*セーブデータの確認
+/*void boukennnosyo_check(void)
+/********************************************************************************************/
 void boukennnosyo_check(void)
 {
 	autoplay_start(BOUKENNNOSYO, SQUARE);
@@ -110,14 +114,14 @@ void boukennnosyo_check(void)
 /*	else
 		send_serial(SAVE_DATA_CREATION);*/
 }
+
 /****************************************************************************/
 /*ゲームシーケンス															*/
 /*void game_sequence(void)													*/
 /****************************************************************************/
 void game_sequence(void)
 {
-	unsigned char i,ret;
-	AUTOPLAYER* pautoplayer[3];
+	unsigned char ret;
 	switch(g_sequence){
 	case 0:
 		game_start();
@@ -127,15 +131,10 @@ void game_sequence(void)
 		ret = input_check();
 		if (ret != OFF) {
 			auto_play_end_processing();
-			g_sequence++;//スイッチ又はエンターが押された
+			g_sequence++;			//スイッチ又はエンターが押されたら次へ進む
 		}
-		else if (playing_flg == OFF) {//最後まで演奏された時は途中から演奏
-			for (i = 0; i < SPEAKER_NUM; i++) {
-				pautoplayer[i] = get_autoplayer(i);
-				*pautoplayer[i] = REPEATING_FROM_INTERMEDIATE[i];
-			}
+		else if (playing_flg == OFF)//最後まで演奏された時は途中から演奏
 			autoplay_start_from_intermediate();
-		}
 		break;
 	case 2://セーブデータを確認する
 		boukennnosyo_check();

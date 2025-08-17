@@ -143,16 +143,44 @@ void speaker_initialize(void)
 	mtu1_initialize();					//MTU1の設定、DA出力用タイマ設定
 	DA.DACR.BYTE				= 0xff;	//チャンネル１のアナログ出力許可
 }
-
+/********************************************************************************************/
+/*DA出力に必要な処理、波形ごとの処理																	*/
+/*void da_process(int sound_num)
+/*
+/********************************************************************************************/
+void da_process(int sound_num)
+{
+	g_interrupt_count				= 0;
+	g_1_cycle_interruption_number	= (onnkai_freq_value[sound_num] == 0) ? 0 : (1 / onnkai_freq_value[sound_num]) / 0.00000375;//1周期当たりの割り込み回数を求める
+	if(mode == AUTOPLAY)
+		g_wave_type						= get_autoplayer(0)->wave_type;
+	else
+		g_wave_type						= get_speaker(0)->wave_type;
+	switch(g_wave_type){
+	case SQUARE:
+		square_wave_calculation();
+		break;
+	case SAWTHOOTH:
+		sawthooth_wave_calculation();
+		break;
+	case TRIANGLE:
+		triangle_wave_calculation();
+		break;
+	case SINE:
+		sine_wave_calculation(onnkai_freq_value[sound_num]);
+		break;
+	}
+}
 /********************************************************************************************/
 /*スピーカとLEDの出力をセットする								  							*/
 /*void set_output_value(unsigned char scale,unsigned char speaker_num)		  				*/
 /*			引数：const char scale 出力する音の番号、pwm_timer_valueの添え字番号			*/
 /*				  unsigned char speaker_num スピーカー番号1~3								*/
 /********************************************************************************************/
+//DA出力の波形はモードによって参照する設定をオートプレーヤーの設定かスピーカーの設定かを変える
 void set_output_value(unsigned char scale,unsigned char speaker_num)
 {
-	SPEAKER *speaker						= get_speaker();
+	SPEAKER *speaker						= get_speaker(speaker_num);
 	switch(speaker_num){
 	case SPEAKER1:
 		if(mode != TIMER){
@@ -163,13 +191,13 @@ void set_output_value(unsigned char scale,unsigned char speaker_num)
 		MTUA.TSTR.BIT.CST1					= 0;					//DA出力タイマ停止
 		DA.DACR.BIT.DAOE1					= 1;					//DA出力許可
 		MTU6.TGRA 							= pwm_timer_value[scale];
-		MTU6.TGRB							= MTU6.TGRA * (speaker[0].duty_value / 100);
-		da_process_each_waveform(speaker[0].wave_type,scale);		//DA出力に必要な処理、波形ごとの処理
+		MTU6.TGRB							= MTU6.TGRA * (speaker->duty_value / 100);
+		da_process(scale);		//DA出力に必要な処理
 		break;
 	case SPEAKER2:
 		MTUB.TSTR.BIT.CST1					= 0;
 		MTU7.TGRA 							= pwm_timer_value[scale];
-		MTU7.TGRB							= MTU7.TGRA * (speaker[1].duty_value / 100);
+		MTU7.TGRB							= MTU7.TGRA * (speaker->duty_value / 100);
 		break;
 	case SPEAKER3:
 		MTUB.TSTR.BIT.CST2					= 0;
@@ -254,32 +282,7 @@ void mute(unsigned char speaker_num)
 		break;
 	}
 }
-/********************************************************************************************/
-/*DA出力に必要な処理、波形ごとの処理
-/*void da_process_each_waveform(int wave_type,int sound_num)
-/*
-/*
-/********************************************************************************************/
-void da_process_each_waveform(int wave_type,int sound_num)
-{
-	g_interrupt_count				= 0;
-	g_1_cycle_interruption_number	= (onnkai_freq_value[sound_num] == 0) ? 0 : (1 / onnkai_freq_value[sound_num]) / 0.00000375;//1周期当たりの割り込み回数を求める
-	g_wave_type						= wave_type;
-	switch(wave_type){
-	case SQUARE:
-		square_wave_calculation();
-		break;
-	case SAWTHOOTH:
-		sawthooth_wave_calculation();
-		break;
-	case TRIANGLE:
-		triangle_wave_calculation();
-		break;
-	case SINE:
-		sine_wave_calculation(onnkai_freq_value[sound_num]);
-		break;
-	}
-}
+
 //MAX4.6V,分解能10ビットなので0.004492187Vが最小幅
 //例：1オクターブ目のド、261.626Hz
 //		1 / 261.626 = 0.0038222500821784 :1周期の時間
