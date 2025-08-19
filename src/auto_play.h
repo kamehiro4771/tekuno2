@@ -12,7 +12,8 @@ typedef struct AUTOPLAYER{
 	unsigned char end_flg;
 }AUTOPLAYER;
 
-void autoplay_start(unsigned short title,unsigned char wave_type);
+void autoplay_start_from_beginning(unsigned short title,unsigned char wave_type);
+void autoplay_start_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3);
 AUTOPLAYER *get_autoplayer(unsigned char player_num);
 AUTOPLAYER get_interrupt_data(unsigned char player_num);
 #endif

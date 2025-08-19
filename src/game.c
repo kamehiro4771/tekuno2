@@ -94,7 +94,7 @@ void game_start(void)
 {
 	game_param_init();										//プレイヤーのパラメータ初期化
 	send_serial(GAME_TITLE, sizeof(GAME_TITLE));			//タイトル表示
-	autoplay_start(DORAGON_QUEST, SQUARE);					//オープニング曲を自動演奏開始
+	autoplay_start_from_beginning(DORAGON_QUEST, SQUARE);					//オープニング曲を自動演奏開始
 	sci0_receive_start();									//受信開始
 }
 
@@ -104,7 +104,7 @@ void game_start(void)
 /********************************************************************************************/
 void boukennnosyo_check(void)
 {
-	autoplay_start(BOUKENNNOSYO, SQUARE);
+	autoplay_start_from_beginning(BOUKENNNOSYO, SQUARE);
 #if 0
 	if (blank_check())//セーブデータがあれば「ぼうけんをする」「ぼうけんのしょをつくる」両方表示
 #endif
@@ -134,7 +134,7 @@ void game_sequence(void)
 			g_sequence++;			//スイッチ又はエンターが押されたら次へ進む
 		}
 		else if (playing_flg == OFF)//最後まで演奏された時は途中から演奏
-			autoplay_start_from_intermediate();
+			autoplay_start_from_intermediate(REPEATING_FROM_INTERMEDIATE[0],REPEATING_FROM_INTERMEDIATE[1],REPEATING_FROM_INTERMEDIATE[2]);
 		break;
 	case 2://セーブデータを確認する
 		boukennnosyo_check();
@@ -181,7 +181,7 @@ void game_sequence(void)
 			else
 				sci0_receive_start();//受信開始
 		}else if(playing_flg == OFF)
-			autoplay_start(BOUKENNNOSYO,SQUARE,0,0,0);
+			autoplay_start_from_beginning(BOUKENNNOSYO,SQUARE);
 		break;
 	case 6:
 		auto_play_end_processing();
@@ -200,7 +200,7 @@ void game_sequence(void)
 		break;
 	default:
 		send_serial(GAME_OVER,sizeof(GAME_OVER));
-		autoplay_start(ZENNMETU,SQUARE,0,0,0);
+		autoplay_start_from_beginning(ZENNMETU,SQUARE);
 		while(playing_flg == ON){
 
 		}

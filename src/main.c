@@ -104,7 +104,7 @@ void eneiro_initialize(void)
 #ifndef LCD
 	lcd_init();
 #endif
-	autoplay_start(INITIAL_CHECK, SQUARE);
+	autoplay_start_from_beginning(INITIAL_CHECK, SQUARE);
 }
 
 /****************************************************************************/
@@ -115,7 +115,7 @@ void eneiro_initialize(void)
 void main(void)
 {
 	eneiro_initialize();
-//	autoplay_start(AVE_MARIA,SAWTHOOTH);
+//	autoplay_start_from_beginning(AVE_MARIA,SAWTHOOTH);
 //	timer_area_registration(&timer_area);
 	while(1)
 	{
@@ -388,7 +388,7 @@ static void autplay_mode(void)
 		return;//波形選択でeが入力されたらメニューへ戻る
 	send_serial(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1],sizeof(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1]));
 	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
-	autoplay_start(SELECTABLE_TITLE_ARREY[title - 1],wave_type);
+	autoplay_start_from_beginning(SELECTABLE_TITLE_ARREY[title - 1],wave_type);
 	sci0_receive_start();
 	while(playing_flg == ON){
 		if(input_check() != OFF)
@@ -486,7 +486,7 @@ static void timer_mode(void)
 			break;
 	}
 	segled_display_update(&timer_value[0], 500);
-	autoplay_start(CANON, TRIANGLE, 0, 0, 0);
+	autoplay_start_from_beginning(CANON, TRIANGLE, 0, 0, 0);
 	while (playing_flg == ON) {//演奏中
 		if (input_check() != OFF) {
 			auto_play_end_processing();

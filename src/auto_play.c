@@ -38,14 +38,24 @@ void autoplay_function_set(void)
 }
 
 /********************************************************************/
-/*自動演奏を開始する位置、波形を
+/*自動演奏する楽譜、波形を
 /*
 /********************************************************************/
-void autoplayer_set(unsigned char wave_type,AUTOPLAYER set1,AUTOPLAYER set2,AUTOPLAYER set3)
+void autoplayer_set(unsigned short title,unsigned char wave_type)
 {
-	autoplayer[0] 				= set1;
-	autoplayer[1] 				= set2;
-	autoplayer[2] 				= set3;
+	autoplayer[0].score_count	= 0;
+	autoplayer[1].score_count	= 0;
+	autoplayer[2].score_count	= 0;
+	autoplayer[0].pscore = SCORE_POINTER_ARRAY[title - 1][0];
+	autoplayer[1].pscore = SCORE_POINTER_ARRAY[title - 1][1];
+	autoplayer[2].pscore = SCORE_POINTER_ARRAY[title - 1][2];
+	autoplayer[0].pnote_value = NOTE_POINTER_ARRAY[title - 1][0];
+	autoplayer[1].pnote_value = NOTE_POINTER_ARRAY[title - 1][1];
+	autoplayer[2].pnote_value = NOTE_POINTER_ARRAY[title - 1][2];
+	autoplayer[0].note_size = NOTE_SIZE_ARRAY[title - 1][0];
+	autoplayer[1].note_size = NOTE_SIZE_ARRAY[title - 1][1];
+	autoplayer[2].note_size = NOTE_SIZE_ARRAY[title - 1][2];
+	g_use_speaker_num = USE_SPEAKER_ARRAY[title - 1];
 	autoplayer[0].wave_type 	= wave_type;
 	switch (g_use_speaker_num) {
 	case 1:
@@ -63,33 +73,6 @@ void autoplayer_set(unsigned char wave_type,AUTOPLAYER set1,AUTOPLAYER set2,AUTO
 	}
 }
 
-/****************************************************************/
-/*演奏する曲の楽譜セットする											*/
-/*void score_set_speaker(int title)								*/
-/*	引数：int title タイトル番号										*/
-/****************************************************************/
-void score_set(int title)
-{
-	autoplayer[0].pscore 		= SCORE_POINTER_ARRAY[title - 1][0];
-	autoplayer[1].pscore 		= SCORE_POINTER_ARRAY[title - 1][1];
-	autoplayer[2].pscore 		= SCORE_POINTER_ARRAY[title - 1][2];
-	autoplayer[0].pnote_value 	= NOTE_POINTER_ARRAY[title - 1][0];
-	autoplayer[1].pnote_value 	= NOTE_POINTER_ARRAY[title - 1][1];
-	autoplayer[2].pnote_value 	= NOTE_POINTER_ARRAY[title - 1][2];
-	autoplayer[0].note_size 	= NOTE_SIZE_ARRAY[title - 1][0];
-	autoplayer[1].note_size 	= NOTE_SIZE_ARRAY[title - 1][1];
-	autoplayer[2].note_size 	= NOTE_SIZE_ARRAY[title - 1][2];
-	g_use_speaker_num 			= USE_SPEAKER_ARRAY[title - 1];
-}
-
-/********************************************************************/
-/*任意の場所から演奏を開始したいとき
-/*
-/**/
-void interrupt_data_set(AUTOPLAYER set1,AUTOPLAYER set2,AUTOPLAYER set3)
-{
-
-}
 /********************************************************************/
 /*自動演奏終了処理													*/
 /*void auto_play_end_processing(void)								*/
@@ -106,36 +89,35 @@ void auto_play_end_processing(void)
 	playing_flg = OFF;							//演奏中フラグOFF
 }
 /******************************************************************************************************************************************************/
-/* 自動演奏開始関数
+/*初めから演奏する
 /*unsigned char automatic_playing_start(unsigned short title,unsigned char wave_type)*/
 /*	引数 unsigned short title*/
 /*		 unsigned char wave_type*/
 /******************************************************************************************************************************************************/
-void autoplay_start(unsigned short title,unsigned char wave_type)
+void autoplay_start_from_beginning(unsigned short title,unsigned char wave_type)
 {
 	auto_play_end_processing();
 	playing_flg						= ON;	//演奏中フラグON
-	score_set(title);						//楽譜をセットする
-	autoplayer_set(wave_type,,,);
+	autoplayer_set(title,wave_type);
 	autoplay_function_set();				//自動演奏に必要な関数をシステムタイマに登録する
 }
 
+/******************************************************************************************/
+/*途中から演奏する																		  */
+/*void autoplay_start_from_beginning_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)*/
+/**/
 /*********************************************/
-/*中断した演奏を再開								 */
-/*void autoplay_start_from_intermediate(void)*/
-/*********************************************/
-void autoplay_start_from_intermediate(void)
+void autoplay_start_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
 {
 	playing_flg						= ON;	//演奏中フラグON
-	//中断データをセットする
+	autoplay_data_set(set1, set2, set3);	//中断データをセットする
 	output_speaker_start(7);				//出力開始
 	autoplay_function_set();
 }
 
 /********************************************************************/
 /*時間経過で楽譜を進めるコールバック関数										*/
-/*void forward_score(unsigned char i)								*/
-/*	引数：unsigned char i　スピーカー番号									*/
+/*void forward_score(void)								*/
 /********************************************************************/
 //経過時間をダウンカウント
 //経過時間を見て０ならスコアカウントを進める

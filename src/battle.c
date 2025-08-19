@@ -65,7 +65,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 		if(penemy->hp == 0){
 			battle_display(KILLED_ENEMY,NULL);
 			auto_play_end_processing();
-			autoplay_start(WINNING,SQUARE,0,0,0);
+			autoplay_start_from_beginning(WINNING,SQUARE,0,0,0);
 			while(playing_flg == ON){
 				/*nop*/
 			}
@@ -90,7 +90,7 @@ void player_turn(void)
 	battle_display(PLAYER_TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
-		autoplay_start(BATTLE1,SQUARE,0,0,0);//戦闘テーマ演奏開始
+		autoplay_start_from_beginning(BATTLE1,SQUARE,0,0,0);//戦闘テーマ演奏開始
 		output_battle_field(NEW_FIELD);
 	}else{
 		output_battle_field(CURRENT_FIELD);
@@ -103,7 +103,7 @@ void player_turn(void)
 			break;
 		}
 		if(playing_flg == OFF)//戦闘の曲が終了したとき
-			autoplay_start(BATTLE1,SQUARE,0,0,0);
+			autoplay_start_from_beginning(BATTLE1,SQUARE,0,0,0);
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
@@ -158,7 +158,6 @@ void motion_after_input(void)
 {
 	unsigned char i;
 	unsigned char *dladder = NULL;
-	AUTOPLAYER *pautoplayer = get_autoplayer();
 	move_jewel(operation[0],operation[1]);
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
@@ -169,8 +168,7 @@ void motion_after_input(void)
 					resume_data[i]		= get_interrupt_data(i);
 				}
 			}else
-				pautoplayer[0].score_count = pautoplayer[1].score_count = pautoplayer[2].score_count = 0;
-			autoplay_start(ALLY_ATACK,SQUARE,0,0,0);//攻撃音演奏
+			autoplay_start_from_beginning(ALLY_ATACK,SQUARE);//攻撃音演奏
 			while(playing_flg == ON){
 				//nop
 			}
@@ -179,11 +177,7 @@ void motion_after_input(void)
 				battle_display(ADD_ATTACK,dladder);
 			}else
 				battle_display(RECOVERY,dladder);
-			//演奏再開
-			for(i = 0;i < 3;i++){
-				pautoplayer[i] 		= resume_data[i];
-			}
-			autoplay_start(BATTLE1,SQUARE,resume_data[0].score_count,resume_data[1].score_count,resume_data[2].score_count);
+			autoplay_start_from_intermediate(resume_data[0],resume_data[1],resume_data[2]);//演奏再開
 			free_padding(dladder);//空いた宝石配列を詰める
 		}else{//自分のターン終了
 			sci0_receive_start();//受信が終わっているので開始
