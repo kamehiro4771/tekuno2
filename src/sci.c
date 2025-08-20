@@ -236,7 +236,7 @@ unsigned char sci0_find_received_data(unsigned char find_char)
 /*‘—M										*/
 /*void send_serial(display *send_data)			*/
 /****************************************************/
-void send_serial(T_DISPLAY *send_data,unsigned short length)
+void send_serial(T_DISPLAY send_data,unsigned short length)
 {
 	sci0.send_data[sci0.reg_cnt]	= send_data;
 	sci0.send_length[sci0.reg_cnt]	= length;

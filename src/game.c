@@ -18,7 +18,7 @@ void game_sequence(void);
 /*
  * 定数定義
  */
-const T_DISPLAY GAME_TITLE[] = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+const T_DISPLAY GAME_TITLE = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 						   "~                                          ~\n"
 						   "~               \x1b[37meNeiro QUEST\x1b[31m               ~\n"
 						   "~                                          ~\n"
@@ -27,12 +27,12 @@ const T_DISPLAY GAME_TITLE[] = {"\x1b[2J\x1b[47A\x1b[44m\x1b[31m~~~~~~~~~~~~~~~~
 						   "~                                          ~\n"
 		                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\n"
 							};
-const T_DISPLAY SAVE_DATA_CREATION[]	= {"1:ぼうけんのしょをつくる\n"};
-const T_DISPLAY LOAD_SAVE_DATA[]		= {"2:ぼうけんをする\n"};
-const T_DISPLAY INPUT_NAME[] 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
-const T_DISPLAY ARRIVAL[]				= {"はダンジョンに到着した\n"};
-const T_DISPLAY GAME_CLEAR[] 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
-const T_DISPLAY GAME_OVER[] 			= {"~~~~GAME_OVER~~~~"};
+const T_DISPLAY SAVE_DATA_CREATION	= {"1:ぼうけんのしょをつくる\n"};
+const T_DISPLAY LOAD_SAVE_DATA		= {"2:ぼうけんをする\n"};
+const T_DISPLAY INPUT_NAME 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
+const T_DISPLAY ARRIVAL				= {"はダンジョンに到着した\n"};
+const T_DISPLAY GAME_CLEAR 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
+const T_DISPLAY GAME_OVER 			= {"~~~~GAME_OVER~~~~"};
 AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGONQUEST_NOTE_VALUE1,32,375,96,OFF,OFF},//オープニング曲を途中から
 													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},

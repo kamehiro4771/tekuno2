@@ -101,7 +101,12 @@ void autoplay_start_from_beginning(unsigned short title,unsigned char wave_type)
 	autoplayer_set(title,wave_type);
 	autoplay_function_set();				//自動演奏に必要な関数をシステムタイマに登録する
 }
-
+void autoplay_data_set(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
+{
+	autoplayer[0] = set1;
+	autoplayer[1] = set2;
+	autoplayer[2] = set3;
+}
 /******************************************************************************************/
 /*途中から演奏する																		  */
 /*void autoplay_start_from_beginning_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)*/
