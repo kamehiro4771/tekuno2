@@ -59,7 +59,7 @@ const T_DISPLAY TIMER_SETTING_METHOD											= {"SW1:OŒ…–Úİ’è@SW3:“ñŒ…–Úİ’
 const T_DISPLAY ERROR_MESSAGE													= {"“ü—Í‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ\n"};
 /*‘I‘ğo—ˆ‚é€–Ú‚ğ•Ï‚¦‚½‚¢‚ÍˆÈ‰º‚Ì”z—ñ‚ğ•ÏX‚µ‚ÄA‘Œ¸‚ª‚ ‚Á‚½‚ç#define‚ÌSELECT_NUM‚ğ•Ï‚¦‚é*/
 const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,SETTING};//‘I‘ğ‚Å‚«‚éƒ‚[ƒh
-const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]				= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING};//‚±‚Ì”z—ñ‚É“ü‚Á‚Ä‚¢‚é‹È‚ªƒƒjƒ…[‚É•\¦‚³‚ê‘I‘ğ‚Å‚«‚é
+const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]				= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING,ZENNMETU};//‚±‚Ì”z—ñ‚É“ü‚Á‚Ä‚¢‚é‹È‚ªƒƒjƒ…[‚É•\¦‚³‚ê‘I‘ğ‚Å‚«‚é
 const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//‘I‘ğ‚Å‚«‚é”gŒ`
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
 const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]				= {SPEAKER1,SPEAKER2,SPEAKER3,};
@@ -101,7 +101,7 @@ void eneiro_initialize(void)
 	cmt1_initiralize();				//—”¶¬—pƒ^ƒCƒ}
 	speaker_initialize();			//ƒXƒs[ƒJ—pPWM,DAƒRƒ“ƒo[ƒ^ADAo—Í—pƒ^ƒCƒ}‰Šú‰»
 	sci0_init(BAUD_RATE);			//ƒVƒŠƒAƒ‹’ÊMƒ‚[ƒWƒ…[ƒ‹‚Ì‰Šú‰»
-#ifndef LCD
+#ifdef LCD
 	lcd_init();
 #endif
 	autoplay_start_from_beginning(INITIAL_CHECK, SQUARE);
@@ -115,7 +115,6 @@ void eneiro_initialize(void)
 void main(void)
 {
 	eneiro_initialize();
-//	autoplay_start_from_beginning(AVE_MARIA,SAWTHOOTH);
 //	timer_area_registration(&timer_area);
 	while(1)
 	{
@@ -386,8 +385,8 @@ static void autplay_mode(void)
 	wave_type = item_select(WAVETYPE_SELECT,WAVE_TYPE_NAME,SELECTABLE_WAVE_ARREY,SELECT_WAVE_NUM,END_METHOD);
 	if(wave_type == 'e')
 		return;//”gŒ`‘I‘ğ‚Åe‚ª“ü—Í‚³‚ê‚½‚çƒƒjƒ…[‚Ö–ß‚é
-	send_serial(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1],sizeof(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1]));
-	send_serial(WAVE_TYPE_NAME[wave_type - 1],sizeof(WAVE_TYPE_NAME[wave_type - 1]));
+	send_serial(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1],strlen(TITLE_NAME[SELECTABLE_TITLE_ARREY[title - 1] - 1]));
+	send_serial(WAVE_TYPE_NAME[wave_type - 1],strlen(WAVE_TYPE_NAME[wave_type - 1]));
 	autoplay_start_from_beginning(SELECTABLE_TITLE_ARREY[title - 1],wave_type);
 	sci0_receive_start();
 	while(playing_flg == ON){
@@ -531,7 +530,7 @@ unsigned char input_check(void)
 */
 struct SPEAKER *get_speaker(unsigned char speaker_num)
 {
-	return &speaker[speaker_num];
+	return &speaker[speaker_num - 1];
 }
 
 

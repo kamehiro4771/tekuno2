@@ -7,35 +7,36 @@
 /*********************************************************************/
 /*定数定義															 */
 /*********************************************************************/
-const T_DISPLAY APPEAR_DISPLAY[]			= {"が現れた！\n"};
-const T_DISPLAY ATTACK_DISPLAY[]			= {"の攻撃！\n"};
-const T_DISPLAY COMBO_DISPLAY[]				= {"コンボ！\n"};
-const T_DISPLAY TO_DISPLAY[]				= {"に"};
-const T_DISPLAY DAMAGE_DISPLAY[]			= {"のダメージ"};
-const T_DISPLAY TAKE_DISPLAY[]				= {"をうけた！\n"};
-const T_DISPLAY LIFE_JEWEL_DISPLAY[]		= {"は命の宝石を使った"};
-const T_DISPLAY RECOVERY_DISPLAY[]			= {"回復！\n"};
-const T_DISPLAY KILL_DISPLAY[]				= ("を倒した！\n");
-const T_DISPLAY REQUEST_COMMAND_DISPLAY[]	= {"コマンド?>>"};
-const T_DISPLAY OPERATION_METHOD_DISPLAY[]	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
-const T_DISPLAY INPUT_ERROR_DISPLAY[]		= {"入力が正しくありません"};
-const T_DISPLAY HP_DISPLAY[]				= {"HP="};
-const T_DISPLAY  LINE_DISPLAY[]				= {"----------------------------------------------------------------------------------------------------"};
+const T_DISPLAY APPEAR_DISPLAY				= {"が現れた！\n"};
+const T_DISPLAY ATTACK_DISPLAY				= {"の攻撃！\n"};
+const T_DISPLAY COMBO_DISPLAY				= {"コンボ！\n"};
+const T_DISPLAY TO_DISPLAY					= {"に"};
+const T_DISPLAY DAMAGE_DISPLAY				= {"のダメージ"};
+const T_DISPLAY TAKE_DISPLAY				= {"をうけた！\n"};
+const T_DISPLAY LIFE_JEWEL_DISPLAY			= {"は命の宝石を使った"};
+const T_DISPLAY RECOVERY_DISPLAY			= {"回復！\n"};
+const T_DISPLAY KILL_DISPLAY				= ("を倒した！\n");
+const T_DISPLAY REQUEST_COMMAND_DISPLAY		= {"コマンド?>>"};
+const T_DISPLAY OPERATION_METHOD_DISPLAY	= {"一文字目動かす宝石の現在地、2文字目動かし先"};
+const T_DISPLAY INPUT_ERROR_DISPLAY			= {"入力が正しくありません"};
+const T_DISPLAY HP_DISPLAY					= {"HP="};
+const T_DISPLAY  LINE_DISPLAY				= {"----------------------------------------------------------------------------------------------------"};
 
 
-const T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM][6] 	= {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
+const T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM] 	= {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
 enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS,COMBO,PLAYER_TURN,ENEMY_TURN};
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
-AUTOPLAYER *resume_data;
-T_MONSTER *penemy;//戦闘中のモンスターへのポインタ
-T_PLAYER *pplayer;//プレイヤーへのポインタ
-T_MONSTER *pally;//味方モンスター達へのポインタ
-T_MONSTER attack_ally;//攻撃したモンスター
-char output_display[9][512];//戦闘中の画面表示
-unsigned char first_turn_flg;//敵が現れて最初のターンなら新しいバトルフィールドを作成する
-unsigned char operation[2];//プレーヤーの入力したアルファベットが入る
+AUTOPLAYER resume_data[SPEAKER_NUM];
+T_MONSTER *penemy;				//戦闘中のモンスターへのポインタ
+T_PLAYER *pplayer;				//プレイヤーへのポインタ
+T_MONSTER *pally;				//味方モンスター達へのポインタ
+T_MONSTER attack_ally;			//攻撃したモンスター
+char output_display[9][512];	//戦闘中の画面表示
+unsigned char first_turn_flg;	//敵が現れて最初のターンなら新しいバトルフィールドを作成する
+unsigned char operation[2];		//プレーヤーの入力したアルファベットが入る
+unsigned short combo_value;		//コンボ数
 /********************************************************************/
 /*プロトタイプ宣言													*/
 /********************************************************************/
@@ -45,6 +46,20 @@ void i_to_a(unsigned short i,unsigned char *output_string);
 static void battle_display(unsigned char activity,unsigned char *param);
 unsigned char puzzle_operation_check(void);
 void motion_after_input(void);
+
+/********************************************************************/
+/*戦闘に勝利															*/
+/*void win(void)													*/
+/********************************************************************/
+void win(void)
+{
+	battle_display(KILLED_ENEMY,NULL);
+	auto_play_end_processing();
+	autoplay_start_from_beginning(WINNING,SQUARE,0,0,0);
+	while(playing_flg == ON){
+		/*nop*/
+	}
+}
 /********************************************************************/
 /*バトルメイン関数													*/
 /*unsigned char battle_main(struct T_MONSTER* enemy)					*/
@@ -63,12 +78,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 	while(kill_cnt < ENEMY_NUM){
 		player_turn();
 		if(penemy->hp == 0){
-			battle_display(KILLED_ENEMY,NULL);
-			auto_play_end_processing();
-			autoplay_start_from_beginning(WINNING,SQUARE,0,0,0);
-			while(playing_flg == ON){
-				/*nop*/
-			}
+			win();
 			kill_cnt++;
 		}
 		enemy_turn();
@@ -76,6 +86,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 			return 0;
 		first_turn_flg 			= OFF;
 	}
+	return 0;
 }
 
 
@@ -95,7 +106,7 @@ void player_turn(void)
 	}else{
 		output_battle_field(CURRENT_FIELD);
 	}
-	send_serial(REQUEST_COMMAND_DISPLAY,sizeof(REQUEST_COMMAND_DISPLAY));
+	send_serial(REQUEST_COMMAND_DISPLAY,strlen(REQUEST_COMMAND_DISPLAY));
 	while(1){
 		ret									= puzzle_operation_check();
 		if(ret == ON){
@@ -106,6 +117,22 @@ void player_turn(void)
 			autoplay_start_from_beginning(BATTLE1,SQUARE,0,0,0);
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
+}
+
+/**********************************************************
+/*入力値の判定 */
+/*unsigned char decision_c(unsigned char c)*/
+/*
+ *
+ */
+/**/
+unsigned char decision_c(unsigned char c)
+{
+	if(c >= 'A' && c  <= 'M')
+		return c;
+	else if(c >= 'a' && c <= 'm')
+		return c;
+	return 0;
 }
 /**********************************************************
  *　パズル操作の入力を判定する
@@ -123,24 +150,9 @@ unsigned char puzzle_operation_check(void)
 		ret						= sci0_get_receive_count();
 		if(ret == 4){//2文字入力された
 			sci0_data_cpy(&input[0]);
-			if(input[0] >= 'A' && input[0] <= 'M'){//1文字目判定
-				operation[0] = input[0];
-				if(input[1] >= 'A' && input[1] <= 'M'){//2文字目判定
-					operation[1]	= input[1];
-					return ON;
-				}
-				if(input[1] >= 'a' && input[1] <= 'm'){
-					operation[1]	= input[1];
-					return ON;
-				}
-			}
-			if(input[0] >= 'a' && input[0] <= 'm'){//
-				operation[0] = input[0];
-				if(input[1] >= 'A' && input[1] <= 'M'){//2文字目判定
-					operation[1]	= input[1];
-					return ON;
-				}
-				if(input[1] >= 'a' && input[1] <= 'm'){
+			if(decision_c(input[0])){
+				operation[0] = input[0];;
+				if(decision_c(input[1])){
 					operation[1]	= input[1];
 					return ON;
 				}
@@ -198,6 +210,23 @@ void enemy_turn(void)
 	battle_display(TAKE_ATTACK,NULL);
 }
 /**************************************************************************
+/*コンボ数を数える。コンボならコンボ数表示											　*/
+/*
+/**************************************************************************/
+void combo(void)
+{
+	combo_value++;
+	if(combo_value >= 2){//コンボカウントが２以上ならコンボ数表示
+		sprintf(output_display[COMBO],"%d%s",combo_value,COMBO_DISPLAY);
+		send_serial((const unsigned char *)output_display[COMBO],strlen(output_display[COMBO]));
+	}
+}
+
+void combo_reset(void)
+{
+	combo_value = 0;
+}
+/**************************************************************************
  * バトル中の画面表示
  * static void battle_display(unsigned char activity,unsigned char *param)
  * 	引数：unsigned char activity　APPEARANCE　敵が現れた
@@ -212,23 +241,13 @@ void enemy_turn(void)
 static void battle_display(unsigned char activity,unsigned char *param)
 {
 	unsigned short damage_value = 0;
-	static unsigned short combo_value = 0;//コンボカウントのリセットを忘れないように
-	unsigned char deleted_number;
-	if(activity == ADD_ATTACK || activity == RECOVERY){
-		/*ダメージ計算とコンボ数表示*/
-		combo_value++;//
-		deleted_number						= delete_jewel(param);//宝石を消して、消した宝石数をもらう
-		if(combo_value >= 2){//コンボカウントが２以上ならコンボ数表示
-			sprintf(output_display[COMBO],"%d%s",combo_value,COMBO_DISPLAY);
-			send_serial((const unsigned char *)output_display[COMBO],strlen(output_display[COMBO]));
-		}
-	}
 	switch(activity){
 	case APPEARANCE:
 		sprintf(output_display[APPEARANCE],"%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,APPEAR_DISPLAY);
 		break;
 	case ADD_ATTACK:
-		damage_value			= damage_or_recovery_value_calculate(penemy,combo_value,attack_ally.el,deleted_number);//ダメージ計算
+		combo();
+		damage_value			= damage_or_recovery_value_calculate(penemy, combo_value, attack_ally.el, delete_jewel(param));//ダメージ計算
 		sprintf(output_display[ADD_ATTACK],"%s%s%s%s%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[attack_ally.el],attack_ally.name,DEFAULT_CHAR,ATTACK_DISPLAY,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,TO_DISPLAY,damage_value,DAMAGE_DISPLAY,CRLF);
 		if(penemy->hp >= damage_value)
 			penemy->hp 			= penemy->hp - damage_value;//モンスターのHPからダメージを引く
@@ -245,7 +264,8 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		break;
 	case RECOVERY:
 		/*回復表示の時*/
-		damage_value			= damage_or_recovery_value_calculate(penemy,combo_value,LIFE,deleted_number);//ダメージ計算
+		combo();
+		damage_value			= damage_or_recovery_value_calculate(penemy, combo_value, LIFE, delete_jewel(param));//ダメージ計算
 		sprintf(output_display[RECOVERY],"%s%s%d%s",pplayer->name,LIFE_JEWEL_DISPLAY,damage_value,RECOVERY_DISPLAY);
 		pplayer->hp = pplayer->hp + damage_value;//自分のHPにダメージを足す最大値を超えないように
 		if(pplayer->hp > pplayer->max_hp)
@@ -263,7 +283,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 																COLOR_CHAR_ARRAY[pally[SOIL].el],pally[SOIL].name,DEFAULT_CHAR,CRLF,
 																CURSOL_MOVING_SENTER,HP_DISPLAY,pplayer->hp,pplayer->max_hp,CRLF,
 																CRLF,CRLF,LINE_DISPLAY,CRLF);
-		combo_value 			= 0;
+		combo_reset();
 		break;
 	case ENEMY_TURN:
 	case PLAYER_TURN:
@@ -276,68 +296,3 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	}
 	send_serial((const unsigned char *)output_display[activity],strlen(output_display[activity]));
 }
-//敵と味方のステータスを表示する
-/********************************************************************/
-/*数値を文字列に変換する											*/
-/*void i_to_a(unsigned short i)										*/
-/*	引数：unsigned short i 数値										*/
-/********************************************************************/
-//入力は65535まで
-//出力はワークエリア定義のoutput_stringに変換される
-//最後にNULL文字を入れる
-/*
-void i_to_a(unsigned short i,unsigned char *output_string)
-{
-	if(i > 9999){
-		output_string[0]	= (i / 10000) + 0x30;
-		output_string[1]	= ((i / 1000) % 10) + 0x30;
-		output_string[2]	= ((i / 100) % 10) + 0x30;
-		output_string[3]	= ((i / 10) % 10) + 0x30;
-		output_string[4]	= (i % 10) + 0x30;
-		output_string[5]		= '\0';
-	}else if(i > 999){
-		output_string[0]	= ((i / 1000) % 10) + 0x30;
-		output_string[1]	= ((i / 100) % 10) + 0x30;
-		output_string[2]	= ((i / 10) % 10) + 0x30;
-		output_string[3]	= (i % 10) + 0x30;
-		output_string[4]		= '\0';
-	}else if(i > 99){
-		output_string[0]	= ((i / 100) % 10) + 0x30;
-		output_string[1]	= ((i / 10) % 10) + 0x30;
-		output_string[2]	= (i % 10) + 0x30;
-		output_string[3]		= '\0';
-	}else if(i > 9){
-		output_string[0]	= ((i / 10) % 10) + 0x30;
-		output_string[1]	= (i % 10) + 0x30;
-		output_string[2]		= '\0';
-	}else{
-		output_string[0]	= (i % 10) + 0x30;
-		output_string[1]		= '\0';
-	}
-}*/
-
-/********************************************************************/
-/*else if(ret == 3){
-				if(input[i] < 0x41 || input[i] > 0x4d)//1文字目A~M以外の入力
-					//nop
-				else if(input[i] < 0x61 || input[i] > 0x6d)//1文字目a~m以外の入力
-					//nop
-				else{
-					i++;
-					if(i == 2)
-						break;
-				}
-			}
-			if(i == 0){
-				send_serial(INPUT_ERROR,sizeof(INPUT_ERROR));
-				input[0]	= 0;
-				input[1]	= 0;
-				i			= 0;
-			}
-		}else if(ret >= SW1 && ret <= SW13){//スイッチが押されたとき
-			g_start[0]	= speaker[0].score_count;
-			g_start[1]	= speaker[1].score_count;
-			g_start[2]	= speaker[2].score_count;
-			input[i]	= ret;
-			i++;*/
-

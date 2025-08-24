@@ -22,7 +22,6 @@ void end_flg_check(void);
  * ワークエリア定義
  */
 AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},};
-AUTOPLAYER interrupt_data[3];//エンターやスイッチで演奏終了したときのスピーカの情報を保存しておく
 unsigned char g_use_speaker_num;		//使用するスピーカーの個数
 unsigned char playing_flg = OFF;
 
@@ -61,10 +60,12 @@ void autoplayer_set(unsigned short title,unsigned char wave_type)
 	case 1:
 		autoplayer[0].set_flg 	= ON;
 		autoplayer[0].end_flg 	= OFF;
+		autoplayer[1].end_flg = autoplayer[2].end_flg	= ON;
 		break;
 	case 2:
 		autoplayer[0].set_flg 	= autoplayer[1].set_flg = ON;
 		autoplayer[0].end_flg 	= autoplayer[1].end_flg	= OFF;
+		autoplayer[2].end_flg	= ON;
 		break;
 	case 3:
 		autoplayer[0].set_flg 	= autoplayer[1].set_flg = autoplayer[2].set_flg = ON;
@@ -82,7 +83,7 @@ void auto_play_end_processing(void)
 	if (playing_flg == OFF)						//演奏中出ない時に呼び出されたら何もしない
 		return;
 	led_lights_out();							//LED消灯
-	mute(ALL_SPEAKER);							//スピーカーi消音
+	mute(ALL_SPEAKER);							//スピーカー消音
 	count_timer_dell(forward_score);
 	count_timer_dell(output_function_call);
 	count_timer_dell(end_flg_check);
@@ -186,6 +187,6 @@ AUTOPLAYER *get_autoplayer(unsigned char player_num)
 
 AUTOPLAYER get_interrupt_data(unsigned char player_num)
 {
-	return interrupt_data[player_num];
+	return autoplayer[player_num];
 }
 

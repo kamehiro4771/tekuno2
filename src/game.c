@@ -93,7 +93,7 @@ void game_param_init(void)
 void game_start(void)
 {
 	game_param_init();										//プレイヤーのパラメータ初期化
-	send_serial(GAME_TITLE, sizeof(GAME_TITLE));			//タイトル表示
+	send_serial(GAME_TITLE, strlen(GAME_TITLE));			//タイトル表示
 	autoplay_start_from_beginning(DORAGON_QUEST, SQUARE);					//オープニング曲を自動演奏開始
 	sci0_receive_start();									//受信開始
 }
@@ -109,8 +109,8 @@ void boukennnosyo_check(void)
 	if (blank_check())//セーブデータがあれば「ぼうけんをする」「ぼうけんのしょをつくる」両方表示
 #endif
 		send_serial(RESET, 10);
-		send_serial(SAVE_DATA_CREATION, sizeof(SAVE_DATA_CREATION));
-		send_serial(LOAD_SAVE_DATA, sizeof(LOAD_SAVE_DATA));
+		send_serial(SAVE_DATA_CREATION, strlen(SAVE_DATA_CREATION));
+		send_serial(LOAD_SAVE_DATA, strlen(LOAD_SAVE_DATA));
 /*	else
 		send_serial(SAVE_DATA_CREATION);*/
 }
@@ -169,7 +169,7 @@ void game_sequence(void)
 	case 4://名前の入力促す表示
 		sci0_receive_start();//受信開始
 		send_serial(RESET,10);
-		send_serial(INPUT_NAME,sizeof(INPUT_NAME));
+		send_serial(INPUT_NAME, strlen(INPUT_NAME));
 		g_sequence++;
 		break;
 	case 5:
@@ -177,7 +177,7 @@ void game_sequence(void)
 		if(ret == ON){
 			ret = sci0_str_cpy(player.name);//入力をプレイヤーの名前に設定
 			if(ret >= 3)
-				g_sequence = 8;
+				g_sequence++;
 			else
 				sci0_receive_start();//受信開始
 		}else if(playing_flg == OFF)
@@ -186,7 +186,7 @@ void game_sequence(void)
 	case 6:
 		auto_play_end_processing();
 		send_serial(player.name,strlen((const char*)player.name));
-		send_serial(ARRIVAL,sizeof(ARRIVAL));
+		send_serial(ARRIVAL, strlen(ARRIVAL));
 		g_sequence++;
 		break;
 	case 7://モンスターと戦闘
@@ -194,12 +194,12 @@ void game_sequence(void)
 		g_sequence++;
 		break;
 	case 8:
-		send_serial(player.name,sizeof(player.name));
-		send_serial(GAME_CLEAR,sizeof(GAME_CLEAR));
+		send_serial(player.name, strlen(player.name));
+		send_serial(GAME_CLEAR, strlen(GAME_CLEAR));
 		g_sequence	= GAME_END;
 		break;
 	default:
-		send_serial(GAME_OVER,sizeof(GAME_OVER));
+		send_serial(GAME_OVER, strlen(GAME_OVER));
 		autoplay_start_from_beginning(ZENNMETU,SQUARE);
 		while(playing_flg == ON){
 

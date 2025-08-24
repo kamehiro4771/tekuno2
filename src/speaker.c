@@ -139,10 +139,13 @@ void speaker_initialize(void)
 	MTU8.TMDR.BYTE				= 0x02;	//通常動作、PWMモードに設定
 	MTU8.TIOR.BIT.IOA			= 0x1;	//初期出力はLOW出力コンペアマッチでLOW出力
 	MTU8.TIOR.BIT.IOB			= 0x2;	//初期出力はLOW出力コンペアマッチでHI出力
+
 	//DAコンバーターの設定
 	mtu1_initialize();					//MTU1の設定、DA出力用タイマ設定
 	DA.DACR.BYTE				= 0xff;	//チャンネル１のアナログ出力許可
 }
+
+
 /********************************************************************************************/
 /*DA出力に必要な処理、波形ごとの処理																	*/
 /*void da_process(int sound_num)
@@ -202,7 +205,7 @@ void set_output_value(unsigned char scale,unsigned char speaker_num)
 	case SPEAKER3:
 		MTUB.TSTR.BIT.CST2					= 0;
 		MTU8.TGRA 							= pwm_timer_value[scale];
-		MTU8.TGRB							= MTU8.TGRA * (speaker[2].duty_value / 100);
+		MTU8.TGRB							= MTU8.TGRA * (speaker->duty_value / 100);
 		break;
 	}
 	set_output_speaker_length(speaker_num - 1);
@@ -278,6 +281,7 @@ void mute(unsigned char speaker_num)
 		MTUB.TSTR.BYTE	= 0;
 		MTU6.TGRA = MTU6.TGRB 	= 0;
 		MTU7.TGRA = MTU7.TGRB 	= 0;
+		MTU8.TGRA = MTU8.TGRB 	= 0;
 		DA.DACR.BIT.DAOE1		= 0;	//DA出力禁止
 		break;
 	}
