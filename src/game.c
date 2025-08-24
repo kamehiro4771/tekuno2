@@ -37,9 +37,7 @@ AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGON
 													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
-/*const char map1[][]		= {""}
-const char map2[][]		= {""}//
-const char map3[][]		= {""}*/
+
 /********************************************************************************************/
 /*ワークエリア定義																				*/
 /********************************************************************************************/
@@ -104,7 +102,6 @@ void game_start(void)
 /********************************************************************************************/
 void boukennnosyo_check(void)
 {
-	autoplay_start_from_beginning(BOUKENNNOSYO, SQUARE);
 #if 0
 	if (blank_check())//セーブデータがあれば「ぼうけんをする」「ぼうけんのしょをつくる」両方表示
 #endif
@@ -115,6 +112,19 @@ void boukennnosyo_check(void)
 		send_serial(SAVE_DATA_CREATION);*/
 }
 
+//曲を流しながら入力を確認する、曲が終了したら同じ曲をかけなおす
+unsigned char wait_tune_with(unsigned char title,unsigned char wave_type)
+{
+	autoplay_start_from_beginning(title, wave_type);
+	sci0_receive_start();//受信開始
+	while(1){
+		ret = input_check();
+		if(ret != OFF){
+			return ret;
+		if (playing_flg == OFF)
+			autoplay_start_from_beginning(title, wave_type);
+	}
+}
 /****************************************************************************/
 /*ゲームシーケンス															*/
 /*void game_sequence(void)													*/
@@ -141,38 +151,19 @@ void game_sequence(void)
 		g_sequence++;
 		break;
 	case 3:
-		ret = input_check();
-		switch(ret){
-		case ON:
-			if(sci0_find_received_data('1') == 1)
-				g_sequence++;
-			else if(sci0_find_received_data('2') == 1)
-				g_sequence = 8;
-			else//無効なキーボード入力があった場合再入力
-				sci0_receive_start();//受信開始
-			break;
-		case SW1:
-			g_sequence++;
-			break;
-		case SW2:
-			g_sequence = 8;
-			break;
-		case OFF:
-			if(playing_flg == OFF)
-				g_sequence = 4;
-			break;
-		default:
-			//無効なスイッチ入力があった場合
-			break;
-		}
+		ret = wait_tune_with(BOUKENNNOSYO,SQUARE);
+		g_sequence++;
 		break;
-	case 4://名前の入力促す表示
+	case 4://入力判定
+
+		break;
+	case 5://名前の入力促す表示
 		sci0_receive_start();//受信開始
 		send_serial(RESET,10);
 		send_serial(INPUT_NAME, strlen(INPUT_NAME));
 		g_sequence++;
 		break;
-	case 5:
+	case 6:
 		ret = input_check();
 		if(ret == ON){
 			ret = sci0_str_cpy(player.name);//入力をプレイヤーの名前に設定
@@ -183,17 +174,17 @@ void game_sequence(void)
 		}else if(playing_flg == OFF)
 			autoplay_start_from_beginning(BOUKENNNOSYO,SQUARE);
 		break;
-	case 6:
+	case 7:
 		auto_play_end_processing();
 		send_serial(player.name,strlen((const char*)player.name));
 		send_serial(ARRIVAL, strlen(ARRIVAL));
 		g_sequence++;
 		break;
-	case 7://モンスターと戦闘
+	case 8://モンスターと戦闘
 		battle(enemy,ally,&player);
 		g_sequence++;
 		break;
-	case 8:
+	case 9:
 		send_serial(player.name, strlen(player.name));
 		send_serial(GAME_CLEAR, strlen(GAME_CLEAR));
 		g_sequence	= GAME_END;
