@@ -37,7 +37,7 @@ AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGON
 													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
-
+unsigned char *decision_table[]
 /********************************************************************************************/
 /*ワークエリア定義																				*/
 /********************************************************************************************/
@@ -111,8 +111,13 @@ void boukennnosyo_check(void)
 /*	else
 		send_serial(SAVE_DATA_CREATION);*/
 }
-
-//曲を流しながら入力を確認する、曲が終了したら同じ曲をかけなおす
+/***************************************************************************/
+/*演奏しながら入力待ち*/
+/*unsigned char wait_tune_with(unsigned char title,unsigned char wave_type)*/
+/*	引数：unsigned char title　演奏される曲*/
+/*		　unsigned char wave_type　波形									   */
+/**/
+/***************************************************************************/
 unsigned char wait_tune_with(unsigned char title,unsigned char wave_type)
 {
 	autoplay_start_from_beginning(title, wave_type);
@@ -123,6 +128,30 @@ unsigned char wait_tune_with(unsigned char title,unsigned char wave_type)
 			return ret;
 		if (playing_flg == OFF)
 			autoplay_start_from_beginning(title, wave_type);
+	}
+}
+
+
+unsigned char key_input_decision(unsigned char input, unsigned char scene)
+{
+
+}
+/**/
+/*スイッチ入力を判定する*/
+/**/
+
+unsigned char sw_input_decision(unsigned char input, unsigned char scene)
+{
+
+}
+
+unsigned char input_decision(unsigned char input,unsigned char scene)
+{
+	if (input == ON) {
+		key_input_decision(input,scene)
+	}
+	else {
+		sw_input_decision(input,scene);
 	}
 }
 /****************************************************************************/
@@ -155,7 +184,7 @@ void game_sequence(void)
 		g_sequence++;
 		break;
 	case 4://入力判定
-
+		input_decision(ret,);
 		break;
 	case 5://名前の入力促す表示
 		sci0_receive_start();//受信開始
