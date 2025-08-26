@@ -37,7 +37,8 @@ AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGON
 													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
-unsigned char *decision_table[]
+unsigned char sw_decision_table[SCENE_NUM][SW13] = {SW1,SW2,};
+unsigned char key_decision_table1[SCENE_NUM] = {};//長さ判定
 /********************************************************************************************/
 /*ワークエリア定義																				*/
 /********************************************************************************************/
@@ -131,27 +132,34 @@ unsigned char wait_tune_with(unsigned char title,unsigned char wave_type)
 	}
 }
 
-
+/**/
+/*キーボード入力を判定する*/
+/**/
 unsigned char key_input_decision(unsigned char input, unsigned char scene)
 {
 
 }
+
 /**/
 /*スイッチ入力を判定する*/
 /**/
-
 unsigned char sw_input_decision(unsigned char input, unsigned char scene)
 {
-
+	unsigned char i;
+	for (i = 0; i < SW13; i++) {
+		if (sw_decision_table[scene][i] == input)
+			return input;
+	}
+	return 0;
 }
 
 unsigned char input_decision(unsigned char input,unsigned char scene)
 {
 	if (input == ON) {
-		key_input_decision(input,scene)
+		return key_input_decision(input, scene);
 	}
 	else {
-		sw_input_decision(input,scene);
+		return sw_input_decision(input,scene);
 	}
 }
 /****************************************************************************/
@@ -184,7 +192,11 @@ void game_sequence(void)
 		g_sequence++;
 		break;
 	case 4://入力判定
-		input_decision(ret,);
+		ret = input_decision(ret,);
+		if (ret != 0)
+			g_sequence = 5;
+		else
+			g_sequence = 3;
 		break;
 	case 5://名前の入力促す表示
 		sci0_receive_start();//受信開始

@@ -24,6 +24,7 @@
 #define CURRENT_FIELD (1)
 #define UPDATE_FIELD (2)
 #define ATTRIBUTE_NUM (4)
+#define SCENE_NUM (5)
 enum scene = {};
 /********************************************************************************************/
 /*プロトタイプ宣言																		*/
