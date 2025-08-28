@@ -268,3 +268,8 @@ void sci0_scanf(void)
 
 	}
 }
+
+int sci0_comp(const char* str)
+{
+	return strcmp(sci0.receive_data,str);
+}

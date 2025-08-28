@@ -21,4 +21,5 @@ unsigned char sci0_find_received_data(unsigned char find_char);
 signed long a_to_i(void);
 unsigned char sci0_get_reg_0_flg(void);
 void sci0_scanf(void);
+int sci0_comp(const char* str);
 #endif /* SCI_H_ */
