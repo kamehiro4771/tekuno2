@@ -86,7 +86,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 			return 0;
 		first_turn_flg 			= OFF;
 	}
-	return 0;
+	return 1;
 }
 
 
@@ -98,6 +98,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 void player_turn(void)
 {
 	unsigned char ret;
+	cmt2_wait（,CKS512）；//表示を変える前の時間待ち
 	battle_display(PLAYER_TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
@@ -289,7 +290,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	case PLAYER_TURN:
 		//ターン表示
 		if(param != NULL)//プレーヤーのターンならプレイヤー名
-			sprintf(output_display[PLAYER_TURN],"【%sのターン】\r\n",pplayer->name);
+			sprintf(output_display[PLAYER_TURN],"%s【%sのターン】\r\n",DISPLAY_CLEAR,pplayer->name);
 		else
 			sprintf(output_display[ENEMY_TURN],"【%s%s%sのターン】\r\n",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR);
 		break;

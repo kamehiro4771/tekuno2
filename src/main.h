@@ -91,7 +91,7 @@
 #define KEY_DOWN (80)							//↓キー
 #define KEY_LEFT (75)							//←キー
 #define KEY_RIGHT (77)							//→キー
-typedef unsigned char* T_DISPLAY;
+typedef char* T_DISPLAY;
 typedef const unsigned char T_SCORE;
 typedef const unsigned short T_NOTE;
 enum menu{ORGAN = 1,AUTOPLAY,GAME,TIMER,SETTING};//メインメニューの項目

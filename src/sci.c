@@ -109,6 +109,7 @@ static void sci0_send_start(void)
 /****************************************************/
 void sci0_receive_start(void)
 {
+	memset(sci0.receive_data,0,sizeof(sci0.receive_data));
 	sci0.receive_count		= 0;//受信カウントの初期化
 	sci0.enter_flg			= OFF;//エンターフラグOFF
 	SCI0.SCR.BIT.RE			= 1;//シリアル受信動作許可

@@ -10,10 +10,6 @@
 
 #include "main.h"
 #include "game.h"
-/********************************************************************************************/
-/*プロトタイプ宣言																				*/
-/********************************************************************************************/
-void game_sequence(void);
 /*
  * 定数定義
  */
@@ -37,7 +33,7 @@ AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGON
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
 
-enum {GAME_START,BOUKENNNOSYO,SELECT,NAME_SETTING,BATTLE,GAME_CLEAR,GAME_OVER,GAME_END};
+enum GameState {GAME_START,SAVE_DATA_CHECK,SELECT,NAME_SETTING,BATTLE,CLEAR,OVER,GAME_END};
 /********************************************************************************************/
 /*ワークエリア定義																			*/
 /********************************************************************************************/
@@ -56,18 +52,7 @@ unsigned char output_num				= OFF;
 unsigned char last_output_num			= OFF;
 unsigned char g_sequence;//シーケンス番号
 signed short party_hp;//パーティー全体のHP
-/********************************************************************************************/
-/*ゲームモードメイン																		*/
-/*void game_mode(void)																		*/
-/********************************************************************************************/
-void game_main(void)
-{
-	while(g_sequence != GAME_END){
-		game_sequence();
-	}
-	send_serial(RESET,4);
-	g_sequence = 0;
-}
+
 
 /********************************************************************************************/
 /*ゲームに使われるパラメータの初期化														*/
@@ -98,10 +83,11 @@ unsigned char wait_tune_with(unsigned char title, unsigned char wave_type)
 	while (1) {
 		ret = input_check();
 		if (ret != OFF) {
+			auto_play_end_processing();
 			return ret;
-			if (playing_flg == OFF)
-				autoplay_start_from_beginning(title, wave_type);
 		}
+		if (playing_flg == OFF)
+			autoplay_start_from_beginning(title, wave_type);
 	}
 }
 /********************************************************************************************/
@@ -110,6 +96,7 @@ unsigned char wait_tune_with(unsigned char title, unsigned char wave_type)
 /********************************************************************************************/
 void game_start(void)
 {
+	unsigned char ret;
 	game_param_init();										//プレイヤーのパラメータ初期化
 	send_serial(GAME_TITLE, strlen(GAME_TITLE));			//タイトル表示
 	autoplay_start_from_beginning(DORAGON_QUEST, SQUARE);	//オープニング曲を自動演奏開始
@@ -123,7 +110,7 @@ void game_start(void)
 		else if (playing_flg == OFF)//最後まで演奏された時は途中から演奏
 			autoplay_start_from_intermediate(REPEATING_FROM_INTERMEDIATE[0], REPEATING_FROM_INTERMEDIATE[1], REPEATING_FROM_INTERMEDIATE[2]);
 	}
-	g_sequence	= BOUKENNNOSYO;
+	g_sequence	= SAVE_DATA_CHECK;
 }
 
 /********************************************************************************************/
@@ -147,7 +134,8 @@ void boukennnosyo_check(void)
 void create_or_road(void)
 {
 	char* str1 = {"1\r\n"};
-	char* str2 = {"2\y\n"};
+	char* str2 = {"2\r\n"};
+	unsigned char ret;
 	while (1) {
 		ret = wait_tune_with(BOUKENNNOSYO, SQUARE);
 		if (ret == ON) {
@@ -169,67 +157,100 @@ void create_or_road(void)
 
 void player_name_setting(void)
 {
+	unsigned char ret;
+	autoplay_start_from_intermediate(get_interrupt_data(0), get_interrupt_data(1), get_interrupt_data(2));
 	sci0_receive_start();//受信開始
 	send_serial(RESET, 10);
 	send_serial(INPUT_NAME, strlen(INPUT_NAME));
-	ret = input_check();
-	if (ret == ON) {
-		ret = sci0_str_cpy(player.name);//入力をプレイヤーの名前に設定
-		if (ret >= 3)
-			g_sequence++;
-		else
-			sci0_receive_start();//受信開始
+	while (1) {
+		ret = input_check();
+		if (ret == ON) {
+			ret = sci0_str_cpy(player.name);//入力をプレイヤーの名前に設定
+			if (ret >= 3){
+				g_sequence = BATTLE;
+				break;
+			}else
+				sci0_receive_start();//受信開始
+		}
+		else if (playing_flg == OFF)
+			autoplay_start_from_beginning(BOUKENNNOSYO, SQUARE);
 	}
-	else if (playing_flg == OFF)
-		autoplay_start_from_beginning(BOUKENNNOSYO, SQUARE); 7
 }
+
+/****************************************************************************/
+/**/
+/**/
+/****************************************************************************/
+void battle_function_call(void)
+{
+	auto_play_end_processing();
+	send_serial(player.name, strlen((const char*)player.name));
+	send_serial(ARRIVAL, strlen(ARRIVAL));
+	if (battle(enemy, ally, &player))
+		g_sequence = CLEAR;
+	else
+		g_sequence = OVER;
+}
+
+void ending_display(void)
+{
+	if (g_sequence == CLEAR) {
+		send_serial(player.name, strlen(player.name));
+		send_serial(GAME_CLEAR, strlen(GAME_CLEAR));
+	}
+	else {
+		send_serial(GAME_OVER, strlen(GAME_OVER));
+		autoplay_start_from_beginning(ZENNMETU, SQUARE);
+	}
+	while (playing_flg == ON) {
+
+	}
+	g_sequence = GAME_END;
+
+}
+
 /****************************************************************************/
 /*ゲームシーケンス															*/
 /*void game_sequence(void)													*/
 /****************************************************************************/
 void game_sequence(void)
 {
-	enum { GAME_START, BOUKENNNOSYO, SELECT, INPUT_NAME, BATTLE, GAME_CLEAR, GAME_OVER };
-	unsigned char ret;
 	switch(g_sequence){
 	case GAME_START:
 		game_start();
 		break;
-	case BOUKENNNOSYO://セーブデータを確認する
+	case SAVE_DATA_CHECK://セーブデータを確認する
 		boukennnosyo_check();
 		break;
 	case SELECT:
-		create_or_road
+		create_or_road();
 		break;
 	case NAME_SETTING://名前の入力促す表示
 		player_name_setting();
 		break;
-	case 6:
-		auto_play_end_processing();
-		send_serial(player.name,strlen((const char*)player.name));
-		send_serial(ARRIVAL, strlen(ARRIVAL));
-		g_sequence++;
+	case BATTLE://モンスターと戦闘
+		battle_function_call();
 		break;
-	case 7://モンスターと戦闘
-		battle(enemy,ally,&player);
-		g_sequence++;
+	default :
+		ending_display();
 		break;
-	case 8:
-		send_serial(player.name, strlen(player.name));
-		send_serial(GAME_CLEAR, strlen(GAME_CLEAR));
-		g_sequence	= GAME_END;
-		break;
-	default:
-		send_serial(GAME_OVER, strlen(GAME_OVER));
-		autoplay_start_from_beginning(ZENNMETU,SQUARE);
-		while(playing_flg == ON){
-
-		}
-		g_sequence = GAME_END;
 	}
 }
 
 T_MONSTER get_ally_data(unsigned char ally_num)
 {
 	return ally[ally_num];
+}
+
+/********************************************************************************************/
+/*ゲームモードメイン																		*/
+/*void game_mode(void)																		*/
+/********************************************************************************************/
+void game_main(void)
+{
+	while(g_sequence != GAME_END){
+		game_sequence();
+	}
+	send_serial(RESET,4);
+	g_sequence = GAME_START;
 }
