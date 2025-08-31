@@ -79,6 +79,14 @@ void cmt2_wait(unsigned long cnt,unsigned char cks)
 	MSTP(CMT2)			= 1;	//モジュールストップ
 }
 
+void second_wait(unsigned long sec)
+{
+	unsigned long cnt,wait_num;
+	wait_num = sec * 10;
+	for (cnt = 0; cnt < wait_num; cnt++) {
+		cmt2_wait(9375, CKS512);
+	}
+}
 /********************************************************************/
 /*マルチファンクションタイマのコンペアマッチA割り込みで呼ばれる		*/
 /*void count_time(void)												*/

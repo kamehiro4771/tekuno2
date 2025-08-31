@@ -60,6 +60,19 @@ void win(void)
 		/*nop*/
 	}
 }
+/**/
+/*バトルに使うグローバル変数初期化*/
+/*void battle_init(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)*/
+/**/
+/* */
+/**/
+/********************************************************************/
+void battle_init(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
+{
+	penemy					= enemy;
+	pplayer					= player;
+	pally					= ally;
+}
 /********************************************************************/
 /*バトルメイン関数													*/
 /*unsigned char battle_main(struct T_MONSTER* enemy)					*/
@@ -70,21 +83,21 @@ void win(void)
 unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 {
 	unsigned char kill_cnt = 0;
-	first_turn_flg 			= ON;
-	penemy					= enemy;
-	pplayer					= player;
-	pally					= ally;
-	battle_display(APPEARANCE,NULL);
+	battle_init(enemy,ally,player);
 	while(kill_cnt < ENEMY_NUM){
 		player_turn();
 		if(penemy->hp == 0){
 			win();
 			kill_cnt++;
+			penemy = &enemy[kill_cnt];
+			battle_display(APPEARANCE,NULL);
+			first_turn_flg 			= ON;
+		}else{
+			enemy_turn();
+			first_turn_flg 			= OFF;
+			if(pplayer->hp <= 0)
+				return 0;
 		}
-		enemy_turn();
-		if(pplayer->hp <= 0)
-			return 0;
-		first_turn_flg 			= OFF;
 	}
 	return 1;
 }
@@ -98,7 +111,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 void player_turn(void)
 {
 	unsigned char ret;
-	cmt2_wait（,CKS512）；//表示を変える前の時間待ち
+	second_wait(2);//表示を変える前の時間待ち
 	battle_display(PLAYER_TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
@@ -180,7 +193,7 @@ void motion_after_input(void)
 				for(i = 0;i < 3;i++){
 					resume_data[i]		= get_interrupt_data(i);
 				}
-			}else
+			}
 			autoplay_start_from_beginning(ALLY_ATACK,SQUARE);//攻撃音演奏
 			while(playing_flg == ON){
 				//nop
