@@ -121,6 +121,7 @@ void player_turn(void)
 		output_battle_field(CURRENT_FIELD);
 	}
 	send_serial(REQUEST_COMMAND_DISPLAY,strlen(REQUEST_COMMAND_DISPLAY));
+	sci0_receive_start();
 	while(1){
 		ret									= puzzle_operation_check();
 		if(ret == ON){
@@ -205,10 +206,8 @@ void motion_after_input(void)
 				battle_display(RECOVERY,dladder);
 			autoplay_start_from_intermediate(resume_data[0],resume_data[1],resume_data[2]);//演奏再開
 			free_padding(dladder);//空いた宝石配列を詰める
-		}else{//自分のターン終了
-			sci0_receive_start();//受信が終わっているので開始
+		}else//自分のターン終了
 			break;
-		}
 	}
 }
 /********************************************************************
@@ -303,7 +302,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	case PLAYER_TURN:
 		//ターン表示
 		if(param != NULL)//プレーヤーのターンならプレイヤー名
-			sprintf(output_display[PLAYER_TURN],"%s【%sのターン】\r\n",DISPLAY_CLEAR,pplayer->name);
+			sprintf(output_display[PLAYER_TURN],"%s【%sのターン】\r\n",RESET,pplayer->name);
 		else
 			sprintf(output_display[ENEMY_TURN],"【%s%s%sのターン】\r\n",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR);
 		break;

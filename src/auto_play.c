@@ -115,8 +115,13 @@ void autoplay_data_set(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
 /*********************************************/
 void autoplay_start_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
 {
+	unsigned char i;
 	playing_flg						= ON;	//演奏中フラグON
 	autoplay_data_set(set1, set2, set3);	//中断データをセットする
+	for(i = 0;i < SONG_NUM;i++){
+		if(set1.pscore == SCORE_POINTER_ARRAY[i][0])
+			g_use_speaker_num		= USE_SPEAKER_ARRAY[i];//スピーカーの数セット
+	}
 	output_speaker_start(7);				//出力開始
 	autoplay_function_set();
 }
