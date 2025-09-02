@@ -32,7 +32,6 @@ AUTOPLAYER resume_data[SPEAKER_NUM];
 T_MONSTER *penemy;				//戦闘中のモンスターへのポインタ
 T_PLAYER *pplayer;				//プレイヤーへのポインタ
 T_MONSTER *pally;				//味方モンスター達へのポインタ
-T_MONSTER attack_ally;			//攻撃したモンスター
 char output_display[9][512];	//戦闘中の画面表示
 unsigned char first_turn_flg;	//敵が現れて最初のターンなら新しいバトルフィールドを作成する
 unsigned char operation[2];		//プレーヤーの入力したアルファベットが入る
@@ -199,10 +198,9 @@ void motion_after_input(void)
 			while(playing_flg == ON){
 				//nop
 			}
-			if(*dladder != LIFE){
-				attack_ally 			= get_ally_data(*dladder);
+			if(*dladder != LIFE)
 				battle_display(ADD_ATTACK,dladder);
-			}else
+			else
 				battle_display(RECOVERY,dladder);
 			autoplay_start_from_intermediate(resume_data[0],resume_data[1],resume_data[2]);//演奏再開
 			free_padding(dladder);//空いた宝石配列を詰める
@@ -254,12 +252,14 @@ void combo_reset(void)
 static void battle_display(unsigned char activity,unsigned char *param)
 {
 	unsigned short damage_value = 0;
+	T_MONSTER attack_ally;			//攻撃したモンスター
 	switch(activity){
 	case APPEARANCE:
 		sprintf(output_display[APPEARANCE],"%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,APPEAR_DISPLAY);
 		break;
 	case ADD_ATTACK:
 		combo();
+		attack_ally				= get_ally_data(*param);
 		damage_value			= damage_or_recovery_value_calculate(penemy, combo_value, attack_ally.el, delete_jewel(param));//ダメージ計算
 		sprintf(output_display[ADD_ATTACK],"%s%s%s%s%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[attack_ally.el],attack_ally.name,DEFAULT_CHAR,ATTACK_DISPLAY,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,TO_DISPLAY,damage_value,DAMAGE_DISPLAY,CRLF);
 		if(penemy->hp >= damage_value)
