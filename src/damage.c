@@ -5,42 +5,13 @@ const float ATTRIBUTE_CORRECTION_VALUE[ATTRIBUTE_NUM][ATTRIBUTE_NUM] = {//[UŒ‚‚
 											//‰Î‘®«				…‘®«				•—‘®«				“y‘®«
 											{1.0,0.5,2.0,1.0,},{2.0,1.0,1.0,0.5,},{0.5,1.0,1.0,2.0,},{1.0,2.0,0.5,1.0,},
 																};
-/************************************************************************************************************************************/
-/*ƒ_ƒ[ƒW‹y‚Ñ‰ñ•œ—Ê‚ÌŒvZ																											*/
-/*signed short damage_calculation(struct Enemy* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)	*/
-/*	ˆø”Fstruct Enemy* enemy@“Gƒ‚ƒ“ƒXƒ^[‚Ìî•ñ																					*/
-/*		@unsigned short combo_count@ƒRƒ“ƒ{”																						*/
-/*		@unsigned char type@•óÎ‚Ìí—Ş																							*/
-/*		@unsigned char deleted_number@Á–Å•óÎ”																					*/
-/*	–ß‚è’lFsigned short@ŒvZŒ‹‰Ê																									*/
-/************************************************************************************************************************************/
-unsigned short damage_or_recovery_value_calculate(T_MONSTER* enemy,unsigned short combo_count,unsigned char type,unsigned char deleted_number)
-{
-	unsigned char i,exponent;
-	float result = 1.0, base = 1.5;
-	unsigned short ally_ap;
-	signed short value;
-	unsigned char random_num;
-	srand(random_number_acquisition());
-	random_num	= rand() % 21;
-	exponent	= deleted_number - 3 + combo_count;//‰½æ‚·‚é‚©‹‚ß‚é
-	for(i = 0;i < exponent;i++)//—İæ‚·‚é
-		result *= base;
-	if(type == LIFE)//Á‚µ‚½•óÎ‚ª–½‘®«‚Ì
-		value	= ((20 * result) * (90 + random_num)) / 100;
-	else{
-		ally_ap = get_ally_data(type).ap;
-		value	= ((((ally_ap - enemy->gp) > 0) ? (ally_ap - enemy->gp) : 1) * ATTRIBUTE_CORRECTION_VALUE[type][enemy->el] * result * (90 + random_num)) / 100;
-	}
-	return value;
-}
 
 /**********************************************************************************/
 /*1.5‚Ì‚×‚«æ‚ğ‹‚ß‚é															@*/
 /*float power_calculate(unsigned short combo_count, unsigned char deleted_number) */
-/**/
-/**/
-/**/
+/*ˆø”Funsigned short combo_count ƒRƒ“ƒ{‚µ‚½”									  */
+/*		unsigned char deleted_number Á–Å‚µ‚½•óÎ‚Ì”							  */
+/*–ß‚è’lFfloat result ŒvZŒ‹‰Ê													  */
 /**********************************************************************************/
 float power_calculate(unsigned short combo_count, unsigned char deleted_number)
 {
@@ -52,6 +23,12 @@ float power_calculate(unsigned short combo_count, unsigned char deleted_number)
 	return result;
 }
 
+/**********************************************************************************/
+/*‰ñ•œ’l‚ÌŒvZ*/
+/*unsigned short recovery_value_calculate(unsigned short combo_count, unsigned char deleted_number)*/
+/*ˆø”F*/
+/*–ß‚è’lF*/
+/**********************************************************************************/
 unsigned short recovery_value_calculate(unsigned short combo_count, unsigned char deleted_number)
 {
 	float result;
@@ -64,16 +41,21 @@ unsigned short recovery_value_calculate(unsigned short combo_count, unsigned cha
 	return value;
 }
 
-unsigned short damage_from_ally_calculation(T_MONSTER* enemy, unsigned short combo_count, unsigned char type, unsigned char deleted_number)
+/**********************************************************************************/
+/*–¡•û‚©‚ç“G‚Ö‚Ìƒ_ƒ[ƒWŒvZ*/
+/*unsigned short damage_from_ally_calculation(T_MONSTER enemy, T_MONSTER ally, unsigned short combo_count, unsigned char deleted_number)*/
+/*ˆø”F*/
+/*–ß‚è’lF*/
+/**********************************************************************************/
+unsigned short damage_from_ally_calculation(T_MONSTER enemy, T_MONSTER ally, unsigned short combo_count, unsigned char deleted_number)
 {
 	float result;
-	unsigned short ally_ap, value;
+	unsigned short value;
 	unsigned char random_num;
 	srand(random_number_acquisition());
 	random_num = rand() % 21;
 	result = power_calculate(combo_count, deleted_number);
-	ally_ap = get_ally_data(type).ap;
-	value = ((((ally_ap - enemy->gp) > 0) ? (ally_ap - enemy->gp) : 1) * ATTRIBUTE_CORRECTION_VALUE[type][enemy->el] * result * (90 + random_num)) / 100;
+	value = ((((ally.ap - enemy.gp) > 0) ? (ally.ap - enemy.gp) : 1) * ATTRIBUTE_CORRECTION_VALUE[ally.el][enemy.el] * result * (90 + random_num)) / 100;
 	return value;
 }
 /*

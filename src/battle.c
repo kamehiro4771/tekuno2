@@ -54,7 +54,7 @@ void win(void)
 {
 	battle_display(KILLED_ENEMY,NULL);
 	auto_play_end_processing();
-	autoplay_start_from_beginning(WINNING,SQUARE,0,0,0);
+	autoplay_start_from_beginning(WINNING,SQUARE);
 	while(playing_flg == ON){
 		/*nop*/
 	}
@@ -71,6 +71,7 @@ void battle_init(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 	penemy					= enemy;
 	pplayer					= player;
 	pally					= ally;
+	battle_display(APPEARANCE,NULL);
 }
 /********************************************************************/
 /*バトルメイン関数													*/
@@ -89,7 +90,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 			win();
 			kill_cnt++;
 			penemy = &enemy[kill_cnt];
-			battle_display(APPEARANCE,NULL);
+			battle_display(APPEARANCE,NULL);//次のモンスターが現れる
 			first_turn_flg 			= ON;
 		}else{
 			enemy_turn();
@@ -114,7 +115,7 @@ void player_turn(void)
 	battle_display(PLAYER_TURN,&ret);
 	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
-		autoplay_start_from_beginning(BATTLE1,SQUARE,0,0,0);//戦闘テーマ演奏開始
+		autoplay_start_from_beginning(BATTLE1,SQUARE);//戦闘テーマ演奏開始
 		output_battle_field(NEW_FIELD);
 	}else{
 		output_battle_field(CURRENT_FIELD);
@@ -128,7 +129,7 @@ void player_turn(void)
 			break;
 		}
 		if(playing_flg == OFF)//戦闘の曲が終了したとき
-			autoplay_start_from_beginning(BATTLE1,SQUARE,0,0,0);
+			autoplay_start_from_beginning(BATTLE1,SQUARE);
 	}
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
@@ -260,7 +261,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	case ADD_ATTACK:
 		combo();
 		attack_ally				= get_ally_data(*param);
-		damage_value			= damage_or_recovery_value_calculate(penemy, combo_value, attack_ally.el, delete_jewel(param));//ダメージ計算
+		damage_value			= damage_from_ally_calculation(*penemy, attack_ally, combo_value, delete_jewel(param));//ダメージ計算
 		sprintf(output_display[ADD_ATTACK],"%s%s%s%s%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[attack_ally.el],attack_ally.name,DEFAULT_CHAR,ATTACK_DISPLAY,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,TO_DISPLAY,damage_value,DAMAGE_DISPLAY,CRLF);
 		if(penemy->hp >= damage_value)
 			penemy->hp 			= penemy->hp - damage_value;//モンスターのHPからダメージを引く
@@ -268,7 +269,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 			penemy->hp 			= 0;
 		break;
 	case TAKE_ATTACK:
-		damage_value			= damge_from_enemy_calculation(pplayer->gp,penemy);
+		damage_value			= damge_from_enemy_calculation(pplayer->gp,penemy->ap);
 		pplayer->hp				= pplayer->hp - damage_value;
 		sprintf(output_display[TAKE_ATTACK],"%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,ATTACK_DISPLAY,damage_value,DAMAGE_DISPLAY,TAKE_DISPLAY);
 		break;
@@ -278,7 +279,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 	case RECOVERY:
 		/*回復表示の時*/
 		combo();
-		damage_value			= damage_or_recovery_value_calculate(penemy, combo_value, LIFE, delete_jewel(param));//ダメージ計算
+		damage_value			= recovery_value_calculate(combo_value,delete_jewel(param));//ダメージ計算
 		sprintf(output_display[RECOVERY],"%s%s%d%s",pplayer->name,LIFE_JEWEL_DISPLAY,damage_value,RECOVERY_DISPLAY);
 		pplayer->hp = pplayer->hp + damage_value;//自分のHPにダメージを足す最大値を超えないように
 		if(pplayer->hp > pplayer->max_hp)

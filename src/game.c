@@ -179,7 +179,7 @@ void player_name_setting(void)
 
 /****************************************************************************/
 /**/
-/**/
+/*void battle_function_call(void)*/
 /****************************************************************************/
 void battle_function_call(void)
 {
@@ -192,7 +192,11 @@ void battle_function_call(void)
 		g_sequence = OVER;
 }
 
-void ending_display(void)
+/****************************************************************************/
+/**/
+/**/
+/****************************************************************************/
+void ending(void)
 {
 	if (g_sequence == CLEAR) {
 		send_serial(player.name, strlen(player.name));
@@ -232,7 +236,7 @@ void game_sequence(void)
 		battle_function_call();
 		break;
 	default :
-		ending_display();
+		ending();
 		break;
 	}
 }
