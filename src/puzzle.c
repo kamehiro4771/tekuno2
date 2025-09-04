@@ -6,6 +6,7 @@
 /********************************************************************************************/
 /*定数定義																					*/
 /********************************************************************************************/
+const unsigned short display_wait = 46875;
 T_DISPLAY KEY_DISPLAY = "A	B	C	D	E	F	G	H	I	J	K	L	M\r\n";
 /********************************************************************************************/
 /*ワークエリア定義																			*/
@@ -28,7 +29,6 @@ void output_battle_field(unsigned char sw);
 /********************************************************************************************/
 void move_jewel(unsigned char input1,unsigned char input2)
 {
-	signed char difference;
 	unsigned char absolute_value,temp,position1,position2;
 	if(input1 <= 'Z')
 		position1					= input1 - 'A';//動かす宝石の位置
@@ -38,8 +38,7 @@ void move_jewel(unsigned char input1,unsigned char input2)
 		position2					= input2 - 'A';
 	else
 		position2					= input2 - 'a';
-	difference						= position1 - position2;//一番目に入力した値と二番目に入力した値の差を求める
-	if(difference > 0){
+	if(position1 > position2){//一番目に入力した値と二番目に入力した値
 		absolute_value				= position1 - position2;
 		//宝石を左にづらしていく
 		while(absolute_value--){
@@ -48,7 +47,7 @@ void move_jewel(unsigned char input1,unsigned char input2)
 			battle_field[position1]			= temp;
 			position1--;
 			output_battle_field(UPDATE_FIELD);
-			cmt2_wait(18750,CKS512);//200ミリ秒間隔をあける
+			cmt2_wait(display_wait,CKS512);//200ミリ秒間隔をあける
 		}
 	}else{
 		absolute_value = position2 - position1;
@@ -59,21 +58,16 @@ void move_jewel(unsigned char input1,unsigned char input2)
 			battle_field[position1]	= temp;
 			position1++;
 			output_battle_field(UPDATE_FIELD);
-			cmt2_wait(18750,CKS512);//200ミリ秒間隔をあける
+			cmt2_wait(display_wait,CKS512);//200ミリ秒間隔をあける
 		}
 	}
 }
 
 /********************************************************************************************/
-/*3つ以上揃っている宝石の数を数える															*/
+/*3つ以上揃っている宝石の先頭のアドレスを返す												*/
 /*unsigned char* count_jewel(void)															*/
 /*	戻り値：unsigned char* 3つ以上一致した先頭のアドレス									*/
 /********************************************************************************************/
-//最初に三つ以上一致した先頭のアドレスを返す
-/**
- * 回復の宝石と風の宝石を消したのに白虎が攻撃した
- * 2種類の宝石を同時にけすとおかしくなる？
- */
 unsigned char* count_jewel(void)
 {
 	unsigned char i = 0;
@@ -100,6 +94,7 @@ unsigned char* count_jewel(void)
 /*	引数：unsigned char *first_address 3つ以上一致した最初のアドレス						*
 /*	戻り値：unsigned char ret 消した宝石の数												*/
 /********************************************************************************************/
+g_matched_countがグローバル変数である必要がないかも
 unsigned char delete_jewel(unsigned char *first_address)
 {
 	unsigned char i;
@@ -108,7 +103,7 @@ unsigned char delete_jewel(unsigned char *first_address)
 	}
 	output_battle_field(UPDATE_FIELD);
 	send_serial(CRLF,2);
-	cmt2_wait(18750,CKS512);//200ミリ秒間隔をあける
+	cmt2_wait(display_wait,CKS512);//500ミリ秒間隔をあける
 	return g_matched_count + 1;
 }
 
@@ -132,7 +127,7 @@ void free_padding(unsigned char *first_address)
 		}
 		battle_field[FIELD_NUM - 1]				= rand() % 5;//右端に新しい宝石発生させる
 		output_battle_field(UPDATE_FIELD);//送信データ作成
-		cmt2_wait(37500,CKS512);//200ミリ秒間隔をあける
+		cmt2_wait(display_wait,CKS512);//200ミリ秒間隔をあける
 	}
 	g_matched_count								= 0;
 }

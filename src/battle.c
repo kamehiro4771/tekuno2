@@ -47,6 +47,18 @@ unsigned char puzzle_operation_check(void);
 void motion_after_input(void);
 
 /********************************************************************/
+/*曲の演奏を再開する位置を保存する									*/
+/*voidresume_data_save(void)										*/
+/********************************************************************/
+void resume_data_save(void)
+{
+	unsigned char i;
+	for (i = 0; i < 3; i++) {
+		resume_data[i] = get_interrupt_data(i);
+	}
+}
+
+/********************************************************************/
 /*戦闘に勝利															*/
 /*void win(void)													*/
 /********************************************************************/
@@ -134,13 +146,12 @@ void player_turn(void)
 	send_serial(CURSOR_2LINE_ADVANCE,4);
 }
 
-/**********************************************************
-/*入力値の判定 */
-/*unsigned char decision_c(unsigned char c)*/
-/*
- *
- */
-/**/
+/******************************************************************************/
+/*入力値の判定																  */
+/*unsigned char decision_c(unsigned char c)									  */
+/*	引数：unsigned char c　判定する値										  */
+/*	戻り値：unsigned char ret 入力が不正なら０、正しかったら引数をそのまま返す*/
+/******************************************************************************/
 unsigned char decision_c(unsigned char c)
 {
 	if(c >= 'A' && c  <= 'M')
@@ -183,38 +194,31 @@ unsigned char puzzle_operation_check(void)
  */
 void motion_after_input(void)
 {
-	unsigned char i;
 	unsigned char *dladder = NULL;
 	move_jewel(operation[0],operation[1]);
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
-		if(dladder != NULL){
-			if(playing_flg == ON){
-				auto_play_end_processing();
-				for(i = 0;i < 3;i++){
-					resume_data[i]		= get_interrupt_data(i);
-				}
-			}
-			autoplay_start_from_beginning(ALLY_ATACK,SQUARE);//攻撃音演奏
-			while(playing_flg == ON){
-				//nop
-			}
-			if(*dladder != LIFE)
-				battle_display(ADD_ATTACK,dladder);
-			else
-				battle_display(RECOVERY,dladder);
-			autoplay_start_from_intermediate(resume_data[0],resume_data[1],resume_data[2]);//演奏再開
-			free_padding(dladder);//空いた宝石配列を詰める
-		}else//自分のターン終了
-			break;
+		if(dladder == NULL)
+			break;//自分のターン終了
+		auto_play_end_processing();
+		resume_data_save();
+		autoplay_start_from_beginning(ALLY_ATACK,SQUARE);//攻撃音演奏
+		while(playing_flg == ON){
+			//nop
+		}
+		autoplay_start_from_intermediate(resume_data[0], resume_data[1], resume_data[2]);//演奏再開
+		if(*dladder != LIFE)
+			battle_display(ADD_ATTACK,dladder);
+		else
+			battle_display(RECOVERY,dladder);
+		free_padding(dladder);//空いた宝石配列を詰める
 	}
 }
-/********************************************************************
-/*敵のターン関数
-/*void enemy_turn(void)
-/*	引数：struct Enemy* enemy　攻撃する敵の情報
-/*	戻り値：unsigned char
-********************************************************************/
+
+/********************************************************************/
+/*敵のターン関数													*/
+/*void enemy_turn(void)											    */
+/********************************************************************/
 void enemy_turn(void)
 {
 	//敵の攻撃音も追加
@@ -223,7 +227,7 @@ void enemy_turn(void)
 }
 /**************************************************************************
 /*コンボ数を数える。コンボならコンボ数表示											　*/
-/*
+/*void combo(void)
 /**************************************************************************/
 void combo(void)
 {
