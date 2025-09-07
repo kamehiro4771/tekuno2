@@ -1,7 +1,7 @@
 
 
 /********************************************************************/
-/*ヘッダーファイル															*/
+/*ヘッダーファイル													*/
 /********************************************************************/
 #include "main.h"
 /*********************************************************************/
@@ -24,7 +24,7 @@ const T_DISPLAY  LINE_DISPLAY				= {"-------------------------------------------
 
 
 const T_DISPLAY COLOR_CHAR_ARRAY[COLOR_NUM] 	= {RED_CHAR,BLUE_CHAR,GREEN_CHAR,YELLOW_CHAR,PURPLE_CHAR};
-enum activity{APPEARANCE,ADD_ATTACK,TAKE_ATTACK,KILLED_ENEMY,RECOVERY,STATUS,COMBO,PLAYER_TURN,ENEMY_TURN};
+enum activity{APPEARANCE,ADD_ATTACK,KILLED_ENEMY,RECOVERY,COMBO,PLAYER_TURN,ENEMY_TURN};
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
@@ -125,7 +125,6 @@ void player_turn(void)
 	unsigned char ret;
 	second_wait(2);//表示を変える前の時間待ち
 	battle_display(PLAYER_TURN,&ret);
-	battle_display(STATUS,NULL);
 	if(first_turn_flg == ON){
 		autoplay_start_from_beginning(BATTLE1,SQUARE);//戦闘テーマ演奏開始
 		output_battle_field(NEW_FIELD);
@@ -195,7 +194,7 @@ unsigned char puzzle_operation_check(void)
 void motion_after_input(void)
 {
 	unsigned char *dladder = NULL;
-	move_jewel(operation[0],operation[1]);
+	move_jewel(operation[0],operation[1],BATTLE1);
 	while(1){
 		dladder							= count_jewel();//3つ以上宝石が一致していたら配列のアドレスを返す。一致してなかったらNULLを返す
 		if(dladder == NULL)
@@ -223,7 +222,6 @@ void enemy_turn(void)
 {
 	//敵の攻撃音も追加
 	battle_display(ENEMY_TURN,NULL);
-	battle_display(TAKE_ATTACK,NULL);
 }
 /**************************************************************************
 /*コンボ数を数える。コンボならコンボ数表示											　*/
@@ -247,10 +245,8 @@ void combo_reset(void)
  * static void battle_display(unsigned char activity,unsigned char *param)
  * 	引数：unsigned char activity　APPEARANCE　敵が現れた
  * 							ADD_ATTACK　敵に攻撃を加えた
- * 							TAKE_ATTACK　敵に攻撃された
  * 							KILLED_ENEMY　敵を倒した時の表示
  * 							RECOVERY　回復表示
- * 							STATUS　ステータス表示
  * 		unsigned char *param　消去した宝石の先頭アドレス、又はNULL
  */
 
@@ -258,58 +254,56 @@ static void battle_display(unsigned char activity,unsigned char *param)
 {
 	unsigned short damage_value = 0;
 	T_MONSTER attack_ally;			//攻撃したモンスター
-	switch(activity){
+	switch (activity) {
 	case APPEARANCE:
-		sprintf(output_display[APPEARANCE],"%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,APPEAR_DISPLAY);
+		sprintf(output_display[APPEARANCE], "%s%s%s%s", COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, APPEAR_DISPLAY);
 		break;
 	case ADD_ATTACK:
 		combo();
-		attack_ally				= get_ally_data(*param);
-		damage_value			= damage_from_ally_calculation(*penemy, attack_ally, combo_value, delete_jewel(param));//ダメージ計算
-		sprintf(output_display[ADD_ATTACK],"%s%s%s%s%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[attack_ally.el],attack_ally.name,DEFAULT_CHAR,ATTACK_DISPLAY,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,TO_DISPLAY,damage_value,DAMAGE_DISPLAY,CRLF);
-		if(penemy->hp >= damage_value)
-			penemy->hp 			= penemy->hp - damage_value;//モンスターのHPからダメージを引く
+		attack_ally = get_ally_data(*param);
+		damage_value = damage_from_ally_calculation(*penemy, attack_ally, combo_value, delete_jewel(param));//ダメージ計算
+		sprintf(output_display[ADD_ATTACK], "%s%s%s%s%s%s%s%s%d%s%s", COLOR_CHAR_ARRAY[attack_ally.el], attack_ally.name, DEFAULT_CHAR, ATTACK_DISPLAY, COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, TO_DISPLAY, damage_value, DAMAGE_DISPLAY, CRLF);
+		if (penemy->hp >= damage_value)
+			penemy->hp = penemy->hp - damage_value;//モンスターのHPからダメージを引く
 		else
-			penemy->hp 			= 0;
-		break;
-	case TAKE_ATTACK:
-		damage_value			= damge_from_enemy_calculation(pplayer->gp,penemy->ap);
-		pplayer->hp				= pplayer->hp - damage_value;
-		sprintf(output_display[TAKE_ATTACK],"%s%s%s%s%d%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,ATTACK_DISPLAY,damage_value,DAMAGE_DISPLAY,TAKE_DISPLAY);
+			penemy->hp = 0;
 		break;
 	case KILLED_ENEMY:
-		sprintf(output_display[KILLED_ENEMY],"%s%s%s%s%s",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,KILL_DISPLAY,CRLF);
+		sprintf(output_display[KILLED_ENEMY], "%s%s%s%s%s", COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, KILL_DISPLAY, CRLF);
 		break;
 	case RECOVERY:
-		/*回復表示の時*/
 		combo();
-		damage_value			= recovery_value_calculate(combo_value,delete_jewel(param));//ダメージ計算
-		sprintf(output_display[RECOVERY],"%s%s%d%s",pplayer->name,LIFE_JEWEL_DISPLAY,damage_value,RECOVERY_DISPLAY);
+		damage_value = recovery_value_calculate(combo_value, delete_jewel(param));//ダメージ計算
+		sprintf(output_display[RECOVERY], "%s%s%d%s", pplayer->name, LIFE_JEWEL_DISPLAY, damage_value, RECOVERY_DISPLAY);
 		pplayer->hp = pplayer->hp + damage_value;//自分のHPにダメージを足す最大値を超えないように
-		if(pplayer->hp > pplayer->max_hp)
+		if (pplayer->hp > pplayer->max_hp)
 			pplayer->hp = pplayer->max_hp;
-		break;
-	case STATUS:
-		//味方のステータスも表示する
-		sprintf(output_display[STATUS],"%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s %s%s %s%s %s%s%s%s%s%s%d/%d%s%s%s%s%s",
-																LINE_DISPLAY,CRLF,CRLF,
-																CURSOL_MOVING_SENTER,COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR,CRLF,
-																CURSOL_MOVING_SENTER,HP_DISPLAY,penemy->hp,penemy->max_hp,CRLF,CRLF,CRLF,
-																COLOR_CHAR_ARRAY[pally[FIRE].el],pally[FIRE].name,
-																COLOR_CHAR_ARRAY[pally[WATER].el],pally[WATER].name,
-																COLOR_CHAR_ARRAY[pally[WIND].el],pally[WIND].name,
-																COLOR_CHAR_ARRAY[pally[SOIL].el],pally[SOIL].name,DEFAULT_CHAR,CRLF,
-																CURSOL_MOVING_SENTER,HP_DISPLAY,pplayer->hp,pplayer->max_hp,CRLF,
-																CRLF,CRLF,LINE_DISPLAY,CRLF);
-		combo_reset();
 		break;
 	case ENEMY_TURN:
 	case PLAYER_TURN:
 		//ターン表示
-		if(param != NULL)//プレーヤーのターンならプレイヤー名
-			sprintf(output_display[PLAYER_TURN],"%s【%sのターン】\r\n",RESET,pplayer->name);
-		else
-			sprintf(output_display[ENEMY_TURN],"【%s%s%sのターン】\r\n",COLOR_CHAR_ARRAY[penemy->el],penemy->name,DEFAULT_CHAR);
+		if (param != NULL) {//プレーヤーのターンならプレイヤー名
+			sprintf(output_display[PLAYER_TURN], "%s【%sのターン】\r\n%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s %s%s %s%s %s%s%s%s%s%s%d/%d%s%s%s%s%s",
+				RESET, pplayer->name,
+				LINE_DISPLAY, CRLF, CRLF,
+				CURSOL_MOVING_SENTER, COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, CRLF,
+				CURSOL_MOVING_SENTER, HP_DISPLAY, penemy->hp, penemy->max_hp, CRLF, CRLF, CRLF,
+				COLOR_CHAR_ARRAY[pally[FIRE].el], pally[FIRE].name,
+				COLOR_CHAR_ARRAY[pally[WATER].el], pally[WATER].name,
+				COLOR_CHAR_ARRAY[pally[WIND].el], pally[WIND].name,
+				COLOR_CHAR_ARRAY[pally[SOIL].el], pally[SOIL].name, DEFAULT_CHAR, CRLF,
+				CURSOL_MOVING_SENTER, HP_DISPLAY, pplayer->hp, pplayer->max_hp, CRLF,
+				CRLF, CRLF, LINE_DISPLAY, CRLF);
+			combo_reset();
+		}
+		else {
+			damage_value = damge_from_enemy_calculation(pplayer->gp, penemy->ap);
+			pplayer->hp = pplayer->hp - damage_value;
+			sprintf(output_display[ENEMY_TURN], "%s【%s%s%sのターン】\r\n%s%s%s%s%d%s%s",
+				RESET,
+				COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR,
+				COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, ATTACK_DISPLAY, damage_value, DAMAGE_DISPLAY, TAKE_DISPLAY);
+		}
 		break;
 	}
 	send_serial((const unsigned char *)output_display[activity],strlen(output_display[activity]));

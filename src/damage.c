@@ -47,6 +47,7 @@ unsigned short recovery_value_calculate(unsigned short combo_count, unsigned cha
 /*引数：*/
 /*戻り値：*/
 /**********************************************************************************/
+//0ダメージの時があるかも
 unsigned short damage_from_ally_calculation(T_MONSTER enemy, T_MONSTER ally, unsigned short combo_count, unsigned char deleted_number)
 {
 	float result;

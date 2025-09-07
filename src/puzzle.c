@@ -27,7 +27,7 @@ void output_battle_field(unsigned char sw);
 /*	引数：unsigned char input1　1番目に入力した値											*/
 /*		　unsigned char input2　2番目に入力した値											*/
 /********************************************************************************************/
-void move_jewel(unsigned char input1,unsigned char input2)
+void move_jewel(unsigned char input1,unsigned char input2,unsigned short title)
 {
 	unsigned char absolute_value,temp,position1,position2;
 	if(input1 <= 'Z')
@@ -48,6 +48,8 @@ void move_jewel(unsigned char input1,unsigned char input2)
 			position1--;
 			output_battle_field(UPDATE_FIELD);
 			cmt2_wait(display_wait,CKS512);//200ミリ秒間隔をあける
+			if(playing_flg == OFF)
+				autoplay_start_from_beginning(BATTLE1,SQUARE);
 		}
 	}else{
 		absolute_value = position2 - position1;
@@ -59,6 +61,8 @@ void move_jewel(unsigned char input1,unsigned char input2)
 			position1++;
 			output_battle_field(UPDATE_FIELD);
 			cmt2_wait(display_wait,CKS512);//200ミリ秒間隔をあける
+			if(playing_flg == OFF)
+				autoplay_start_from_beginning(BATTLE1,SQUARE);
 		}
 	}
 }
@@ -94,7 +98,6 @@ unsigned char* count_jewel(void)
 /*	引数：unsigned char *first_address 3つ以上一致した最初のアドレス						*
 /*	戻り値：unsigned char ret 消した宝石の数												*/
 /********************************************************************************************/
-g_matched_countがグローバル変数である必要がないかも
 unsigned char delete_jewel(unsigned char *first_address)
 {
 	unsigned char i;
