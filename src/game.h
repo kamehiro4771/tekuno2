@@ -32,10 +32,13 @@ void game_main(void);
 /********************************************************************************************/
 /*ç\ë¢ëÃêÈåæ																				*/
 /********************************************************************************************/
+typedef struct hp {
+	unsigned short now_hp;
+	unsigned short max_hp;
+}T_HP;
 typedef struct monster{
 	unsigned char name[64];
-	unsigned short hp;
-	unsigned short max_hp;
+	T_HP hp;
 	unsigned short el;
 	unsigned short ap;
 	unsigned short gp;
@@ -44,8 +47,7 @@ typedef struct monster{
 
 typedef struct Player{
 	unsigned char name[64];
-	unsigned short hp;
-	unsigned short max_hp;
+	T_HP hp;
 	unsigned short gp;
 }T_PLAYER;
 

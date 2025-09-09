@@ -480,6 +480,7 @@ T_SCORE zennmetu_score3[]			= {73,14,73,13,73,10,73,};//7
 T_NOTE zennmetu_note_value1[]		= {250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,125,125,1250};//5500
 T_NOTE zennmetu_note_value2[]		= {250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,250,125,125,1250};//5500
 T_NOTE zennmetu_note_value3[]		= {250,500,500,500,500,500,2750};
+
 T_SCORE initial_check_score[]				= {24,26,28,29,31,33,35,36};
 T_NOTE initial_check_note_value[]			=	{500,500,500,500,500,500,500,500};
 T_SCORE *const SCORE_POINTER_ARRAY[SONG_NUM][SPEAKER_NUM]	= {{ave_maria_score,NULL,NULL},{saint_march_score,NULL,NULL},

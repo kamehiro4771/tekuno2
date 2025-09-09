@@ -46,7 +46,7 @@
 #define NOT_FOUND (0)
 //選択できる項目数
 #define SELECT_MODE_NUM (5)					//選択するモード数
-#define SELECT_PLAY_TITLE_NUM (9)			//自動演奏モードで演奏する曲数
+#define SELECT_PLAY_TITLE_NUM (10)			//自動演奏モードで演奏する曲数
 #define SELECT_WAVE_NUM (4)					//選択する波形の種類
 #define SELECT_SETTING_ITEM_NUM (3)
 #define SELECT_SPEAKER_NUM (3)
