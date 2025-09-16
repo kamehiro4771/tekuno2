@@ -63,7 +63,7 @@ void game_param_init(void)
 	unsigned char i;
 	unsigned short temp;
 	for (i = 0; i < ALLY_NUM; i++) {
-		player.max_hp = player.hp += ally[i].hp;	//味方モンスターのHPの合計をプレイヤーHPの合計に設定
+		player.hp.max_hp = player.hp.now_hp += ally[i].hp.max_hp;	//味方モンスターのHPの合計をプレイヤーHPの合計に設定
 		temp += ally[i].gp;		//味方モンスターの防御力を合計する
 	}
 	player.gp = temp / ALLY_NUM;			//平均値を防御力に設定

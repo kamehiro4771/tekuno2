@@ -60,21 +60,28 @@ P1847データフラッシュのブランクチェックフローチャート
 /****************************************/
 unsigned char e2_blank_check(void)
 {
-	FLASH.FMODR.BIT.FRDMD				= 1;//FCUリードモードをレジスタリードモードに設定
-	FLASH.DFLBCCNT.BIT.BCSIZE			= 1;//ブランクチェックのサイズを2Kバイトに指定
-	while(offset < 32768){//最大32Kバイトブランクチェック
-		e2_FLASH						= 0x71;//ブランクチェック第一サイクル
-		*(&e2_FLASH + offset)			= 0xd0;//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
-		e2_timeout_check_area			= 1;//1msでタイムアウト
+	FLASH.FMODR.BIT.FRDMD = 1;	//レジスタリード方式に設定　ブランクチェックコマンドを使用する場合に設定
+	FLASH.DFLBCCNT.BIT.BCSIZE = 1;	//ブランクチェックのサイズを2Kバイトに指定
+	FLASH.FENTRYR.FENTRY0				= 0;	//データフラッシュP/EモードはFENTRY.FENTRY0ビットを０かつFENTRYR.FENTRYDビットを１
+	FLASH.FENTRYR.FENTRYD				= 1;	//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
+	FLASH.FWEPROR.FLWE					= 1;	//書き込み消去プロテクト解除
+	timer_area_registration(e2_timeout_check_area);
+	while(offset < 32768){						//最大32Kバイトブランクチェックするまで繰り返す
+		e2_FLASH						= 0x71;	//ブランクチェック第一サイクル
+		*(&e2_FLASH + offset)			= 0xd0;	//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
+		e2_timeout_check_area			= 1;	//1msでタイムアウト
 		while(FLASH.FSTATR0.BIT.FRDY == 0){
-			timer_area_registration(e2_timeout_check_area);
-			if(e2_timeout_check_area == 0){//タイムアウト判定
+			if(e2_timeout_check_area == 0){		//タイムアウト判定タイムアウトしたらＦＣＵを初期化してエラーを返す
 				FLASH.FRESETR.BIT.FRESET = 1;
-				cmt2_wait(210,0);//35μs待機
+				cmt2_wait(210,0);				//35μs待機
 				FLASH.FRESETR.BIT.FRESET = 0;
 				return ERROR;
 			}
 		}
+		if (FLASH.FSTATR0.BIT.ILGLERR == 1) {//FCUが不正なコマンドや、不正なROM/データフラッシュアクセスを検出したかチェック
+			return ERROR;
+		}ERRORとWRITTEN_STATEが同じ定義だから変更が必要
+
 		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){
 			if(offset == 0)
 				return BLANK;
@@ -83,7 +90,6 @@ unsigned char e2_blank_check(void)
 		}
 		offset						+= 2048;//次の2Kバイトをブランクチェックする
 	}
-	offset								= 0;
 	return WRITTEN_STATE;//32Kバイト書き込まれていた時
 }
 

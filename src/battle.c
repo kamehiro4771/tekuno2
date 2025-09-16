@@ -98,7 +98,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 	battle_init(enemy,ally,player);
 	while(kill_cnt < ENEMY_NUM){
 		player_turn();
-		if(penemy->hp == 0){
+		if(penemy->hp.now_hp == 0){
 			win();
 			kill_cnt++;
 			penemy = &enemy[kill_cnt];
@@ -107,7 +107,7 @@ unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 		}else{
 			enemy_turn();
 			first_turn_flg 			= OFF;
-			if(pplayer->hp <= 0)
+			if(pplayer->hp.now_hp <= 0)
 				return 0;
 		}
 	}
@@ -291,16 +291,16 @@ static void battle_display(unsigned char activity,unsigned char *param)
 			pplayer->hp.now_hp = pplayer->hp.max_hp;
 		break;
 	case PLAYER_TURN:
-		sprintf(output_display[PLAYER_TURN], "%sy%s‚Ìƒ^[ƒ“z\r\n%s%s%s%s%s%s%s%s%s%s%d/%d%s%s%s%s%s %s%s %s%s %s%s%s%s%s%s%d/%d%s%s%s%s%s",
+		sprintf(output_display[PLAYER_TURN], "%sy%s‚Ìƒ^[ƒ“z\r\n%s%s%s%s%s%s%s%s%s%s%s%d%s/%d%s%s%s%s%s %s%s %s%s %s%s%s%s%s%s%s%d%s/%d%s%s%s%s%s",
 			RESET, pplayer->name,
 			LINE_DISPLAY, CRLF, CRLF,
 			CURSOL_MOVING_SENTER, COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, CRLF,
-			CURSOL_MOVING_SENTER, HP_DISPLAY, penemy->hp.now_hp, penemy->hp.max_hp, CRLF, CRLF, CRLF,
+			CURSOL_MOVING_SENTER, HP_DISPLAY, hp_color_decision(penemy->hp),penemy->hp.now_hp,DEFAULT_CHAR, penemy->hp.max_hp, CRLF, CRLF, CRLF,
 			COLOR_CHAR_ARRAY[pally[FIRE].el], pally[FIRE].name,
 			COLOR_CHAR_ARRAY[pally[WATER].el], pally[WATER].name,
 			COLOR_CHAR_ARRAY[pally[WIND].el], pally[WIND].name,
 			COLOR_CHAR_ARRAY[pally[SOIL].el], pally[SOIL].name, DEFAULT_CHAR, CRLF,
-			CURSOL_MOVING_SENTER, HP_DISPLAY, pplayer->hp.now_hp, pplayer->hp.max_hp, CRLF,
+			CURSOL_MOVING_SENTER, HP_DISPLAY, hp_color_decision(pplayer->hp),pplayer->hp.now_hp, DEFAULT_CHAR,pplayer->hp.max_hp, CRLF,
 			CRLF, CRLF, LINE_DISPLAY, CRLF);
 		combo_reset();
 		break;
