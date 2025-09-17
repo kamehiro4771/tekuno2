@@ -62,9 +62,7 @@ unsigned char e2_blank_check(void)
 {
 	FLASH.FMODR.BIT.FRDMD = 1;	//レジスタリード方式に設定　ブランクチェックコマンドを使用する場合に設定
 	FLASH.DFLBCCNT.BIT.BCSIZE = 1;	//ブランクチェックのサイズを2Kバイトに指定
-	FLASH.FENTRYR.FENTRY0				= 0;	//データフラッシュP/EモードはFENTRY.FENTRY0ビットを０かつFENTRYR.FENTRYDビットを１
-	FLASH.FENTRYR.FENTRYD				= 1;	//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
-	FLASH.FWEPROR.FLWE					= 1;	//書き込み消去プロテクト解除
+	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
 	timer_area_registration(e2_timeout_check_area);
 	while(offset < 32768){						//最大32Kバイトブランクチェックするまで繰り返す
 		e2_FLASH						= 0x71;	//ブランクチェック第一サイクル
@@ -80,8 +78,7 @@ unsigned char e2_blank_check(void)
 		}
 		if (FLASH.FSTATR0.BIT.ILGLERR == 1) {//FCUが不正なコマンドや、不正なROM/データフラッシュアクセスを検出したかチェック
 			return ERROR;
-		}ERRORとWRITTEN_STATEが同じ定義だから変更が必要
-
+		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){
 			if(offset == 0)
 				return BLANK;
@@ -93,6 +90,51 @@ unsigned char e2_blank_check(void)
 	return WRITTEN_STATE;//32Kバイト書き込まれていた時
 }
 
+void erase(unsigned short address)
+{
+	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
+	2Kバイトずつブロックが分かれている。
+	コード格納用フラッシュメモリの消去方法と同じ
+	P1773
+	消去はブロック単位
+	指定したアドレスのブロックのデータフラッシュ書き込み・消去許可レジスタを書き込み/消去許可に変更
+	if(address <= 2048){
+
+	}else if(address <= 4096){
+
+	}else if(address <= 6144){
+
+	}else if(address <= 8192){
+
+	}else if(address <= 10240){
+
+	}else if(address <= 12288){
+
+	}else if(address <= 14336){
+
+	}else if(){
+
+	}else if(){
+
+	}else if(){
+
+	}else if(){
+
+	}else if(){
+
+	}else if(){
+
+	}else if(){
+
+	}
+	FLASH.DFLWE0
+
+}
+
+void all_erase(void)
+{
+
+}
 /***********************************************
  *
  */

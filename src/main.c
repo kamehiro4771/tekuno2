@@ -114,11 +114,16 @@ void eneiro_initialize(void)
 /****************************************************************************/
 void main(void)
 {
+	unsigned char ret = 0;
 	eneiro_initialize();
 //	timer_area_registration(&timer_area);
 	while(1)
 	{
-		main_process();
+		ret = e2_blank_check();
+		while(1){
+
+		}
+//		main_process();
 	}
 }
 
