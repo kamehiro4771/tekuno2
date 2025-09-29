@@ -10,8 +10,26 @@
  * ワークエリア定義						*
  ***************************************/
 unsigned char e2_FLASH;
+volatile unsigned char FCU_RAM[8192];
+volatile unsigned char FCU_FIRM_WARE[8192];
+
 unsigned long e2_timeout_check_area;
 unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
+
+//ROMに格納されているFCUファームをFCURAM領域に格納する
+//#pragma address FCU_RAM = 0x007f8000
+//#pragma address FCU_FIRM_WARE = 0xfeffe000
+void fcu_initialize(void)
+{
+	FLASH.FENTRYR.WORD = 0;//FCUを停止
+	FLASH.FCURAME.WORD = 0xc401;//FCURAMアクセス許可状態にする
+	memcpy(&FCU_RAM,&FCU_FIRM_WARE,8192);
+}
+//FCUコマンド使用
+void fcu_command(void)
+{
+
+}
 //E2データフラッシュのブランクチェック
 //ブランクなら0をデータが書かれていたら1を返す
 //ロックビットリード２コマンドはデータフラッシュのブランクチェックを兼ねている
@@ -89,7 +107,7 @@ unsigned char e2_blank_check(void)
 	}
 	return WRITTEN_STATE;//32Kバイト書き込まれていた時
 }
-
+/*
 void erase(unsigned short address)
 {
 	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
@@ -130,9 +148,11 @@ void erase(unsigned short address)
 	FLASH.DFLWE0
 
 }
-
+*/
 void all_erase(void)
 {
+//FCUコマンドを使用するためにFCU用のファームウェアをFCURAMに格納する必要がある
+//FCUのファームウェアをFCURAにコピーする必要がある
 
 }
 /***********************************************
@@ -144,4 +164,9 @@ unsigned char e2_writing(unsigned short addr)
 	e2_FLASH				= 0x40;//ワード数を64（128バイト）に設定
 //	*(&e2_FLASH + offset)	= ;
 	cmt2_wait(1875,2);//5ms待機
+}
+
+void flash_error(void)
+{
+
 }
