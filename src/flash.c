@@ -5,7 +5,23 @@
  *      Author: kameyamahiroki
  */
 #include "main.h"
-
+#define DBWE (0x400)
+#define DATA_BLOCK0 (0x000)
+#define DATA_BLOCK1 (0x800)
+#define DATA_BLOCK2 (0x1000)
+#define DATA_BLOCK3 (0x1800)
+#define DATA_BLOCK4 (0x2000)
+#define DATA_BLOCK5 (0x2800)
+#define DATA_BLOCK6 (0x3000)
+#define DATA_BLOCK7 (0x3800)
+#define DATA_BLOCK8 (0x4000)
+#define DATA_BLOCK9 (0x4800)
+#define DATA_BLOCK10 (0x5000)
+#define DATA_BLOCK11 (0x5800)
+#define DATA_BLOCK12 (0x6000)
+#define DATA_BLOCK13 (0x6800)
+#define DATA_BLOCK14 (0x7000)
+#define DATA_BLOCK15 (0x7800)
 /****************************************
  * ワークエリア定義						*
  ***************************************/
@@ -29,6 +45,20 @@ void fcu_initialize(void)
 void fcu_command(void)
 {
 
+}
+
+unsigned char fcu_wait(void)
+{
+	e2_timeout_check_area			= 1;	//1msでタイムアウト
+	while(FLASH.FSTATR0.BIT.FRDY == 0){
+		if(e2_timeout_check_area == 0){		//タイムアウト判定タイムアウトしたらＦＣＵを初期化してエラーを返す
+			FLASH.FRESETR.BIT.FRESET = 1;
+			cmt2_wait(210,0);				//35μs待機
+			FLASH.FRESETR.BIT.FRESET = 0;
+			return ERROR;
+		}
+	}
+	return SUCCESS;
 }
 //E2データフラッシュのブランクチェック
 //ブランクなら0をデータが書かれていたら1を返す
@@ -76,24 +106,17 @@ P1847データフラッシュのブランクチェックフローチャート
 /*unsigned char e2_blank_check(void)	*/
 /*　戻り値：unsigned char */
 /****************************************/
+//ステータスリードモードに移行する必要があるのか？
 unsigned char e2_blank_check(void)
 {
 	FLASH.FMODR.BIT.FRDMD = 1;	//レジスタリード方式に設定　ブランクチェックコマンドを使用する場合に設定
 	FLASH.DFLBCCNT.BIT.BCSIZE = 1;	//ブランクチェックのサイズを2Kバイトに指定
-	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
+	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EノーマルモードにするFCUコマンドを使用するため
 	timer_area_registration(e2_timeout_check_area);
 	while(offset < 32768){						//最大32Kバイトブランクチェックするまで繰り返す
-		e2_FLASH						= 0x71;	//ブランクチェック第一サイクル
+		e2_FLASH							= 0x71;//ブランクチェック第一サイクルロックビットリードモードに移行
 		*(&e2_FLASH + offset)			= 0xd0;	//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
-		e2_timeout_check_area			= 1;	//1msでタイムアウト
-		while(FLASH.FSTATR0.BIT.FRDY == 0){
-			if(e2_timeout_check_area == 0){		//タイムアウト判定タイムアウトしたらＦＣＵを初期化してエラーを返す
-				FLASH.FRESETR.BIT.FRESET = 1;
-				cmt2_wait(210,0);				//35μs待機
-				FLASH.FRESETR.BIT.FRESET = 0;
-				return ERROR;
-			}
-		}
+		fcu_wait();								//処理待ち、タイムアウト判定
 		if (FLASH.FSTATR0.BIT.ILGLERR == 1) {//FCUが不正なコマンドや、不正なROM/データフラッシュアクセスを検出したかチェック
 			return ERROR;
 		}
@@ -110,7 +133,7 @@ unsigned char e2_blank_check(void)
 /*
 void erase(unsigned short address)
 {
-	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EモードにするFCUコマンドを使用するためにROM　P/Eモードへ移行
+	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュP/EノーマルモードにするFCUコマンドを使用するため
 	2Kバイトずつブロックが分かれている。
 	コード格納用フラッシュメモリの消去方法と同じ
 	P1773
@@ -149,11 +172,17 @@ void erase(unsigned short address)
 
 }
 */
-void all_erase(void)
+/***********************************************
+ *指定されたバイト数データフラッシュから消去
+ *
+ */
+void e2data_erase(unsigned char erase_address)
 {
-//FCUコマンドを使用するためにFCU用のファームウェアをFCURAMに格納する必要がある
-//FCUのファームウェアをFCURAにコピーする必要がある
-
+	unsigned short enable				= 0x1e00 ;
+	FLASH.FENTRYR.WORD					= 0xaa80;	//データフラッシュP/Eノーマルモードにする
+	FLASH.DFLWE0.WORD					= 0x1e;//消去対象の書き込み・消去プロテクト解除
+	FCU_RAM								= 0x20;		//ブロックイレーズ第一サイクル
+	*(&e2_FLASH + offset)				= 0xd0;		//ブロックイレーズ第二サイクル消去したいアドレスにD0h書き込み
 }
 /***********************************************
  *
