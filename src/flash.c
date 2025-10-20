@@ -5,7 +5,7 @@
  *      Author: kameyamahiroki
  */
 #include "main.h"
-#define DBWE (0x400)
+#define DBWE (0x800)
 #define DATA_BLOCK0 (0x000)
 #define DATA_BLOCK1 (0x800)
 #define DATA_BLOCK2 (0x1000)
@@ -35,33 +35,44 @@ unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
 //ROMに格納されているFCUファームをFCURAM領域に格納する
 //#pragma address FCU_RAM = 0x007f8000
 //#pragma address FCU_FIRM_WARE = 0xfeffe000
-void fcu_initialize(void)
+void fcu_firmware_transfer(void)
 {
 	FLASH.FENTRYR.WORD = 0;//FCUを停止
 	FLASH.FCURAME.WORD = 0xc401;//FCURAMアクセス許可状態にする
 	memcpy(&FCU_RAM,&FCU_FIRM_WARE,8192);
+}
+
+void fcu_initialize(void)
+{
+	FLASH.FRESETR.BIT.FRESET 	= 1;
+	cmt2_wait(210,0);				//35μs待機
+	FLASH.FRESETR.BIT.FRESET 	= 0;
+	FLASH.PCKAR.WORD				= 0x30;
+	//周辺クロック通知コマンド使用
+	return fcu_wait();
 }
 //FCUコマンド使用
 void fcu_command(void)
 {
 
 }
-
+/*
+ * FCUが処理を完了するまで待機
+ */
 unsigned char fcu_wait(void)
 {
 	e2_timeout_check_area			= 1;	//1msでタイムアウト
 	while(FLASH.FSTATR0.BIT.FRDY == 0){
 		if(e2_timeout_check_area == 0){		//タイムアウト判定タイムアウトしたらＦＣＵを初期化してエラーを返す
-			FLASH.FRESETR.BIT.FRESET = 1;
-			cmt2_wait(210,0);				//35μs待機
-			FLASH.FRESETR.BIT.FRESET = 0;
+			fcu_initialize();
 			return ERROR;
 		}
 	}
+	if(FLASH.FSTATR0.BIT.ERSERR || FLASH.FSTATR0.BIT.ILGLERR == 1)//FCUが不正なコマンドや、不正なROM/データフラッシュアクセスを検出したかチェック
+		return ERROR;
 	return SUCCESS;
 }
-//E2データフラッシュのブランクチェック
-//ブランクなら0をデータが書かれていたら1を返す
+
 //ロックビットリード２コマンドはデータフラッシュのブランクチェックを兼ねている
 //1サイクル目：アドレス　EA　データ　0x71
 //2サイクル目：アドレス　BA　データ　0xd0
@@ -88,102 +99,60 @@ unsigned char fcu_wait(void)
  *  味方情報
  * 	演奏中の曲情報
  */
-//128の倍数で
-//データROMのアドレスの先頭からブランクチェックして書き込まれているアドレスを求める
-//書き込まれていなかったらBLANKを返す
-/*
- * アドレス0x0010　0000から書き込み
- * 128バイトずつ書き込む
- * 最初にブランクチェックして消去状態のアドレス保持しておく
- */
-/*
-P1845データフラッシュ書き込みのフローチャート
-P1847データフラッシュのブランクチェックフローチャート
 
-*/
 /****************************************/
 /*ブランクチェック						*/
 /*unsigned char e2_blank_check(void)	*/
 /*　戻り値：unsigned char */
 /****************************************/
-//ステータスリードモードに移行する必要があるのか？
 unsigned char e2_blank_check(void)
 {
-	FLASH.FMODR.BIT.FRDMD = 1;	//レジスタリード方式に設定　ブランクチェックコマンドを使用する場合に設定
-	FLASH.DFLBCCNT.BIT.BCSIZE = 1;	//ブランクチェックのサイズを2Kバイトに指定
-	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュをP/EノーマルモードにするFCUコマンドを使用するため
+	FLASH.FMODR.BIT.FRDMD = 1;						//レジスタリード方式に設定　ブランクチェックコマンドを使用する場合に設定
+	FLASH.DFLBCCNT.BIT.BCSIZE = 1;					//ブランクチェックのサイズを2Kバイトに指定
+	FLASH.FENTRYR.WORD					= 0xaa80;	//データフラッシュをP/EノーマルモードにするFCUコマンドを使用するため
 	timer_area_registration(e2_timeout_check_area);
-	while(offset < 32768){						//最大32Kバイトブランクチェックするまで繰り返す
-		e2_FLASH							= 0x71;//ブランクチェック第一サイクルロックビットリードモードに移行
-		*(&e2_FLASH + offset)			= 0xd0;	//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
-		fcu_wait();								//処理待ち、タイムアウト判定
-		if (FLASH.FSTATR0.BIT.ILGLERR == 1) {//FCUが不正なコマンドや、不正なROM/データフラッシュアクセスを検出したかチェック
+	while(offset < 32768){							//最大32Kバイトブランクチェックするまで繰り返す
+		e2_FLASH							= 0x71;		//ブランクチェック第一サイクルロックビットリードモードに移行
+		*(&e2_FLASH + offset)			= 0xd0;		//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
+		;
+		if (Ffcu_wait() == ERROR) {					//処理待ち、タイムアウト、エラー判定
 			return ERROR;
 		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){
-			if(offset == 0)
-				return BLANK;
-			else
-				return WRITTEN_STATE;
+			return offset;							//ブランクの先頭アドレスを返す
 		}
-		offset						+= 2048;//次の2Kバイトをブランクチェックする
+		offset						+= 2048;			//次の2Kバイトをブランクチェックする
 	}
 	return WRITTEN_STATE;//32Kバイト書き込まれていた時
 }
-/*
-void erase(unsigned short address)
-{
-	FLASH.FENTRYR.WORD					= 0xaa80;//データフラッシュP/EノーマルモードにするFCUコマンドを使用するため
-	2Kバイトずつブロックが分かれている。
-	コード格納用フラッシュメモリの消去方法と同じ
-	P1773
-	消去はブロック単位
-	指定したアドレスのブロックのデータフラッシュ書き込み・消去許可レジスタを書き込み/消去許可に変更
-	if(address <= 2048){
 
-	}else if(address <= 4096){
-
-	}else if(address <= 6144){
-
-	}else if(address <= 8192){
-
-	}else if(address <= 10240){
-
-	}else if(address <= 12288){
-
-	}else if(address <= 14336){
-
-	}else if(){
-
-	}else if(){
-
-	}else if(){
-
-	}else if(){
-
-	}else if(){
-
-	}else if(){
-
-	}else if(){
-
-	}
-	FLASH.DFLWE0
-
-}
-*/
 /***********************************************
  *指定されたバイト数データフラッシュから消去
  *
  */
 void e2data_erase(unsigned char erase_address)
 {
-	unsigned short enable				= 0x1e00 ;
+	unsigned char bit_point				= 0;
 	FLASH.FENTRYR.WORD					= 0xaa80;	//データフラッシュP/Eノーマルモードにする
-	FLASH.DFLWE0.WORD					= 0x1e;//消去対象の書き込み・消去プロテクト解除
-	FCU_RAM								= 0x20;		//ブロックイレーズ第一サイクル
+	FLASH.FWEPROR.BYTE					= 0x01;		//書き込み消去可能にする
+	bit_point							= erase_address % DBWE;
+	if(bit_point <= DATA_BLOCK7)
+		FLASH.DFLWE0.WORD				= 0x1e00 + (1 << bit_point);
+	else
+		FLASH.DFLWE1.WORD				= 0x1e00 + (1 << bit_point);
+	e2_FLASH								= 0x20;		//ブロックイレーズ第一サイクル
 	*(&e2_FLASH + offset)				= 0xd0;		//ブロックイレーズ第二サイクル消去したいアドレスにD0h書き込み
+	return fcu_wait();
 }
+
+void e2data_all_erase(void)
+{
+	int i;
+	for(i = 0;i < ;i += DBWE){
+		e2data_erase();
+	}
+}
+
 /***********************************************
  *
  */
