@@ -32,6 +32,7 @@ volatile unsigned char FCU_FIRM_WARE[8192];
 unsigned long e2_timeout_check_area;
 unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
 
+unsigned char fcu_wait(void);
 //ROMに格納されているFCUファームをFCURAM領域に格納する
 //#pragma address FCU_RAM = 0x007f8000
 //#pragma address FCU_FIRM_WARE = 0xfeffe000
@@ -42,13 +43,20 @@ void fcu_firmware_transfer(void)
 	memcpy(&FCU_RAM,&FCU_FIRM_WARE,8192);
 }
 
-void fcu_initialize(void)
+unsigned char fcu_initialize(void)
 {
-	FLASH.FRESETR.BIT.FRESET 	= 1;
-	cmt2_wait(210,0);				//35μs待機
-	FLASH.FRESETR.BIT.FRESET 	= 0;
-	FLASH.PCKAR.WORD				= 0x30;
+	volatile unsigned int *wptr = (volatile unsigned int *)e2_FLASH;
+	fcu_firmware_transfer();
+	FLASH.FRESETR.WORD 			= 0xcc01;	//FCUをリセットする
+	cmt2_wait(210,0);						//35μs待機
+	FLASH.FRESETR.BIT.FRESET 	= 0xcc00;	//リセット終了FCUコマンドを使用可能にする
+	FLASH.PCKAR.WORD				= 0x30;		//周辺クロックを48MHｚに設定
 	//周辺クロック通知コマンド使用
+	e2_FLASH						= 0xe9;
+	e2_FLASH						= 0x03;
+	wptr[0]						= 0x0f0f;
+	wptr[1]						= 0x0f0f;
+	wptr[2]						= 0x0f0f;
 	return fcu_wait();
 }
 //FCUコマンド使用
@@ -115,7 +123,7 @@ unsigned char e2_blank_check(void)
 		e2_FLASH							= 0x71;		//ブランクチェック第一サイクルロックビットリードモードに移行
 		*(&e2_FLASH + offset)			= 0xd0;		//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
 		;
-		if (Ffcu_wait() == ERROR) {					//処理待ち、タイムアウト、エラー判定
+		if (fcu_wait() == ERROR) {					//処理待ち、タイムアウト、エラー判定
 			return ERROR;
 		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){
@@ -144,7 +152,7 @@ void e2data_erase(unsigned char erase_address)
 	*(&e2_FLASH + offset)				= 0xd0;		//ブロックイレーズ第二サイクル消去したいアドレスにD0h書き込み
 	return fcu_wait();
 }
-
+/*
 void e2data_all_erase(void)
 {
 	int i;
@@ -152,7 +160,7 @@ void e2data_all_erase(void)
 		e2data_erase();
 	}
 }
-
+*/
 /***********************************************
  *
  */
