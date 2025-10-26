@@ -57,19 +57,16 @@ unsigned char fcu_initialize(void)
 	wptr[0]						= 0x0f0f;
 	wptr[1]						= 0x0f0f;
 	wptr[2]						= 0x0f0f;
-	return fcu_wait();
+	return fcu_wait(1);
 }
-//FCUコマンド使用
-void fcu_command(void)
-{
 
-}
 /*
  * FCUが処理を完了するまで待機
  */
-unsigned char fcu_wait(void)
+待機時間を引数に貰う仕様にする
+unsigned char fcu_wait(unsigned short wait_time)
 {
-	e2_timeout_check_area			= 1;	//1msでタイムアウト
+	e2_timeout_check_area			= wait_time;	//1msでタイムアウト
 	while(FLASH.FSTATR0.BIT.FRDY == 0){
 		if(e2_timeout_check_area == 0){		//タイムアウト判定タイムアウトしたらＦＣＵを初期化してエラーを返す
 			fcu_initialize();
@@ -81,12 +78,6 @@ unsigned char fcu_wait(void)
 	return SUCCESS;
 }
 
-//ロックビットリード２コマンドはデータフラッシュのブランクチェックを兼ねている
-//1サイクル目：アドレス　EA　データ　0x71
-//2サイクル目：アドレス　BA　データ　0xd0
-//FCUへのコマンド発行は、データフラッシュ領域に対するライトアクセスで実現されます（P１８４２）
-//データフラッシュアドレス0x0010 0000~0010 7fff
-//FCUコマンドの使用方法P1844
 /*ブランクチェックの第一サイクルでは、７１hをデータフラッシュ領域のアドレスにバイト書き込みします。
  * コマンドの第二サイクルでは、ブランクチェック対象領域を含む消去ブロック内の任意のアドレスにD0h
  * をバイト書き込みすると、FCUがデータフラッシュのブランクチェック処理を開始します。
@@ -109,11 +100,11 @@ unsigned char fcu_wait(void)
  */
 
 /****************************************/
-/*ブランクチェック						*/
-/*unsigned char e2_blank_check(void)	*/
-/*　戻り値：unsigned char */
-/****************************************/
-unsigned char e2_blank_check(void)
+/*ブランクチェック											   */
+/*unsigned char e2_blank_check(void)				   */
+/*　戻り値：unsigned short ブランクだったアドレス。0ｘ100000からのオフセット値 */
+/*******************************************************/
+unsigned short e2_blank_check(void)
 {
 	FLASH.FMODR.BIT.FRDMD = 1;						//レジスタリード方式に設定　ブランクチェックコマンドを使用する場合に設定
 	FLASH.DFLBCCNT.BIT.BCSIZE = 1;					//ブランクチェックのサイズを2Kバイトに指定
@@ -123,7 +114,7 @@ unsigned char e2_blank_check(void)
 		e2_FLASH							= 0x71;		//ブランクチェック第一サイクルロックビットリードモードに移行
 		*(&e2_FLASH + offset)			= 0xd0;		//ブランクチェック第二サイクルブランクチェックしたいアドレスにD0h書き込み
 		;
-		if (fcu_wait() == ERROR) {					//処理待ち、タイムアウト、エラー判定
+		if (fcu_wait(1) == ERROR) {					//処理待ち、タイムアウト、エラー判定
 			return ERROR;
 		}
 		if(FLASH.DFLBCSTAT.BIT.BCST == BLANK){
@@ -134,11 +125,13 @@ unsigned char e2_blank_check(void)
 	return WRITTEN_STATE;//32Kバイト書き込まれていた時
 }
 
+
+
 /***********************************************
  *指定されたバイト数データフラッシュから消去
  *
  */
-void e2data_erase(unsigned char erase_address)
+unsigned char e2data_erase(unsigned short erase_address)
 {
 	unsigned char bit_point				= 0;
 	FLASH.FENTRYR.WORD					= 0xaa80;	//データフラッシュP/Eノーマルモードにする
@@ -153,6 +146,9 @@ void e2data_erase(unsigned char erase_address)
 	return fcu_wait();
 }
 /*
+ * データフラッシュのデータを全部消去する
+ *
+ */
 void e2data_all_erase(void)
 {
 	int i;
@@ -160,19 +156,56 @@ void e2data_all_erase(void)
 		e2data_erase();
 	}
 }
-*/
+
+
+/*
+ * unsigned short offset 読み出したいアドレスへのオフセット値e2_FLASH + offset
+ * void *read_data_buff 読みだしたデータを格納するバッファへのポインタ
+ * unsigned int byte_count 読み出すバイト数
+ */
+unsigned char e2_read(unsigned short offset,void *read_data_buff,unsigned int byte_count)
+{
+	unsigned int i;
+	unsigned char *buff			= (unsigned char *)read_data_buff;
+	FLASH.FENTRYR.WORD			= 0xaa00;//ROM/データフラッシュリードモードに移行
+	while(FLASH.FENTRYR.WORD == 0x0000){
+
+	}
+	for(i = 0;i < byte_count;i++){
+		buff					= *(e2_FLASH + offset + i);
+	}
+}
+
 /***********************************************
  *
  */
-unsigned char e2_writing(unsigned short addr)
+unsigned char e2_writing(unsigned short offset,void *write_data,unsigned int word_count)
 {
-	e2_FLASH				= 0xe8;
-	e2_FLASH				= 0x40;//ワード数を64（128バイト）に設定
-//	*(&e2_FLASH + offset)	= ;
-	cmt2_wait(1875,2);//5ms待機
+	unsigned int i;
+	unsigned short *flash_ptr 	= (unsigned short*)(e2_FLASH + offset);
+	unsigned short *word_data 	= (unsigned short*)write_data;
+	FLASH.FENTRYR.WORD			= 0xaa80;	//データフラッシュP/Eノーマルモードにする
+	FLASH.FWEPROR.BYTE			= 0x01;		//書き込み消去可能にする
+	FLASH.DFLWE0.WORD			= 0x1eff;	//DB00~DB07ブロックまで書き込み許可
+	FLASH.DFLWE1.WORD			= 0x1eff;	//DB08~DB15ブロックまで書き込み許可
+	//エラーの確認
+	while(){
+		e2_FLASH					= 0xe8;
+		e2_FLASH					= 0x40;//ワード数を128バイトに設定
+		for(i = 0;i < 0x3f;i++){
+			if(){
+				flash_ptr[i]			= word_data[i];
+			else
+				flash_ptr[i]			= 0xffff;
+		}
+		e2_FLASH					= 0xd0;
+		if(fcu_wait(5) == ERROR){
+
+
+			return ERROR;
+		}
+	}
+
+	return SUCCESS;
 }
 
-void flash_error(void)
-{
-
-}
