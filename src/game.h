@@ -7,16 +7,19 @@
 
 #ifndef __GAME_H__
 #define __GAME_H__
+#include "auto_play.h"
 
 #define FIELD_NUM (13)//バトルフィールドの数
 #define ONE_JEWEL (6)//一つの宝石のバイト数
-#define ENEMY_NUM (5)//敵モンスターの数
-#define ALLY_NUM (4)//味方の数
+
+
 #define FIRE (0)
 #define WATER (1)
 #define WIND (2)
 #define SOIL (3)
 #define LIFE (4)
+#define ALLY_NUM (4)//味方の数
+#define ENEMY_NUM (5)//敵モンスターの数
 #define COLOR_NUM (5)
 #define WIN (1)
 #define LOSE (0)
@@ -49,8 +52,14 @@ typedef struct Player{
 	unsigned char name[64];
 	T_HP hp;
 	unsigned short gp;
+	T_MONSTER ally[ALLY_NUM];
 }T_PLAYER;
 
+typedef struct Savedata{
+						T_PLAYER player_data;
+						T_MONSTER enemy[ENEMY_NUM];
+						T_AUTOPLAYER autoplay_data;
+						}T_Savedata;
 T_MONSTER get_ally_data(unsigned char type);
 
 

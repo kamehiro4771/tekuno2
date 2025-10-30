@@ -34,7 +34,7 @@ const T_DISPLAY SETTING_SPEAKER_SELECT										= {"Ý’è‚·‚éƒXƒs[ƒJ‚ð‘I‘ð‚µ‚Ä‚­
 const T_DISPLAY OUTPUT_SPEAKER_SELECT											= {"“dŽqƒIƒ‹ƒKƒ“ƒ‚[ƒhŽž‚Éo—Í‚·‚éƒXƒs[ƒJ”‚ð‘I‘ð‚µ‚Ä‚­‚¾‚³‚¢\n"};
 
 /*€–Ú–¼*/
-const T_DISPLAY MODE_NAME[MODE_NUM]										= {"“dŽqƒIƒ‹ƒKƒ“ƒ‚[ƒh","Ž©“®‰‰‘tƒ‚[ƒh","ƒQ[ƒ€ƒ‚[ƒh","ƒ^ƒCƒ}ƒ‚[ƒh","Ý’è",};//ƒ‚[ƒh–¼
+const T_DISPLAY MODE_NAME[MODE_NUM]										= {"“dŽqƒIƒ‹ƒKƒ“ƒ‚[ƒh","Ž©“®‰‰‘tƒ‚[ƒh","ƒQ[ƒ€ƒ‚[ƒh","ƒ^ƒCƒ}ƒ‚[ƒh","Ý’è","ƒf[ƒ^ƒtƒ‰ƒbƒVƒ…ƒeƒXƒg",};//ƒ‚[ƒh–¼
 const T_DISPLAY TITLE_NAME[SONG_NUM]										= {"ƒAƒ”ƒFEƒ}ƒŠƒA","¹ŽÒ‚Ìsi","ƒƒkƒGƒbƒg","Žå‚æAl‚Ì–]‚Ý‚ÌŠì‚Ñ‚æ","ƒI[ƒ‰EƒŠ[","‚³‚­‚çi“Æ¥","î”M‘å—¤",
 																	   	   	   	   "Let it Be","NHK‚Ì‚ÇŽ©–‚Ìƒe[ƒ}‹È","ƒhƒ‰ƒSƒ“ƒNƒGƒXƒg˜‹È","ƒŒƒxƒ‹ƒAƒbƒv","Ÿ—˜",
 																	   	   	   	   "h‰®","UŒ‚‰¹","–`Œ¯‚Ì‘","í“¬‚Ìƒe[ƒ}","‘S–Å","ƒCƒjƒVƒƒƒ‹ƒ`ƒFƒbƒN","ƒpƒbƒwƒ‹ƒxƒ‹‚ÌƒJƒmƒ“",};
@@ -58,12 +58,17 @@ const T_DISPLAY TIMER_SETTING_METHOD											= {"SW1:ŽOŒ…–ÚÝ’è@SW3:“ñŒ…–ÚÝ’
 																				   "SW2:ƒ^ƒCƒ}ƒXƒ^[ƒg\r\n"};
 const T_DISPLAY ERROR_MESSAGE													= {"“ü—Í‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ\n"};
 /*‘I‘ðo—ˆ‚é€–Ú‚ð•Ï‚¦‚½‚¢Žž‚ÍˆÈ‰º‚Ì”z—ñ‚ð•ÏX‚µ‚ÄA‘Œ¸‚ª‚ ‚Á‚½‚ç#define‚ÌSELECT_NUM‚ð•Ï‚¦‚é*/
-const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,SETTING};//‘I‘ð‚Å‚«‚éƒ‚[ƒh
+const unsigned char SELECTABLE_MODE_ARREY[SELECT_MODE_NUM]						= {ORGAN,AUTOPLAY,GAME,TIMER,SETTING,E2TEST};//‘I‘ð‚Å‚«‚éƒ‚[ƒh,
 const unsigned char SELECTABLE_TITLE_ARREY[SELECT_PLAY_TITLE_NUM]				= {AVE_MARIA,SAINT_MARCH,JESU_JOY_OF_MAN_S,MENUETT,CANON,DORAGON_QUEST,BATTLE1,WINNING,ZENNMETU,LEVEL_UP};//‚±‚Ì”z—ñ‚É“ü‚Á‚Ä‚¢‚é‹È‚ªƒƒjƒ…[‚É•\Ž¦‚³‚ê‘I‘ð‚Å‚«‚é
 const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHOOTH,TRIANGLE,SINE};//‘I‘ð‚Å‚«‚é”gŒ`
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
 const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]				= {SPEAKER1,SPEAKER2,SPEAKER3,};
 const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] 	= {SPEAKER1,SPEAKER2,SPEAKER3,};
+const T_Savedata e2_test_data											= {
+		{"kameyama",{100,50},},
+		{},
+		{},
+};
 
 /****************************************************************************/
 /* ƒ[ƒNƒGƒŠƒA’è‹`															*/
@@ -120,11 +125,7 @@ void main(void)
 //	timer_area_registration(&timer_area);
 	while(1)
 	{
-		ret = e2_blank_check();
-		while(1){
-
-		}
-//		main_process();
+		main_process();
 	}
 }
 
@@ -511,6 +512,16 @@ static void timer_mode(void)
 	segled_lights_out();
 	led_lights_out();
 }
+
+/*********************************************************/
+/**/
+/**/
+/*********************************************************/
+void flash_test_mode(void)
+{
+	e2_writing();
+}
+
 /*********************************************************/
 /**/
 /**/

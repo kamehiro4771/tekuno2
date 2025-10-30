@@ -78,11 +78,11 @@ void win(void)
 /* */
 /**/
 /********************************************************************/
-void battle_init(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
+void battle_init(T_MONSTER* enemy, T_PLAYER* player)
 {
 	penemy					= enemy;
 	pplayer					= player;
-	pally					= ally;
+	pally					= player->ally;
 	battle_display(APPEARANCE,NULL);
 }
 /********************************************************************/
@@ -92,10 +92,10 @@ void battle_init(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
 /*	ñﬂÇËílÅFunsigned char ret 1èüóò									*/
 /*							  0îsñk									*/
 /********************************************************************/
-unsigned char battle(T_MONSTER* enemy, T_MONSTER* ally,T_PLAYER* player)
+unsigned char battle(T_MONSTER* enemy,T_PLAYER* player)
 {
 	unsigned char kill_cnt = 0;
-	battle_init(enemy,ally,player);
+	battle_init(enemy,player);
 	while(kill_cnt < ENEMY_NUM){
 		player_turn();
 		if(penemy->hp.now_hp == 0){

@@ -25,14 +25,14 @@
 /****************************************
  * ワークエリア定義						*
  ***************************************/
-unsigned char e2_FLASH;
+unsigned char *e2_FLASH;
 volatile unsigned char FCU_RAM[8192];
 volatile unsigned char FCU_FIRM_WARE[8192];
 
 unsigned long e2_timeout_check_area;
 unsigned short offset 				= 0;//アドレスを2Kバイトづつオフセットさせる変数
 
-unsigned char fcu_wait(void);
+unsigned char fcu_wait(unsigned short wait_time);
 //ROMに格納されているFCUファームをFCURAM領域に格納する
 //#pragma address FCU_RAM = 0x007f8000
 //#pragma address FCU_FIRM_WARE = 0xfeffe000
@@ -63,7 +63,7 @@ unsigned char fcu_initialize(void)
 /*
  * FCUが処理を完了するまで待機
  */
-待機時間を引数に貰う仕様にする
+//待機時間を引数に貰う仕様にする
 unsigned char fcu_wait(unsigned short wait_time)
 {
 	e2_timeout_check_area			= wait_time;	//1msでタイムアウト
@@ -143,12 +143,13 @@ unsigned char e2data_erase(unsigned short erase_address)
 		FLASH.DFLWE1.WORD				= 0x1e00 + (1 << bit_point);
 	e2_FLASH								= 0x20;		//ブロックイレーズ第一サイクル
 	*(&e2_FLASH + offset)				= 0xd0;		//ブロックイレーズ第二サイクル消去したいアドレスにD0h書き込み
-	return fcu_wait();
+	return fcu_wait(250);
 }
 /*
  * データフラッシュのデータを全部消去する
  *
  */
+/*
 void e2data_all_erase(void)
 {
 	int i;
@@ -157,7 +158,7 @@ void e2data_all_erase(void)
 	}
 }
 
-
+*/
 /*
  * unsigned short offset 読み出したいアドレスへのオフセット値e2_FLASH + offset
  * void *read_data_buff 読みだしたデータを格納するバッファへのポインタ
@@ -172,8 +173,9 @@ unsigned char e2_read(unsigned short offset,void *read_data_buff,unsigned int by
 
 	}
 	for(i = 0;i < byte_count;i++){
-		buff					= *(e2_FLASH + offset + i);
+		*(buff + i)					= e2_FLASH[offset + i];
 	}
+	return 0;
 }
 
 /***********************************************
@@ -181,7 +183,7 @@ unsigned char e2_read(unsigned short offset,void *read_data_buff,unsigned int by
  */
 unsigned char e2_writing(unsigned short offset,void *write_data,unsigned int word_count)
 {
-	unsigned int i;
+	unsigned int i,j = 0;
 	unsigned short *flash_ptr 	= (unsigned short*)(e2_FLASH + offset);
 	unsigned short *word_data 	= (unsigned short*)write_data;
 	FLASH.FENTRYR.WORD			= 0xaa80;	//データフラッシュP/Eノーマルモードにする
@@ -189,23 +191,27 @@ unsigned char e2_writing(unsigned short offset,void *write_data,unsigned int wor
 	FLASH.DFLWE0.WORD			= 0x1eff;	//DB00~DB07ブロックまで書き込み許可
 	FLASH.DFLWE1.WORD			= 0x1eff;	//DB08~DB15ブロックまで書き込み許可
 	//エラーの確認
-	while(){
+	while(word_count){
 		e2_FLASH					= 0xe8;
 		e2_FLASH					= 0x40;//ワード数を128バイトに設定
 		for(i = 0;i < 0x3f;i++){
-			if(){
-				flash_ptr[i]			= word_data[i];
+			if(word_count)
+				flash_ptr[j]			= word_data[j];
 			else
-				flash_ptr[i]			= 0xffff;
+				flash_ptr[j]			= 0xffff;
+			word_count--;
+			j++;
 		}
 		e2_FLASH					= 0xd0;
+	//DB08~DB15ブロックまで書き込み許可
 		if(fcu_wait(5) == ERROR){
-
-
-			return ERROR;
+			break;
 		}
 	}
-
+	FLASH.DFLWE0.WORD			= 0x1e00;	//DB00~DB07ブロックまで書き込み禁止
+	FLASH.DFLWE1.WORD			= 0x1e00;
+	if(word_count)
+		return ERROR;
 	return SUCCESS;
 }
 

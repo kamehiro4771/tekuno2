@@ -21,7 +21,7 @@ void end_flg_check(void);
 /*
  * ワークエリア定義
  */
-AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},};
+T_AUTOPLAYER autoplayer[SPEAKER_NUM] = {{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},{SQUARE,NULL,NULL,0,0,0,OFF,ON},};
 unsigned char g_use_speaker_num;		//使用するスピーカーの個数
 unsigned char playing_flg = OFF;
 
@@ -102,7 +102,7 @@ void autoplay_start_from_beginning(unsigned short title,unsigned char wave_type)
 	autoplayer_set(title,wave_type);
 	autoplay_function_set();				//自動演奏に必要な関数をシステムタイマに登録する
 }
-void autoplay_data_set(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
+void autoplay_data_set(T_AUTOPLAYER set1, T_AUTOPLAYER set2, T_AUTOPLAYER set3)
 {
 	autoplayer[0] = set1;
 	autoplayer[1] = set2;
@@ -110,10 +110,10 @@ void autoplay_data_set(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
 }
 /******************************************************************************************/
 /*途中から演奏する																		  */
-/*void autoplay_start_from_beginning_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)*/
+/*void autoplay_start_from_beginning_from_intermediate(T_AUTOPLAYER set1, T_AUTOPLAYER set2, T_AUTOPLAYER set3)*/
 /**/
 /*********************************************/
-void autoplay_start_from_intermediate(AUTOPLAYER set1, AUTOPLAYER set2, AUTOPLAYER set3)
+void autoplay_start_from_intermediate(T_AUTOPLAYER set1, T_AUTOPLAYER set2, T_AUTOPLAYER set3)
 {
 	unsigned char i;
 	playing_flg						= ON;	//演奏中フラグON
@@ -184,13 +184,13 @@ void end_flg_check(void)
 
 
 
-AUTOPLAYER *get_autoplayer(unsigned char player_num)
+T_AUTOPLAYER *get_autoplayer(unsigned char player_num)
 {
 	return &autoplayer[player_num];
 }
 
 
-AUTOPLAYER get_interrupt_data(unsigned char player_num)
+T_AUTOPLAYER get_interrupt_data(unsigned char player_num)
 {
 	return autoplayer[player_num];
 }

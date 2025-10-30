@@ -28,7 +28,7 @@ const T_DISPLAY INPUT_NAME 			= {"\x1b[2J\x1b[9A　なまえ \r\n>"};
 const T_DISPLAY ARRIVAL				= {"はダンジョンに到着した\n"};
 const T_DISPLAY GAME_CLEAR 			= {"はダンジョンを制覇した！\r\n~~~~GAME CLEAR!~~~~\r\n"};
 const T_DISPLAY GAME_OVER 			= {"~~~~GAME_OVER~~~~"};
-AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGONQUEST_NOTE_VALUE1,32,375,96,OFF,OFF},//オープニング曲を途中から
+T_AUTOPLAYER REPEATING_FROM_INTERMEDIATE[3] = {{SQUARE,DORAGONQUEST_SCORE1,DORAGONQUEST_NOTE_VALUE1,32,375,96,OFF,OFF},//オープニング曲を途中から
 													{SQUARE,DORAGONQUEST_SCORE2,DORAGONQUEST_NOTE_VALUE2,32,375,93,OFF,OFF},
 													{SQUARE,DORAGONQUEST_SCORE3,DORAGONQUEST_NOTE_VALUE3,1,500,62,OFF,OFF},
 													};
@@ -37,15 +37,16 @@ enum GameState {GAME_START,SAVE_DATA_CHECK,SELECT,NAME_SETTING,BATTLE,CLEAR,OVER
 /********************************************************************************************/
 /*ワークエリア定義																			*/
 /********************************************************************************************/
-T_MONSTER enemy[5] = {{"~スライム~",100,100,WATER,10,5},{"#ゴブリン#",200,200,SOIL,20,15},
-						{"@オオコウモリ@",300,300,WIND,30,25},{"@ウェアウルフ@",400,400,WIND,40,30},
-						{"$ドラゴン$",800,800,FIRE,50,40},};
+T_MONSTER enemy[ENEMY_NUM] 			= {{"~スライム~",100,100,WATER,10,5},{"#ゴブリン#",200,200,SOIL,20,15},
+										{"@オオコウモリ@",300,300,WIND,30,25},{"@ウェアウルフ@",400,400,WIND,40,30},
+										{"$ドラゴン$",800,800,FIRE,50,40},};
 
-T_MONSTER ally[ALLY_NUM] = {{"$朱雀$",150,150,FIRE,25,10},
-						{"~玄武~",150,150,WATER,20,15},
-						{"@青龍@",150,150,WIND,15,10},
-						{"#白虎#",150,150,SOIL,20,5},};
-T_PLAYER player = {"アルス",0,0};
+T_PLAYER player 					= {"アルス",{0,0},0,
+										{{"$朱雀$",150,150,FIRE,25,10},
+										{"~玄武~",150,150,WATER,20,15},
+										{"@青龍@",150,150,WIND,15,10},
+										{"#白虎#",150,150,SOIL,20,5},}
+										};
 unsigned char sw						= OFF;
 unsigned char last_sw					= 'e';
 unsigned char output_num				= OFF;
@@ -63,8 +64,8 @@ void game_param_init(void)
 	unsigned char i;
 	unsigned short temp;
 	for (i = 0; i < ALLY_NUM; i++) {
-		player.hp.max_hp = player.hp.now_hp += ally[i].hp.max_hp;	//味方モンスターのHPの合計をプレイヤーHPの合計に設定
-		temp += ally[i].gp;		//味方モンスターの防御力を合計する
+		player.hp.max_hp = player.hp.now_hp += player.ally[i].hp.max_hp;	//味方モンスターのHPの合計をプレイヤーHPの合計に設定
+		temp += player.ally[i].gp;		//味方モンスターの防御力を合計する
 	}
 	player.gp = temp / ALLY_NUM;			//平均値を防御力に設定
 }
@@ -186,7 +187,7 @@ void battle_function_call(void)
 	auto_play_end_processing();
 	send_serial(player.name, strlen((const char*)player.name));
 	send_serial(ARRIVAL, strlen(ARRIVAL));
-	if (battle(enemy, ally, &player))
+	if (battle(enemy, player.ally, &player))
 		g_sequence = CLEAR;
 	else
 		g_sequence = OVER;
