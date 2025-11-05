@@ -213,7 +213,7 @@ void set_output_value(unsigned char scale,unsigned char speaker_num)
 
 void set_output_speaker_length(unsigned char player_num)
 {
-	AUTOPLAYER *autoplayer						= get_autoplayer(player_num);
+	T_AUTOPLAYER *autoplayer						= get_autoplayer(player_num);
 	autoplayer->elapsed_time = autoplayer->pnote_value[autoplayer->score_count];
 }
 /********************************************************************************************/

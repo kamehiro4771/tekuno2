@@ -4,7 +4,7 @@
  *  Created on: 2025/02/27
  *      Author: kameyamahiroki
  */
-#include "main.h"
+#include "auto_play.h"
 #ifndef SCORE_H_
 #define SCORE_H_
 

@@ -29,9 +29,9 @@
 #include "timer.h"
 #include "port.h"
 #include "puzzle.h"
-#include "game.h"
+
 #include "ad.h"
-#include "battle.h"
+//#include "battle.h"
 #include "flash.h"
 
 
@@ -136,4 +136,5 @@ extern unsigned char mode;
 struct SPEAKER *get_speaker(unsigned char speaker_num);
 unsigned char input_check(void);
 unsigned char input_wait(void);
+#include "game.h"
 #endif /* MAIN_H_ */

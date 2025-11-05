@@ -78,27 +78,6 @@ unsigned char fcu_wait(unsigned short wait_time)
 	return SUCCESS;
 }
 
-/*ブランクチェックの第一サイクルでは、７１hをデータフラッシュ領域のアドレスにバイト書き込みします。
- * コマンドの第二サイクルでは、ブランクチェック対象領域を含む消去ブロック内の任意のアドレスにD0h
- * をバイト書き込みすると、FCUがデータフラッシュのブランクチェック処理を開始します。
- * P1847にフローチャート
- * 2Kバイトデータのブランクチェック書き込み時間700μs
- * 書き込み・消去中のリセットパルス幅
- * */
-//何バイト保存するか決める
-//プレーヤー情報 	70 * 1	= 70バイト
-//自動演奏情報 		40 * 3	= 120バイト
-//敵情報 			74 * 5 	= 370バイト
-//味方情報　		74 * 4 	= 296バイト
-//合計　				　　  856バイト
-/*
- * 保存する必要のある情報
- * 	プレーヤー情報
- * 	敵情報
- *  味方情報
- * 	演奏中の曲情報
- */
-
 /****************************************/
 /*ブランクチェック											   */
 /*unsigned char e2_blank_check(void)				   */
@@ -128,10 +107,10 @@ unsigned short e2_blank_check(void)
 
 
 /***********************************************
- *指定されたバイト数データフラッシュから消去
+ *指定されたアドレスのブロックを消去する
  *
  */
-unsigned char e2data_erase(unsigned short erase_address)
+unsigned char e2data_erase(unsigned short offset)
 {
 	unsigned char bit_point				= 0;
 	FLASH.FENTRYR.WORD					= 0xaa80;	//データフラッシュP/Eノーマルモードにする
@@ -149,13 +128,14 @@ unsigned char e2data_erase(unsigned short erase_address)
  * データフラッシュのデータを全部消去する
  *
  */
-/*
+
 void e2data_all_erase(void)
 {
 	int i;
-	for(i = 0;i < ;i += DBWE){
-		e2data_erase();
+	for(i = 0;i <= DATA_BLOCK15;i += DBWE){
+		e2data_erase(i);
 	}
+
 }
 
 */

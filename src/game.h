@@ -7,6 +7,7 @@
 
 #ifndef __GAME_H__
 #define __GAME_H__
+#include "main.h"
 #include "auto_play.h"
 
 #define FIELD_NUM (13)//バトルフィールドの数
@@ -58,9 +59,8 @@ typedef struct Player{
 typedef struct Savedata{
 						T_PLAYER player_data;
 						T_MONSTER enemy[ENEMY_NUM];
-						T_AUTOPLAYER autoplay_data;
+						T_AUTOPLAYER autoplay_data[SPEAKER_NUM];
 						}T_Savedata;
-T_MONSTER get_ally_data(unsigned char type);
 
 
 #endif /* GAME_H_ */

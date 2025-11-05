@@ -23,35 +23,35 @@
 /********************************************************************/
 /*定数定義															*/
 /********************************************************************/
-const T_DISPLAY E_NEIRO														= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
-const T_DISPLAY DUTY_VALUE													= {"デューティー比："};
+const T_DISPLAY E_NEIRO															= {"\x1b[2J\x1b[13A******************** e-NeIRO *********************\n"};
+const T_DISPLAY DUTY_VALUE														= {"デューティー比："};
 const T_DISPLAY WAVE_TYPE														= {"波形："};
 /*項目の種類*/
-const T_DISPLAY PLAYLIST_SELECT												= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
-const T_DISPLAY WAVETYPE_SELECT												= {"音の波形を選択してください\n"};
-const T_DISPLAY SETTING_ITEM_SELECT											= {"設定する項目を選択してください\n"};
-const T_DISPLAY SETTING_SPEAKER_SELECT										= {"設定するスピーカを選択してください\n"};
+const T_DISPLAY PLAYLIST_SELECT													= {"\x1b[2J\x1b[13A曲を選択して下さい\n"};
+const T_DISPLAY WAVETYPE_SELECT													= {"音の波形を選択してください\n"};
+const T_DISPLAY SETTING_ITEM_SELECT												= {"設定する項目を選択してください\n"};
+const T_DISPLAY SETTING_SPEAKER_SELECT											= {"設定するスピーカを選択してください\n"};
 const T_DISPLAY OUTPUT_SPEAKER_SELECT											= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
 
 /*項目名*/
-const T_DISPLAY MODE_NAME[MODE_NUM]										= {"電子オルガンモード","自動演奏モード","ゲームモード","タイマモード","設定","データフラッシュテスト",};//モード名
-const T_DISPLAY TITLE_NAME[SONG_NUM]										= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
+const T_DISPLAY MODE_NAME[MODE_NUM]												= {"電子オルガンモード","自動演奏モード","ゲームモード","タイマモード","設定","データフラッシュテスト",};//モード名
+const T_DISPLAY TITLE_NAME[SONG_NUM]											= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
 																	   	   	   	   "Let it Be","NHKのど自慢のテーマ曲","ドラゴンクエスト序曲","レベルアップ","勝利",
 																	   	   	   	   "宿屋","攻撃音","冒険の書","戦闘のテーマ","全滅","イニシャルチェック","パッヘルベルのカノン",};
-const T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM] 									= {{"矩形波"},
+const T_DISPLAY WAVE_TYPE_NAME[WAVE_NUM] 										= {{"矩形波"},
 																	   	   	   	   {"のこぎり波"},
 																	   	   	   	   {"三角波"},
 																	   	   	   	   {"サイン波",}};
-const T_DISPLAY SETTING_ITME_NAME[SETTING_ITEM_NUM] 						= {{"デューティー比"},
+const T_DISPLAY SETTING_ITME_NAME[SETTING_ITEM_NUM] 							= {{"デューティー比"},
 																	   	   	   	   {"波形"},
 																				   {"スピーカ数"}};
-const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM]							= {"スピーカ１",
-																	   	   	   "スピーカ２",
-																			   "スピーカ３",
+const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM]								= {"スピーカ１",
+																				   "スピーカ２",
+																			       "スピーカ３",
 																	  	  	  	  };
-const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM]						= {"ひとつ","ふたつ","みっつ"};
+const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM]							= {"ひとつ","ふたつ","みっつ"};
 /*操作方法*/
-const T_DISPLAY END_METHOD													= {"メニューに戻る e + エンター\n"};
+const T_DISPLAY END_METHOD														= {"メニューに戻る e + エンター\n"};
 const T_DISPLAY DUTY_SETTING_METHOD 											= {"デューティ比を入力してください（1~99％）\n"
 																					"SW1:1　～　SW9:9 SW10:0\n"};
 const T_DISPLAY TIMER_SETTING_METHOD											= {"SW1:三桁目設定　SW3:二桁目設定　SW5:一桁目設定\r\n"
@@ -64,11 +64,11 @@ const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHO
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
 const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]				= {SPEAKER1,SPEAKER2,SPEAKER3,};
 const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] 	= {SPEAKER1,SPEAKER2,SPEAKER3,};
-const T_Savedata e2_test_data											= {
-		{"kameyama",{100,50},},
-		{},
-		{},
-};
+//const T_Savedata e2_test_data											= {
+//		{"kameyama",{100,50},{}},
+//		{},
+//		{},
+//};
 
 /****************************************************************************/
 /* ワークエリア定義															*/
@@ -79,6 +79,7 @@ unsigned char seg_timer_song										= 0;
 unsigned char timer_value[3]										= {"321"};
 unsigned long timer_area											= 0;
 unsigned char mode;
+T_Savedata e2_test_data;
 /****************************************************************************/
 /* プロトタイプ宣言															*/
 /****************************************************************************/
@@ -121,6 +122,7 @@ void eneiro_initialize(void)
 void main(void)
 {
 	unsigned char ret = 0;
+	size_t size = sizeof(e2_test_data);
 	eneiro_initialize();
 //	timer_area_registration(&timer_area);
 	while(1)

@@ -5,6 +5,7 @@
  *      Author: kameyamahiroki
  */
 
+#include "game.h"
 #ifndef BATTLE_H_
 #define BATTLE_H_
 

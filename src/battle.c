@@ -28,10 +28,9 @@ enum activity{APPEARANCE,ADD_ATTACK,KILLED_ENEMY,RECOVERY,COMBO,PLAYER_TURN,ENEM
 /*********************************************************************/
 /*ワークエリア定義													 */
 /*********************************************************************/
-AUTOPLAYER resume_data[SPEAKER_NUM];
+T_AUTOPLAYER resume_data[SPEAKER_NUM];
 T_MONSTER *penemy;				//戦闘中のモンスターへのポインタ
 T_PLAYER *pplayer;				//プレイヤーへのポインタ
-T_MONSTER *pally;				//味方モンスター達へのポインタ
 char output_display[9][512];	//戦闘中の画面表示
 unsigned char first_turn_flg;	//敵が現れて最初のターンなら新しいバトルフィールドを作成する
 unsigned char operation[2];		//プレーヤーの入力したアルファベットが入る
@@ -82,7 +81,6 @@ void battle_init(T_MONSTER* enemy, T_PLAYER* player)
 {
 	penemy					= enemy;
 	pplayer					= player;
-	pally					= player->ally;
 	battle_display(APPEARANCE,NULL);
 }
 /********************************************************************/
@@ -271,7 +269,7 @@ static void battle_display(unsigned char activity,unsigned char *param)
 		break;
 	case ADD_ATTACK:
 		combo();
-		attack_ally = get_ally_data(*param);
+		attack_ally = pplayer->ally[*param];
 		damage_value = damage_from_ally_calculation(*penemy, attack_ally, combo_value, delete_jewel(param));//ダメージ計算
 		sprintf(output_display[ADD_ATTACK], "%s%s%s%s%s%s%s%s%d%s%s", COLOR_CHAR_ARRAY[attack_ally.el], attack_ally.name, DEFAULT_CHAR, ATTACK_DISPLAY, COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, TO_DISPLAY, damage_value, DAMAGE_DISPLAY, CRLF);
 		if (penemy->hp.now_hp >= damage_value)
@@ -296,10 +294,10 @@ static void battle_display(unsigned char activity,unsigned char *param)
 			LINE_DISPLAY, CRLF, CRLF,
 			CURSOL_MOVING_SENTER, COLOR_CHAR_ARRAY[penemy->el], penemy->name, DEFAULT_CHAR, CRLF,
 			CURSOL_MOVING_SENTER, HP_DISPLAY, hp_color_decision(penemy->hp),penemy->hp.now_hp,DEFAULT_CHAR, penemy->hp.max_hp, CRLF, CRLF, CRLF,
-			COLOR_CHAR_ARRAY[pally[FIRE].el], pally[FIRE].name,
-			COLOR_CHAR_ARRAY[pally[WATER].el], pally[WATER].name,
-			COLOR_CHAR_ARRAY[pally[WIND].el], pally[WIND].name,
-			COLOR_CHAR_ARRAY[pally[SOIL].el], pally[SOIL].name, DEFAULT_CHAR, CRLF,
+			COLOR_CHAR_ARRAY[pplayer->ally[FIRE].el], pplayer->ally[FIRE].name,
+			COLOR_CHAR_ARRAY[pplayer->ally[WATER].el], pplayer->ally[WATER].name,
+			COLOR_CHAR_ARRAY[pplayer->ally[WIND].el], pplayer->ally[WIND].name,
+			COLOR_CHAR_ARRAY[pplayer->ally[SOIL].el], pplayer->ally[SOIL].name, DEFAULT_CHAR, CRLF,
 			CURSOL_MOVING_SENTER, HP_DISPLAY, hp_color_decision(pplayer->hp),pplayer->hp.now_hp, DEFAULT_CHAR,pplayer->hp.max_hp, CRLF,
 			CRLF, CRLF, LINE_DISPLAY, CRLF);
 		combo_reset();

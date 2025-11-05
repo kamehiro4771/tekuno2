@@ -242,10 +242,6 @@ void game_sequence(void)
 	}
 }
 
-T_MONSTER get_ally_data(unsigned char ally_num)
-{
-	return ally[ally_num];
-}
 
 /********************************************************************************************/
 /*ゲームモードメイン																		*/
