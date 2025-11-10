@@ -19,7 +19,7 @@
 /*ヘッダーファイル													*/
 /********************************************************************/
 #include "main.h"
-
+#include "flash.h"
 /********************************************************************/
 /*定数定義															*/
 /********************************************************************/
@@ -32,7 +32,7 @@ const T_DISPLAY WAVETYPE_SELECT													= {"音の波形を選択してください\n"};
 const T_DISPLAY SETTING_ITEM_SELECT												= {"設定する項目を選択してください\n"};
 const T_DISPLAY SETTING_SPEAKER_SELECT											= {"設定するスピーカを選択してください\n"};
 const T_DISPLAY OUTPUT_SPEAKER_SELECT											= {"電子オルガンモード時に出力するスピーカ数を選択してください\n"};
-
+const T_DISPLAY E2_TEST_MODE													= {"******************** E2_TEST_MODE ********************\r\n"};
 /*項目名*/
 const T_DISPLAY MODE_NAME[MODE_NUM]												= {"電子オルガンモード","自動演奏モード","ゲームモード","タイマモード","設定","データフラッシュテスト",};//モード名
 const T_DISPLAY TITLE_NAME[SONG_NUM]											= {"アヴェ・マリア","聖者の行進","メヌエット","主よ、人の望みの喜びよ","オーラ・リー","さくら（独唱","情熱大陸",
@@ -50,6 +50,8 @@ const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM]								= {"スピーカ１",
 																			       "スピーカ３",
 																	  	  	  	  };
 const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM]							= {"ひとつ","ふたつ","みっつ"};
+const T_DISPLAY E2_TEST_SELECT													= {"0x55書き込み\r\n","0xaa書き込み\r\n","消去\r\n",};
+
 /*操作方法*/
 const T_DISPLAY END_METHOD														= {"メニューに戻る e + エンター\n"};
 const T_DISPLAY DUTY_SETTING_METHOD 											= {"デューティ比を入力してください（1~99％）\n"
@@ -64,6 +66,7 @@ const unsigned char SELECTABLE_WAVE_ARREY[SELECT_WAVE_NUM]						= {SQUARE,SAWTHO
 const unsigned char SELECTABLE_SETTING_ARREY[SELECT_SETTING_ITEM_NUM]			= {DUTY,WAVE,SPEAKER_NUM};
 const unsigned char SELECTABLE_SPEAKER_ARREY[SELECT_SPEAKER_NUM]				= {SPEAKER1,SPEAKER2,SPEAKER3,};
 const unsigned char SELECTABLE_OUTPUT_SPEAKER_ARREY[SELECT_OUTPUT_SPEAKER_NUM] 	= {SPEAKER1,SPEAKER2,SPEAKER3,};
+const unsigned char SELECTABLE_E2_TEST[E2_TEST_NUM]								= {1,2,3,};
 //const T_Savedata e2_test_data											= {
 //		{"kameyama",{100,50},{}},
 //		{},
@@ -515,13 +518,60 @@ static void timer_mode(void)
 	led_lights_out();
 }
 
+void flash_write_test(unsigned char data)
+{
+	unsigned char data_buff[128];
+	unsigned short block_address;
+	for(i = 0;i < 128;i++){
+		data_buff[i] = data;
+	}
+	for(i = 1;i < BLOCK_NUM;i++){
+		block_address	= DATA_BLOCK_SIZE * i;
+		if(e2_blank_check(block_address) == WRITTEN_STATE){
+			e2data_erase(block_address);
+		}
+		if(e2_writing(block_address,data_buff,1) == ERROR){
+			break;
+		}
+	}
+}
 /*********************************************************/
 /**/
 /**/
 /*********************************************************/
+/*
+ * ブランクチェック
+ * 書き込んであれば消去
+ * 書き込み0ｘ55か0aa
+ * 読み出し
+ * 比較
+ */
 void flash_test_mode(void)
 {
-	e2_writing();
+
+	unsigned char data,i;
+	unsigned short ret;
+	while(1){
+		ret = item_select(E2_TEST_MODE,E2_TEST_SELECT,SELECTABLE_E2_TEST,sizeof(SELECTABLE_E2_TEST),END_METHOD);
+		switch(ret){
+		case 1:
+			data = 0x55;
+			break
+		case 2:
+			data = 0xaa;
+			break;
+		case 3:
+
+			break;
+		case 'e':
+			return;
+			break;
+		default:
+			break;
+		}
+
+	}
+
 }
 
 /*********************************************************/
