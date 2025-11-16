@@ -78,11 +78,11 @@ void output_led(unsigned char led,unsigned char color,long interval)
 			//nop
 		}else if(led_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
 			led_current_interval	= interval;
-			count_timer_dell(led_blink);
+			interval_function_del(led_blink);
 			interval_function_set(interval,led_blink);
 		}
 	}else if(led_current_interval != 0)										//点滅終了
-		count_timer_dell(led_blink);
+		interval_function_del(led_blink);
 }
 
 /******************************************************************/
@@ -107,7 +107,7 @@ void led_blink(void)
 void led_lights_out(void)
 {
 	if(led_current_interval != 0){
-		count_timer_dell(led_blink);
+		interval_function_del(led_blink);
 		led_current_interval	= 0;
 	}
 	led_state					= 0;
@@ -145,7 +145,7 @@ void segled_display_update(unsigned char *ascii,long interval)
 		//nop
 	}else if(segled_current_interval != interval){							//現在の点滅間隔と違う感覚が指定されたら変更
 		segled_current_interval	= interval;
-		count_timer_dell(segled_blink);
+		interval_function_del(segled_blink);
 		interval_function_set(interval,segled_blink);
 	}
 }
@@ -185,7 +185,7 @@ unsigned char segled_timer_start(unsigned char *start_value)
 /******************************************************************/
 void segled_timer_stop(void)
 {
-	count_timer_dell(segled_timer_update);
+	interval_function_del(segled_timer_update);
 }
 
 /*************************************************************************/
@@ -226,8 +226,8 @@ void segled_flush(void)
 /******************************************************************/
 void segled_lights_out(void)
 {
-	count_timer_dell(segled_flush);				//ダイナミック点灯停止
-	count_timer_dell(segled_blink);
+	interval_function_del(segled_flush);				//ダイナミック点灯停止
+	interval_function_del(segled_blink);
 	segled_pointer 						= &segled_state[0];
 	PORTA.DR.BYTE						= 0;//桁セレクトを0にして消灯
 }

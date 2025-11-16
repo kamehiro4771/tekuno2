@@ -17,6 +17,6 @@ void count_timer_dell(void func(void));
 void cmt2_wait(unsigned long cnt,unsigned char cks);
 unsigned short random_number_acquisition(void);
 void second_wait(unsigned long sec);
-typedef void (*T_FUNC_PTR)(void);							//引数なし、戻り値なしの関数へのポインタ
+
 
 #endif /* TIMER_H_ */

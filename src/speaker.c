@@ -141,7 +141,7 @@ void speaker_initialize(void)
 	MTU8.TIOR.BIT.IOB			= 0x2;	//初期出力はLOW出力コンペアマッチでHI出力
 
 	//DAコンバーターの設定
-	mtu1_initialize();					//MTU1の設定、DA出力用タイマ設定
+	da_speaker_open();					//MTU1の設定、DA出力用タイマ設定
 	DA.DACR.BYTE				= 0xff;	//チャンネル１のアナログ出力許可
 }
 

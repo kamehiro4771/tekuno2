@@ -4,8 +4,9 @@
  *  Created on: 2025/01/05
  *      Author: kameyamahiroki
  */
-#include "main.h"
-#define DATA_BLOCK_SIZE (0x800)
+#include "flash.h"
+#include "iodefine.h"
+
 #define DATA_BLOCK0 (0x000)
 #define DATA_BLOCK1 (0x800)
 #define DATA_BLOCK2 (0x1000)
@@ -96,7 +97,7 @@ unsigned char e2_blank_check(unsigned short block_adress)
 		return ERROR;
 	if(FLASH.DFLBCSTAT.BIT.BCST == BLANK)
 		return BLANK;								//ブランクの先頭アドレスを返す
-	return WRITTEN_STATE;
+	return NOT_BLANK;
 }
 
 /***********************************************
@@ -108,7 +109,7 @@ unsigned char e2data_erase(unsigned short erase_address)
 	unsigned char bit_point				= 0;
 	FLASH.FENTRYR.WORD					= 0xaa80;	//データフラッシュP/Eノーマルモードにする
 	FLASH.FWEPROR.BYTE					= 0x01;		//書き込み消去可能にする
-	bit_point							= erase_address % DBWE;
+	bit_point							= erase_address % DATA_BLOCK_SIZE;
 	if(bit_point <= DATA_BLOCK7)
 		FLASH.DFLWE0.WORD				= 0x1e00 + (1 << bit_point);
 	else
@@ -125,7 +126,7 @@ unsigned char e2data_erase(unsigned short erase_address)
 void e2data_all_erase(void)
 {
 	int i;
-	for(i = 0;i <= DATA_BLOCK15;i += DBWE){
+	for(i = 0;i <= DATA_BLOCK15;i += DATA_BLOCK_SIZE){
 		e2data_erase(i);
 	}
 

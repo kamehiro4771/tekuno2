@@ -50,8 +50,10 @@ const T_DISPLAY SETTING_SPEAKER_NAME[SPEAKER_NUM]								= {"スピーカ１",
 																			       "スピーカ３",
 																	  	  	  	  };
 const T_DISPLAY OUTPUT_SPEAKER_SELECT_NAME[SPEAKER_NUM]							= {"ひとつ","ふたつ","みっつ"};
-const T_DISPLAY E2_TEST_SELECT													= {"0x55書き込み\r\n","0xaa書き込み\r\n","消去\r\n",};
-
+const T_DISPLAY E2_TEST_SELECT[3]												= {"0x55書き込み\r\n","0xaa書き込み\r\n","消去\r\n",};
+const T_DISPLAY E2_BLANK_CHECK_RESULT[3]										= {"BLANK","ERROR","NOT BLANK"};
+const T_DISPLAY E2_ERASE_RESULT[3]												= {"","",""};
+const T_DISPLAY E2_WRITE_STATE[3]												= {"","",""};
 /*操作方法*/
 const T_DISPLAY END_METHOD														= {"メニューに戻る e + エンター\n"};
 const T_DISPLAY DUTY_SETTING_METHOD 											= {"デューティ比を入力してください（1~99％）\n"
@@ -106,7 +108,7 @@ void eneiro_initialize(void)
 {
 	clock_initialize();				//クロック初期化
 	io_port_initialize();			//汎用入出力ポートの初期化
-	mtu0_initialize();				//MTU0の設定、システムタイマ
+	system_timer_open();				//MTU0の設定、システムタイマ
 	cmt1_initiralize();				//乱数生成用タイマ
 	speaker_initialize();			//スピーカ用PWM,DAコンバータ、DA出力用タイマ初期化
 	sci0_init(BAUD_RATE);			//シリアル通信モージュールの初期化
@@ -520,20 +522,36 @@ static void timer_mode(void)
 
 void flash_write_test(unsigned char data)
 {
-	unsigned char data_buff[128];
+	unsigned char write_data_buff[128];
+	unsigned char read_data_buff[128];
+	unsigned char display[64];
+	unsigned char ret,i;
 	unsigned short block_address;
 	for(i = 0;i < 128;i++){
-		data_buff[i] = data;
+		write_data_buff[i] = data;
 	}
 	for(i = 1;i < BLOCK_NUM;i++){
 		block_address	= DATA_BLOCK_SIZE * i;
-		if(e2_blank_check(block_address) == WRITTEN_STATE){
+		ret				= e2_blank_check(block_address);
+		sprintf(display,"< BLOCK%d%s",i,E2_BLANK_CHECK_RESULT[ret]);
+		send_serial(display,strlen(display));
+		if(ret == WRITTEN_STATE)
 			e2data_erase(block_address);
-		}
-		if(e2_writing(block_address,data_buff,1) == ERROR){
-			break;
+		ret				= e2_writing(block_address,data_buff,1);
+		if(ret == ERRRO){
+
+			return;
 		}
 	}
+	for(i = 1;i < BLOCK_NUM;i++){
+		block_address	= DATA_BLOCK_SIZE * i;
+		e2_read(block_address,read_data_buff,sizeof(read_data_buff));
+		if(memcmp(write_data_buff,read_data_buff) != 0){
+			//テスト失敗表示
+			return;
+		}
+	}
+	//テスト成功表示
 }
 /*********************************************************/
 /**/
@@ -549,7 +567,7 @@ void flash_write_test(unsigned char data)
 void flash_test_mode(void)
 {
 
-	unsigned char data,i;
+	unsigned char data;
 	unsigned short ret;
 	while(1){
 		ret = item_select(E2_TEST_MODE,E2_TEST_SELECT,SELECTABLE_E2_TEST,sizeof(SELECTABLE_E2_TEST),END_METHOD);

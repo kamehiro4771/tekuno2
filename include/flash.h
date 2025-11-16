@@ -12,6 +12,9 @@ unsigned char e2_blank_check(unsigned short block_adress);
 #pragma address FCU_RAM = 0x007f8000
 #pragma address FCU_FIRM_WARE = 0xfeffe000
 #define BLOCK_NUM (16)
+#define DATA_BLOCK_SIZE (0x800)
+#define BLANK (0)
+#define NOT_BLANK (2)
 unsigned char fcu_initialize(void);
 unsigned char e2data_erase(unsigned short erase_address);
 unsigned char e2_writing(unsigned short offset,void *write_data,unsigned int word_count);

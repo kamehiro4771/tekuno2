@@ -234,8 +234,9 @@ unsigned char sci0_find_received_data(unsigned char find_char)
 }
 
 /****************************************************/
-/*送信										*/
+/*送信データを登録する										*/
 /*void send_serial(display *send_data)			*/
+/*	引数：送信データへのポインタ
 /****************************************************/
 void send_serial(T_DISPLAY send_data,unsigned short length)
 {
@@ -260,7 +261,7 @@ void send_data_is_exists_confirm(void)
 
 /*******************************************/
 /*受信開始して入力あるまで待機*/
-/**/
+/*											*/
 /*******************************************/
 void sci0_scanf(void)
 {

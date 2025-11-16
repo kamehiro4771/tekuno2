@@ -84,9 +84,9 @@ void auto_play_end_processing(void)
 		return;
 	led_lights_out();							//LED消灯
 	mute(ALL_SPEAKER);							//スピーカー消音
-	count_timer_dell(forward_score);
-	count_timer_dell(output_function_call);
-	count_timer_dell(end_flg_check);
+	interval_function_del(forward_score);
+	interval_function_del(output_function_call);
+	interval_function_del(end_flg_check);
 	playing_flg = OFF;							//演奏中フラグOFF
 }
 /******************************************************************************************************************************************************/
